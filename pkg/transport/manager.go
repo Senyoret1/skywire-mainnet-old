@@ -3,16 +3,17 @@ package transport
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"sync"
 
-	"github.com/SkycoinProject/skywire-mainnet/pkg/snet"
 	"github.com/SkycoinProject/skywire-mainnet/pkg/routing"
+	"github.com/SkycoinProject/skywire-mainnet/pkg/snet"
 
-	"github.com/google/uuid"
 	"github.com/SkycoinProject/dmsg/cipher"
 	"github.com/SkycoinProject/skycoin/src/util/logging"
+	"github.com/google/uuid"
 )
 
 // ManagerConfig configures a Manager.
@@ -152,6 +153,8 @@ func (tm *Manager) acceptTransport(ctx context.Context, lis *snet.Listener) erro
 	}
 
 	// For transports for purpose(data).
+	fmt.Println("requested pk is: ", conn.RemotePK)
+	fmt.Println("table is: %+v", tm.tps)
 
 	tpID := tm.tpIDFromPK(conn.RemotePK(), conn.Network())
 
@@ -246,6 +249,8 @@ func (tm *Manager) Networks() []string {
 
 // Transport obtains a Transport via a given Transport ID.
 func (tm *Manager) Transport(id uuid.UUID) *ManagedTransport {
+	fmt.Println("requedted id is: ", id)
+	fmt.Println("my transports are: ", tm.tps)
 	tm.mx.RLock()
 	tr := tm.tps[id]
 	tm.mx.RUnlock()
