@@ -52,7 +52,15 @@ export interface HealthInfo {
   setup_node?: number;
 }
 
-
+export class ProxyDiscoveryEntry {
+  publicKeyPort: string;
+  country?: string;
+  city?: string;
+  location?: string;
+  status?: string;
+  available?: boolean;
+  updatedAt?: string;
+}
 
 // old
 

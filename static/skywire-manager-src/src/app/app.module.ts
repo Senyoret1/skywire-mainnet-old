@@ -104,6 +104,12 @@ import { SkysocksSettingsComponent } from './components/pages/node/apps/node-app
 import {
   SkysocksClientSettingsComponent
 } from './components/pages/node/apps/node-apps/skysocks-client-settings/skysocks-client-settings.component';
+import {
+  EditSkysocksClientNoteComponent
+} from './components/pages/node/apps/node-apps/skysocks-client-settings/edit-skysocks-client-note/edit-skysocks-client-note.component';
+import {
+  SkysocksClientFilterComponent
+} from './components/pages/node/apps/node-apps/skysocks-client-settings/skysocks-client-filter/skysocks-client-filter.component';
 
 const globalRippleConfig: RippleGlobalOptions = {
   disabled: true,
@@ -185,6 +191,8 @@ const globalRippleConfig: RippleGlobalOptions = {
     TerminalComponent,
     SkysocksSettingsComponent,
     SkysocksClientSettingsComponent,
+    EditSkysocksClientNoteComponent,
+    SkysocksClientFilterComponent,
   ],
   entryComponents: [
     ConfigurationComponent,
@@ -215,6 +223,8 @@ const globalRippleConfig: RippleGlobalOptions = {
     TerminalComponent,
     SkysocksSettingsComponent,
     SkysocksClientSettingsComponent,
+    EditSkysocksClientNoteComponent,
+    SkysocksClientFilterComponent,
   ],
   imports: [
     BrowserModule,
