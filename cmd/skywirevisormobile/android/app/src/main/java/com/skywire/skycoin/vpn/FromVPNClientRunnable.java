@@ -1,5 +1,7 @@
 package com.skywire.skycoin.vpn;
 
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
@@ -91,7 +93,7 @@ public class FromVPNClientRunnable implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                Skywiremob.printString("EXCEPTION IN FromVPNClientRunnable: " + e.getMessage());
+                HelperFunctions.logError("EXCEPTION IN FromVPNClientRunnable", e);
             }
         }
     }

@@ -9,8 +9,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".helpers.App"
         android:allowBackup="true"
-        android:label="SkywireVPN">
+        android:label="@string/general_app_name"
+    >
         <service android:name=".SkywireVPNService"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
@@ -20,7 +22,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="SkywireVPN" >
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/general_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

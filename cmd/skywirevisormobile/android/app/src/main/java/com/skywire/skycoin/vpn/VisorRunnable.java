@@ -15,13 +15,11 @@ import java.net.Socket;
 import skywiremob.Skywiremob;
 
 public class VisorRunnable implements Runnable {
-    private Context context;
     private MainActivity activity;
     private String RemotePK;
     private String Passcode;
 
-    public VisorRunnable(Context context, MainActivity activity, String remotePK, String passcode) {
-        this.context = context;
+    public VisorRunnable(MainActivity activity, String remotePK, String passcode) {
         this.activity = activity;
         this.RemotePK = remotePK;
         this.Passcode = passcode;

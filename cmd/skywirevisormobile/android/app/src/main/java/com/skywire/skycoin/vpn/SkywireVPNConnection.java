@@ -143,7 +143,11 @@ public class SkywireVPNConnection implements Runnable {
             // Connect to the server.
             tunnel.connect(server);
 
-            Skywiremob.setMobileAppAddr(tunnel.getLocalAddress().toString());
+            // Inform Skywire about the local socket address.
+            // NOTE: this function should work in old Android versions, but there is a bug, at least in
+            // Android API 17, which makes the port to always be 0, that is why the app requires Android
+            // API 21+ to run. Maybe creating the socket by hand would allow to support older versions.
+            Skywiremob.setMobileAppAddr(tunnel.socket().getLocalSocketAddress().toString());
 
             // For simplicity, we use the same thread for both reading and
             // writing. Here we put the tunnel into non-blocking mode.
@@ -201,7 +205,6 @@ public class SkywireVPNConnection implements Runnable {
         builder.setMtu((short)Skywiremob.getMTU());
         Skywiremob.printString("TUN IP: " + Skywiremob.tunip());
         builder.addAddress(Skywiremob.tunip(), (int)Skywiremob.getTUNIPPrefix());
-        builder.allowFamily(OsConstants.AF_INET);
         builder.addDnsServer("8.8.8.8");
         //builder.addDnsServer("192.168.1.1");
         builder.addRoute("0.0.0.0", 1);

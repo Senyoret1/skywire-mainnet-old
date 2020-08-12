@@ -4,14 +4,20 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
 import android.widget.Toast;
+
+import com.skywire.skycoin.vpn.helpers.App;
+import com.skywire.skycoin.vpn.helpers.Globals;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -44,9 +50,14 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
         if (mHandler == null) {
             mHandler = new Handler(this);
         }
+
         // Create the intent to "configure" the connection (just start SkywireVPNClient).
-        mConfigureIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        mConfigureIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -79,7 +90,7 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
     private void connect() {
         // Become a foreground service. Background services can be VPN services too, but they can
         // be killed by background check before getting a chance to receive onRevoke().
-        updateForegroundNotification(R.string.connecting);
+        makeForeground(R.string.connecting);
         mHandler.sendEmptyMessage(R.string.connecting);
 
         try {
@@ -136,17 +147,23 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
         setConnection(null);
         stopForeground(true);
     }
+
     private void updateForegroundNotification(final int message) {
-        final String NOTIFICATION_CHANNEL_ID = "SkywireVPN";
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(
-                NOTIFICATION_SERVICE);
-        mNotificationManager.createNotificationChannel(new NotificationChannel(
-                NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_ID,
-                NotificationManager.IMPORTANCE_DEFAULT));
-        startForeground(1, new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_vpn)
-                .setContentText(getString(message))
-                .setContentIntent(mConfigureIntent)
-                .build());
+        NotificationManager mNotificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(1, createUpdatedNotification(message));
+    }
+
+    private void makeForeground(final int message) {
+        startForeground(1, createUpdatedNotification(message));
+    }
+
+    private Notification createUpdatedNotification(final int message) {
+        return new NotificationCompat.Builder(this, Globals.NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_vpn)
+            .setContentTitle(getString(R.string.general_app_name))
+            .setContentText(getString(message))
+            .setContentIntent(mConfigureIntent)
+            .setOnlyAlertOnce(true)
+            .build();
     }
 }
