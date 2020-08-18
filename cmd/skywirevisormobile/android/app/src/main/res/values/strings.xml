@@ -3,6 +3,15 @@
     <string name="general_app_name">SkywireVPN</string>
     <string name="general_notification_channel_description">SkywireVPN status notifications.</string>
 
+    <string name="vpn_state_initializing">Initializing SkywireVPN</string>
+    <string name="vpn_state_starting_visor">Starting SkywireVPN visor</string>
+    <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector</string>
+    <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization</string>
+    <string name="vpn_state_connecting">Establishing VPN connection</string>
+    <string name="vpn_state_connected">VPN connected</string>
+    <string name="vpn_state_disconnecting">Closing VPN connection</string>
+    <string name="vpn_state_disconnected">VPN connection closed</string>
+
     <string name="connecting">SkywireVPN is connecting…</string>
     <string name="connected">SkywireVPN is connected!</string>
     <string name="disconnected">SkywireVPN is disconnected!</string>

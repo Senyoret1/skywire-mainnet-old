@@ -8,12 +8,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.helpers.App;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+
+import java.util.Random;
 
 import skywiremob.Skywiremob;
 
@@ -21,6 +26,10 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
 
     private EditText mRemotePK;
     private EditText mPasscode;
+    private TextView mStatus;
+
+    private Handler serviceCommunicationHandler;
+    private int communicationID;
 
     private final Object visorMx = new Object();
     private VisorRunnable visor = null;
@@ -29,18 +38,13 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
 
     @Override
     public boolean handleMessage(Message msg) {
-        String err = msg.getData().getString("text");
-        HelperFunctions.showToast(err, false);
-        return false;
-    }
-
-    public void startVPNService() {
-        Intent intent = VpnService.prepare(MainActivity.this);
-        if (intent != null) {
-            startActivityForResult(intent, 0);
-        } else {
-            onActivityResult(0, RESULT_OK, null);
+        int stateText = SkywireVPNService.getTextForState(msg.what);
+        if (stateText != -1) {
+            mStatus.setText(stateText);
+            return true;
         }
+
+        return false;
     }
 
     @Override
@@ -50,9 +54,13 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
 
         mRemotePK = findViewById(R.id.editTextRemotePK);
         mPasscode = findViewById(R.id.editTextPasscode);
+        mStatus = findViewById(R.id.textStatus);
 
         findViewById(R.id.buttonStart).setOnClickListener(this);
         findViewById(R.id.buttonStop).setOnClickListener(this);
+
+        serviceCommunicationHandler = new Handler(this);
+        communicationID = new Random().nextInt(Integer.MAX_VALUE);
     }
 
     @Override
@@ -71,15 +79,20 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     protected void onActivityResult(int request, int result, Intent data) {
         if (result == RESULT_OK) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(getServiceIntent().setAction(SkywireVPNService.ACTION_CONNECT));
+                startForegroundService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
             } else {
-                startService(getServiceIntent().setAction(SkywireVPNService.ACTION_CONNECT));
+                startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
             }
         }
     }
 
-    private Intent getServiceIntent() {
-        return new Intent(this, SkywireVPNService.class);
+    private Intent getServiceIntent(boolean IncludeExtras) {
+        Intent response = new Intent(this, SkywireVPNService.class);
+        if (IncludeExtras) {
+            response.putExtra("Messenger", new Messenger(serviceCommunicationHandler));
+            response.putExtra("ID", communicationID);
+        }
+        return response;
     }
 
     private void start() {
@@ -95,31 +108,19 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         }
 
         settings.edit()
-            .putString("remotePK", remotePK)
-            .putString("passcode", passcode)
+            .putString(Globals.StorageVars.SERVER_PK, remotePK)
+            .putString(Globals.StorageVars.SERVER_PASSWORD, passcode)
             .apply();
 
-        synchronized (visorMx) {
-            // TODO: the service may be running even if visor != null, so this have to be improved.
-            if (visor != null) {
-                visor.stopVisor();
-                visor = null;
-                stopService(getServiceIntent().setAction(SkywireVPNService.ACTION_DISCONNECT));
-            }
-
-            visor = new VisorRunnable(MainActivity.this, remotePK, passcode);
-
-            new Thread(visor).start();
+        Intent intent = VpnService.prepare(MainActivity.this);
+        if (intent != null) {
+            startActivityForResult(intent, 0);
+        } else {
+            onActivityResult(0, RESULT_OK, null);
         }
     }
 
     private void stop() {
-        startService(getServiceIntent().setAction(SkywireVPNService.ACTION_DISCONNECT));
-
-        synchronized (visorMx) {
-            if (visor != null) {
-                visor.stopVisor();
-            }
-        }
+        startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
     }
 }
