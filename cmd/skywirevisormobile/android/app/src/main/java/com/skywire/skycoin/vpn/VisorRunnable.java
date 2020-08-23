@@ -27,57 +27,78 @@ public class VisorRunnable {
 
     public Observable<Integer> run() {
         return Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            if (emitter.isDisposed()) { return; }
             emitter.onNext(SkywireVPNService.States.PREPARING_VISOR);
 
+            if (emitter.isDisposed()) { return; }
             String err = Skywiremob.prepareVisor();
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
-                showToast(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                emitter.onComplete();
                 return;
             }
             Skywiremob.printString("Prepared visor");
+            if (emitter.isDisposed()) { return; }
             emitter.onNext(SkywireVPNService.States.PREPARING_VPN_CLIENT);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
+            if (emitter.isDisposed()) { return; }
             err = Skywiremob.prepareVPNClient(
                 settings.getString(Globals.StorageVars.SERVER_PK, ""),
                 settings.getString(Globals.StorageVars.SERVER_PASSWORD, "")
             );
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
-                showToast(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                emitter.onComplete();
                 return;
             }
             Skywiremob.printString("Prepared VPN client");
+            if (emitter.isDisposed()) { return; }
             emitter.onNext(SkywireVPNService.States.FINAL_PREPARATIONS_FOR_VISOR);
 
+            if (emitter.isDisposed()) { return; }
             err = Skywiremob.shakeHands();
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
-                showToast(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                emitter.onComplete();
                 return;
             }
 
+            if (emitter.isDisposed()) { return; }
             err = Skywiremob.startListeningUDP();
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
-                showToast(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                emitter.onComplete();
                 return;
             }
 
+            if (emitter.isDisposed()) { return; }
             Skywiremob.serveVPN();
 
+            if (emitter.isDisposed()) { return; }
             emitter.onNext(SkywireVPNService.States.VISOR_READY);
 
+            if (emitter.isDisposed()) { return; }
             err = Skywiremob.waitForVisorToStop();
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
-                showToast(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                emitter.onComplete();
                 return;
             }
             Skywiremob.printString("Wait finished");
 
+            if (emitter.isDisposed()) { return; }
             emitter.onComplete();
         });
     }

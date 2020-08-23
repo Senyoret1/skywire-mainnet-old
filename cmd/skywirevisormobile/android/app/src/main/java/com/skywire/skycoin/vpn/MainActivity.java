@@ -11,6 +11,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,24 +25,29 @@ import skywiremob.Skywiremob;
 
 public class MainActivity extends Activity implements Handler.Callback, View.OnClickListener {
 
-    private EditText mRemotePK;
-    private EditText mPasscode;
-    private TextView mStatus;
+    private EditText editTextRemotePK;
+    private EditText editTextPasscode;
+    private Button buttonStart;
+    private Button buttonStop;
+    private TextView textStatus;
+    private TextView textFinishAlert;
 
     private Handler serviceCommunicationHandler;
     private int communicationID;
-
-    private final Object visorMx = new Object();
-    private VisorRunnable visor = null;
 
     private SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
     @Override
     public boolean handleMessage(Message msg) {
-        int stateText = SkywireVPNService.getTextForState(msg.what);
-        if (stateText != -1) {
-            mStatus.setText(stateText);
-            return true;
+        if (msg.what != SkywireVPNService.States.ERROR) {
+            int stateText = SkywireVPNService.getTextForState(msg.what);
+            if (stateText != -1) {
+                textStatus.setText(stateText);
+                return true;
+            }
+        } else {
+            textStatus.setText(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
+            displayFinishedState();
         }
 
         return false;
@@ -52,15 +58,34 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRemotePK = findViewById(R.id.editTextRemotePK);
-        mPasscode = findViewById(R.id.editTextPasscode);
-        mStatus = findViewById(R.id.textStatus);
+        editTextRemotePK = findViewById(R.id.editTextRemotePK);
+        editTextPasscode = findViewById(R.id.editTextPasscode);
+        buttonStart = findViewById(R.id.buttonStart);
+        buttonStop = findViewById(R.id.buttonStop);
+        textStatus = findViewById(R.id.textStatus);
+        textFinishAlert = findViewById(R.id.textFinishAlert);
 
-        findViewById(R.id.buttonStart).setOnClickListener(this);
-        findViewById(R.id.buttonStop).setOnClickListener(this);
+        buttonStart.setOnClickListener(this);
+        buttonStop.setOnClickListener(this);
+
+        displayInitialState();
 
         serviceCommunicationHandler = new Handler(this);
         communicationID = new Random().nextInt(Integer.MAX_VALUE);
+
+        if (HelperFunctions.isServiceRunning()) {
+            displayWorkingState();
+            onActivityResult(0, RESULT_OK, null);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (HelperFunctions.isServiceRunning()) {
+            startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_STOP_COMUNNICATION));
+        }
     }
 
     @Override
@@ -83,6 +108,8 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
             } else {
                 startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
             }
+        } else {
+            displayInitialState();
         }
     }
 
@@ -96,8 +123,10 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     }
 
     private void start() {
-        String remotePK = mRemotePK.getText().toString();
-        String passcode = mPasscode.getText().toString();
+        displayWorkingState();
+
+        String remotePK = editTextRemotePK.getText().toString();
+        String passcode = editTextPasscode.getText().toString();
 
         String err = Skywiremob.isPKValid(remotePK);
         if (!err.isEmpty()) {
@@ -122,5 +151,29 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
 
     private void stop() {
         startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
+    }
+
+    private void displayInitialState() {
+        editTextRemotePK.setEnabled(true);
+        editTextPasscode.setEnabled(true);
+        buttonStart.setEnabled(true);
+        buttonStop.setEnabled(false);
+        textFinishAlert.setVisibility(View.GONE);
+    }
+
+    private void displayWorkingState() {
+        editTextRemotePK.setEnabled(false);
+        editTextPasscode.setEnabled(false);
+        buttonStart.setEnabled(false);
+        buttonStop.setEnabled(true);
+        textFinishAlert.setVisibility(View.GONE);
+    }
+
+    private void displayFinishedState() {
+        editTextRemotePK.setEnabled(false);
+        editTextPasscode.setEnabled(false);
+        buttonStart.setEnabled(false);
+        buttonStop.setEnabled(false);
+        textFinishAlert.setVisibility(View.VISIBLE);
     }
 }

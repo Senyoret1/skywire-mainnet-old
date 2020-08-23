@@ -8,6 +8,9 @@ import android.os.Build;
 
 import com.skywire.skycoin.vpn.R;
 
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+import skywiremob.Skywiremob;
+
 public class App extends Application {
     private static Context appContext;
 
@@ -28,6 +31,10 @@ public class App extends Application {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+
+        RxJavaPlugins.setErrorHandler(throwable -> {
+            Skywiremob.printString("ERROR INSIDE RX: " + throwable.getMessage());
+        });
     }
 
     public static Context getContext(){

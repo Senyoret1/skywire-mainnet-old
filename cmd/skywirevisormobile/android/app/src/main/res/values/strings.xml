@@ -11,6 +11,7 @@
     <string name="vpn_state_connected">VPN connected</string>
     <string name="vpn_state_disconnecting">Closing VPN connection</string>
     <string name="vpn_state_disconnected">VPN connection closed</string>
+    <string name="vpn_state_error">There has been a connection error</string>
 
     <string name="connecting">SkywireVPN is connecting…</string>
     <string name="connected">SkywireVPN is connected!</string>

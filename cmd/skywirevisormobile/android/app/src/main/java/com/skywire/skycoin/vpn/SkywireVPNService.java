@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.VpnService;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -17,12 +18,16 @@ import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
+import org.reactivestreams.Subscription;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
@@ -59,6 +64,8 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
             return R.string.vpn_state_disconnecting;
         } else if (state == States.DISCONNECTED) {
             return R.string.vpn_state_disconnected;
+        } else if (state == States.ERROR) {
+            return R.string.vpn_state_error;
         }
 
         return -1;
@@ -67,6 +74,8 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
     public static final String ACTION_CONNECT = "com.skywire.android.vpn.START";
     public static final String ACTION_DISCONNECT = "com.skywire.android.vpn.STOP";
     public static final String ACTION_STOP_COMUNNICATION = "com.skywire.android.vpn.STOP_COMM";
+
+    public static final String ERROR_MSG_PARAM = "ErrorMsg";
 
     private HashMap<Integer, Messenger> messengers = new HashMap<>();
 
@@ -85,8 +94,11 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
     private PendingIntent mConfigureIntent;
 
     private int currentState = States.STARTING;
+    private String lastErrorMsg;
+    private boolean stopRequested;
 
     private VisorRunnable visor;
+    private Disposable visorSubscription;
 
     @Override
     public void onCreate() {
@@ -110,6 +122,16 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
         Message msg = Message.obtain();
         msg.what = currentState;
 
+        if (newState == States.ERROR) {
+            Bundle b = new Bundle();
+            b.putString(ERROR_MSG_PARAM, lastErrorMsg);
+            msg.setData(b);
+
+            if (messengers.size() == 0) {
+                HelperFunctions.showToast(lastErrorMsg, false);
+            }
+        }
+
         for(Map.Entry<Integer, Messenger> entry : messengers.entrySet()) {
             try {
                 entry.getValue().send(msg);
@@ -122,8 +144,8 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
-            // TODO: there should be a dedicated var for knowing if the visor can be stoped, to avoid race conditions.
-            if (visor != null) {
+            if (!stopRequested) {
+                stopRequested = true;
                 Skywiremob.printString("STOPPING ANDROID VPN SERVICE");
                 disconnect();
                 updateState(States.DISCONNECTING);
@@ -131,20 +153,13 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
             }
             return START_NOT_STICKY;
         } else if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
-            // TODO: make foreground one time only.
-
             // Become a foreground service. Background services can be VPN services too, but they can
             // be killed by background check before getting a chance to receive onRevoke().
             makeForeground();
 
             if (intent.hasExtra("ID") && intent.hasExtra("Messenger")) {
                 messengers.put(intent.getIntExtra("ID", 0), intent.getParcelableExtra("Messenger"));
-
-                Message msg = Message.obtain();
-                msg.what = currentState;
-                try {
-                    ((Messenger)intent.getParcelableExtra("Messenger")).send(msg);
-                } catch (Exception e) {}
+                updateState(currentState);
             }
 
             if (visor == null) {
@@ -152,13 +167,21 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
 
                 visor = new VisorRunnable();
 
-                visor.run()
-                    .subscribeOn(Schedulers.io())
+                visorSubscription = visor.run()
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(state -> {
                         updateState(state);
 
                         if (state == States.VISOR_READY) {
                             connect();
+                        }
+                    }, err -> {
+                        lastErrorMsg = err.getLocalizedMessage();
+                        updateState(States.ERROR);
+                    }, () -> {
+                        if (currentState != States.ERROR) {
+                            updateState(States.DISCONNECTED);
                         }
                     });
             }
@@ -168,6 +191,8 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
             if (intent.hasExtra("ID")) {
                 messengers.remove(intent.getIntExtra("ID", 0));
             }
+
+            return START_STICKY;
         } else {
             // TODO: manage the case.
         }
@@ -177,7 +202,9 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
 
     @Override
     public void onDestroy() {
+        Skywiremob.printString("Closing service");
         disconnect();
+        visorSubscription.dispose();
     }
 
     @Override

@@ -35,7 +35,7 @@ public class HelperFunctions {
         });
     }
 
-    public boolean isServiceRunning() {
+    public static boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) App.getContext().getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (SkywireVPNService.class.getName().equals(service.service.getClassName())) {
