@@ -33,7 +33,7 @@ public class App extends Application {
         }
 
         RxJavaPlugins.setErrorHandler(throwable -> {
-            Skywiremob.printString("ERROR INSIDE RX: " + throwable.getMessage());
+            HelperFunctions.logError("ERROR INSIDE RX: ", throwable);
         });
     }
 

@@ -11,7 +11,7 @@ import com.skywire.skycoin.vpn.SkywireVPNService;
 import skywiremob.Skywiremob;
 
 public class HelperFunctions {
-    public static void logError(String prefix, Exception e) {
+    public static void logError(String prefix, Throwable e) {
         String errorMsg = prefix + ": " + e.getMessage() + "\n";
         errorMsg += e.toString() + "\n";
 

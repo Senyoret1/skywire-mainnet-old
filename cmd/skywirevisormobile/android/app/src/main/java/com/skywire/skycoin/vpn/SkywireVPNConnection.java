@@ -1,29 +1,26 @@
 package com.skywire.skycoin.vpn;
 
 import android.app.PendingIntent;
-import android.content.pm.PackageManager;
-import android.net.Network;
-import android.net.ProxyInfo;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
-import android.system.OsConstants;
-import android.text.TextUtils;
+
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 import skywiremob.Skywiremob;
 
-public class SkywireVPNConnection implements Runnable {
+public class SkywireVPNConnection {
     /**
      * Callback interface to let the {@link SkywireVPNService} know about new connections
      * and update the foreground notification with connection status.
@@ -63,68 +60,77 @@ public class SkywireVPNConnection implements Runnable {
     private PendingIntent mConfigureIntent;
     private OnEstablishListener mOnEstablishListener;
     private FromVPNClientRunnable fromVPNClientRunnable;
+    private Observable<Boolean> observable;
 
     private final Object StopMx = new Object();
     private boolean shouldStop = false;
 
-    public void Stop() {
-        synchronized (StopMx) {
-            shouldStop = true;
-        }
-
+    private void stopOperation() {
         fromVPNClientRunnable.Stop();
     }
-    // Allowed/Disallowed packages for VPN usage
-    //private final boolean mAllow;
-    //private final Set<String> mPackages;
-    public SkywireVPNConnection(final VpnService service, final int connectionId,
-                            final String serverName, final int serverPort/*, final byte[] sharedSecret,
-                            boolean allow,
-                            final Set<String> packages*/) {
+
+    public SkywireVPNConnection(final VpnService service, final int connectionId, final String serverName, final int serverPort) {
         mService = service;
         mConnectionId = connectionId;
         mServerName = serverName;
         mServerPort= serverPort;
-        //mAllow = allow;
-        //mPackages = packages;
     }
+
     /**
      * Optionally, set an intent to configure the VPN. This is {@code null} by default.
      */
     public void setConfigureIntent(PendingIntent intent) {
         mConfigureIntent = intent;
     }
+
     public void setOnEstablishListener(OnEstablishListener listener) {
         mOnEstablishListener = listener;
     }
-    @Override
-    public void run() {
-        try {
-            Skywiremob.printString(getTag() + " Starting");
-            // If anything needs to be obtained using the network, get it now.
-            // This greatly reduces the complexity of seamless handover, which
-            // tries to recreate the tunnel without shutting down everything.
-            // In this demo, all we need to know is the server address.
-            final SocketAddress serverAddress = new InetSocketAddress(mServerName, mServerPort);
-            // We try to create the tunnel several times.
-            // TODO: The better way is to work with ConnectivityManager, trying only when the
-            // network is available.
-            // Here we just use a counter to keep things simple.
-            for (int attempt = 0; attempt < 10; ++attempt) {
-                // Reset the counter if we were connected.
-                if (run(serverAddress)) {
-                    attempt = 0;
+
+    public Observable<Boolean> getObservable() {
+        if (observable == null) {
+            observable = Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
+                try {
+                    Skywiremob.printString(getTag() + " Starting");
+                    // If anything needs to be obtained using the network, get it now.
+                    // This greatly reduces the complexity of seamless handover, which
+                    // tries to recreate the tunnel without shutting down everything.
+                    // In this demo, all we need to know is the server address.
+                    final SocketAddress serverAddress = new InetSocketAddress(mServerName, mServerPort);
+                    // We try to create the tunnel several times.
+                    // TODO: The better way is to work with ConnectivityManager, trying only when the
+                    // network is available.
+                    // Here we just use a counter to keep things simple.
+                    for (int attempt = 0; attempt < 10; ++attempt) {
+                        if (emitter.isDisposed()) { stopOperation(); return; }
+                        // Reset the counter if we were connected.
+                        if (run(serverAddress)) {
+                            attempt = 0;
+                        }
+
+                        // Sleep for a while. This also checks if we got interrupted.
+                        if (emitter.isDisposed()) { stopOperation(); return; }
+                        Thread.sleep(3000);
+                    }
+                    Skywiremob.printString(getTag() + " Giving");
+
+                    stopOperation();
+                    if (emitter.isDisposed()) { return; }
+                    emitter.onComplete();
+                } catch (Exception e) {
+                    HelperFunctions.logError(getTag() + " Connection failed, exiting", e);
+                    if (!emitter.isDisposed()) {
+                        emitter.onError(e);
+                        emitter.onComplete();
+                    }
                 }
-                // Sleep for a while. This also checks if we got interrupted.
-                Thread.sleep(3000);
-            }
-            Skywiremob.printString(getTag() + " Giving");
-        } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            Skywiremob.printString(getTag() + " Connection failed, exiting " + e.getMessage());
+            });
         }
+
+        return observable;
     }
-    private boolean run(SocketAddress server)
-            throws IOException, InterruptedException, IllegalArgumentException {
+
+    private boolean run(SocketAddress server) throws IOException, IllegalArgumentException {
         ParcelFileDescriptor iface = null;
         boolean connected = false;
 
@@ -223,6 +229,7 @@ public class SkywireVPNConnection implements Runnable {
         Skywiremob.printString(getTag() + " New interface: " + vpnInterface);
         return vpnInterface;
     }
+
     private final String getTag() {
         return SkywireVPNConnection.class.getSimpleName() + "[" + mConnectionId + "]";
     }

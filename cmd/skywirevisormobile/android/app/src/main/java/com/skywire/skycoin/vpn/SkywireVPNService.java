@@ -7,18 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
-import android.util.Pair;
 
 import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
-
-import org.reactivestreams.Subscription;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,11 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
-public class SkywireVPNService extends VpnService implements Handler.Callback {
+public class SkywireVPNService extends VpnService {
     public static class States {
         public static int STARTING = 10;
         public static int PREPARING_VISOR = 20;
@@ -81,15 +79,7 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
 
     private SkywireVPNConnection connectionRunnable;
 
-    private static final String TAG = SkywireVPNService.class.getSimpleName();
-    private Handler mHandler;
-    private static class Connection extends Pair<Thread, ParcelFileDescriptor> {
-        public Connection(Thread thread, ParcelFileDescriptor pfd) {
-            super(thread, pfd);
-        }
-    }
-    private final AtomicReference<Thread> mConnectingThread = new AtomicReference<>();
-    private final AtomicReference<Connection> mConnection = new AtomicReference<>();
+    private final AtomicReference<ParcelFileDescriptor> mConnection = new AtomicReference<>();
     private AtomicInteger mNextConnectionId = new AtomicInteger(1);
     private PendingIntent mConfigureIntent;
 
@@ -99,14 +89,11 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
 
     private VisorRunnable visor;
     private Disposable visorSubscription;
+    private Disposable startVpnSubscription;
+    private Disposable vpnConnectionSubscription;
 
     @Override
     public void onCreate() {
-        // The handler is only used to show messages.
-        if (mHandler == null) {
-            mHandler = new Handler(this);
-        }
-
         // Create the intent to "configure" the connection (just start SkywireVPNClient).
         final Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -205,72 +192,88 @@ public class SkywireVPNService extends VpnService implements Handler.Callback {
         Skywiremob.printString("Closing service");
         disconnect();
         visorSubscription.dispose();
-    }
-
-    @Override
-    public boolean handleMessage(Message message) {
-        if (message.what != R.string.disconnected) {
-            //updateForegroundNotification(message.what);
-        }
-        return true;
+        startVpnSubscription.dispose();
     }
 
     private void connect() {
-        mHandler.sendEmptyMessage(R.string.connecting);
+        updateState(States.STARTING_VPN_CONNECTION);
 
-        // Maybe this should be in another thread.
-        try {
-            while (!Skywiremob.isVPNReady()) {
-                Skywiremob.printString("VPN STILL NOT READY, WAITING...");
-                Thread.sleep(1000);
+        startVpnSubscription = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            try {
+                if (emitter.isDisposed()) { return; }
+                while (!Skywiremob.isVPNReady()) {
+                    Skywiremob.printString("VPN STILL NOT READY, WAITING...");
+                    Thread.sleep(1000);
+                    if (emitter.isDisposed()) { return; }
+                }
+
+                emitter.onComplete();
+            } catch (Exception e) {
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(e));
+                emitter.onComplete();
             }
-        } catch (Exception e) {
-            Skywiremob.printString(e.getMessage());
-        }
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(
+            val -> {},
+            err -> {
+                lastErrorMsg = err.getLocalizedMessage();
+                updateState(States.ERROR);
+            }, () -> {
+                Skywiremob.printString("VPN IS READY, LET'S TRY IT OUT");
 
-        Skywiremob.printString("VPN IS READY, LET'S TRY IT OUT");
-
-        startConnection(new SkywireVPNConnection(
-                this, mNextConnectionId.getAndIncrement(), "localhost", 7890));
+                startConnection(new SkywireVPNConnection(
+                        this, mNextConnectionId.getAndIncrement(), "localhost", 7890));
+            }
+        );
     }
 
     private void startConnection(final SkywireVPNConnection connection) {
         this.connectionRunnable = connection;
-        // Replace any existing connecting thread with the  new one.
-        final Thread thread = new Thread(connection, "SkywireVPNThread");
-        setConnectingThread(thread);
         // Handler to mark as connected once onEstablish is called.
         connection.setConfigureIntent(mConfigureIntent);
         connection.setOnEstablishListener(tunInterface -> {
-            mHandler.sendEmptyMessage(R.string.connected);
-            mConnectingThread.compareAndSet(thread, null);
-            setConnection(new Connection(thread, tunInterface));
+            updateState(States.CONNECTED);
+            setConnection(tunInterface);
         });
-        thread.start();
-    }
 
-    private void setConnectingThread(final Thread thread) {
-        final Thread oldThread = mConnectingThread.getAndSet(thread);
-        if (oldThread != null) {
-            oldThread.interrupt();
+        // Cancel any previous connection thread.
+        if (vpnConnectionSubscription != null) {
+            vpnConnectionSubscription.dispose();
         }
+
+        vpnConnectionSubscription = connection.getObservable()
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                val -> {},
+                err -> {
+                    lastErrorMsg = err.getLocalizedMessage();
+                    updateState(States.ERROR);
+                    disconnect();
+                }, () -> {
+                    // TODO: maybe this should not happen, so it would have to be managed to reflect that.
+                    disconnect();
+                }
+            );
     }
 
-    private void setConnection(final Connection connection) {
-        final Connection oldConnection = mConnection.getAndSet(connection);
+    private void setConnection(final ParcelFileDescriptor connection) {
+        final ParcelFileDescriptor oldConnection = mConnection.getAndSet(connection);
         if (oldConnection != null) {
             try {
-                oldConnection.first.interrupt();
-                oldConnection.second.close();
+                oldConnection.close();
             } catch (IOException e) {
-                Skywiremob.printString(TAG + " Closing VPN interface " + e.getMessage());
+                HelperFunctions.logError(SkywireVPNService.class.getSimpleName() + " Closing VPN interface", e);
             }
         }
     }
     private void disconnect() {
-        mHandler.sendEmptyMessage(R.string.disconnected);
-        connectionRunnable.Stop();
-        setConnectingThread(null);
+        if (this.currentState != States.ERROR) {
+            updateState(States.DISCONNECTING);
+        }
+        if (vpnConnectionSubscription != null) {
+            vpnConnectionSubscription.dispose();
+        }
         setConnection(null);
         stopForeground(true);
     }
