@@ -211,7 +211,6 @@ public class SkywireVPNService extends VpnService {
             } catch (Exception e) {
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(e));
-                emitter.onComplete();
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(
             val -> {},

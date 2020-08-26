@@ -6,18 +6,16 @@ import android.os.ParcelFileDescriptor;
 
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableEmitter;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
 public class SkywireVPNConnection {
@@ -28,46 +26,18 @@ public class SkywireVPNConnection {
     public interface OnEstablishListener {
         void onEstablish(ParcelFileDescriptor tunInterface);
     }
-    /** Maximum packet size is constrained by the MTU, which is given as a signed short. */
-    private static final int MAX_PACKET_SIZE = Short.MAX_VALUE;
-    /** Time to wait in between losing the connection and retrying. */
-    private static final long RECONNECT_WAIT_MS = TimeUnit.SECONDS.toMillis(3);
-    /** Time between keepalives if there is no traffic at the moment.
-     *
-     * TODO: don't do this; it's much better to let the connection die and then reconnect when
-     *       necessary instead of keeping the network hardware up for hours on end in between.
-     **/
-    private static final long KEEPALIVE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(15);
-    /** Time to wait without receiving any response before assuming the server is gone. */
-    private static final long RECEIVE_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(20);
-    /**
-     * Time between polling the VPN interface for new traffic, since it's non-blocking.
-     *
-     * TODO: really don't do this; a blocking read on another thread is much cleaner.
-     */
-    private static final long IDLE_INTERVAL_MS = TimeUnit.MILLISECONDS.toMillis(100);
-    /**
-     * Number of periods of length {@IDLE_INTERVAL_MS} to wait before declaring the handshake a
-     * complete and abject failure.
-     *
-     * TODO: use a higher-level protocol; hand-rolling is a fun but pointless exercise.
-     */
-    private static final int MAX_HANDSHAKE_ATTEMPTS = 50;
+
     private final VpnService mService;
     private final int mConnectionId;
     private final String mServerName;
     private final int mServerPort;
     private PendingIntent mConfigureIntent;
     private OnEstablishListener mOnEstablishListener;
-    private FromVPNClientRunnable fromVPNClientRunnable;
+
     private Observable<Boolean> observable;
 
-    private final Object StopMx = new Object();
-    private boolean shouldStop = false;
-
-    private void stopOperation() {
-        fromVPNClientRunnable.Stop();
-    }
+    private Disposable sendingProcedureSubscription;
+    private Disposable receivingProcedureSubscription;
 
     public SkywireVPNConnection(final VpnService service, final int connectionId, final String serverName, final int serverPort) {
         mService = service;
@@ -102,105 +72,112 @@ public class SkywireVPNConnection {
                     // network is available.
                     // Here we just use a counter to keep things simple.
                     for (int attempt = 0; attempt < 10; ++attempt) {
-                        if (emitter.isDisposed()) { stopOperation(); return; }
+                        if (emitter.isDisposed()) { return; }
                         // Reset the counter if we were connected.
-                        if (run(serverAddress)) {
+                        if (run(serverAddress, emitter)) {
                             attempt = 0;
                         }
 
                         // Sleep for a while. This also checks if we got interrupted.
-                        if (emitter.isDisposed()) { stopOperation(); return; }
+                        if (emitter.isDisposed()) { return; }
                         Thread.sleep(3000);
                     }
                     Skywiremob.printString(getTag() + " Giving");
 
-                    stopOperation();
                     if (emitter.isDisposed()) { return; }
-                    emitter.onComplete();
+                    emitter.onError(new Exception("Giving"));
                 } catch (Exception e) {
                     HelperFunctions.logError(getTag() + " Connection failed, exiting", e);
                     if (!emitter.isDisposed()) {
                         emitter.onError(e);
-                        emitter.onComplete();
                     }
                 }
+
+                emitter.onComplete();
             });
         }
 
         return observable;
     }
 
-    private boolean run(SocketAddress server) throws IOException, IllegalArgumentException {
+    private boolean run(SocketAddress server, ObservableEmitter<Boolean> parentEmitter) {
         ParcelFileDescriptor iface = null;
         boolean connected = false;
 
         // Create a DatagramChannel as the VPN tunnel.
         try (DatagramChannel tunnel = DatagramChannel.open()) {
+            if (parentEmitter.isDisposed()) { return connected; }
             // Protect the tunnel before connecting to avoid loopback.
             if (!mService.protect(tunnel.socket())) {
                 throw new IllegalStateException("Cannot protect the tunnel");
             }
-            for (int fd = (int)Skywiremob.nextDmsgSocket(); fd != 0; fd = (int)Skywiremob.nextDmsgSocket()) {
+
+            // TODO: use something better for detecting the state of the subscription.
+            for (int fd = (int) Skywiremob.nextDmsgSocket(); fd != 0; fd = (int) Skywiremob.nextDmsgSocket()) {
                 Skywiremob.printString("PRINTING FD " + fd);
                 if (!mService.protect(fd)) {
                     throw new IllegalStateException("Cannot protect the tunnel");
                 }
             }
+
             // Connect to the server.
+            if (parentEmitter.isDisposed()) { return connected; }
             tunnel.connect(server);
 
             // Inform Skywire about the local socket address.
             // NOTE: this function should work in old Android versions, but there is a bug, at least in
             // Android API 17, which makes the port to always be 0, that is why the app requires Android
             // API 21+ to run. Maybe creating the socket by hand would allow to support older versions.
+            if (parentEmitter.isDisposed()) { return connected; }
             Skywiremob.setMobileAppAddr(tunnel.socket().getLocalSocketAddress().toString());
 
             // For simplicity, we use the same thread for both reading and
             // writing. Here we put the tunnel into non-blocking mode.
+            // TODO: now there are 2 threads.
             tunnel.configureBlocking(false);
             // Configure the virtual network interface.
+            if (parentEmitter.isDisposed()) { return connected; }
             iface = configure();
             // Now we are connected. Set the flag.
             connected = true;
-            // Packets to be sent are queued in this input stream.
-            FileInputStream in = new FileInputStream(iface.getFileDescriptor());
-            // Packets received need to be written to this output stream.
-            FileOutputStream out = new FileOutputStream(iface.getFileDescriptor());
 
-            this.fromVPNClientRunnable = new FromVPNClientRunnable(out, tunnel);
-            new Thread(this.fromVPNClientRunnable).start();
-            // Allocate the buffer for a single packet.
-            ByteBuffer packet = ByteBuffer.allocate(MAX_PACKET_SIZE);
             // We keep forwarding packets till something goes wrong.
-            Skywiremob.printString("Start forwarding packets on Android");
-            while (true) {
-                synchronized (StopMx) {
-                    if (shouldStop) {
-                        break;
-                    }
-                }
+            Skywiremob.printString(getTag() + " is forwarding packets on Android");
 
-                // Assume that we did not make any progress in this iteration.
-                // Read the outgoing packet from the input stream.
-                int length = in.read(packet.array());
-                if (length > 0) {
-                    // Write the outgoing packet to the tunnel.
-                    packet.limit(length);
-                    tunnel.write(packet);
-                    packet.clear();
-                }
+            sendingProcedureSubscription = VPNDataManager.createObservable(iface, tunnel, true)
+                .subscribeOn(Schedulers.io()).subscribe(
+                    val -> {},
+                    err -> { throw err; }
+                );
+            receivingProcedureSubscription = VPNDataManager.createObservable(iface, tunnel, false)
+                .subscribeOn(Schedulers.io()).subscribe(
+                    val -> {},
+                    err -> { throw err; }
+                );
+
+            while (!sendingProcedureSubscription.isDisposed() && !receivingProcedureSubscription.isDisposed()) {
+                if (parentEmitter.isDisposed()) { break; }
+                Thread.sleep(1000);
             }
-        } catch (SocketException e) {
-            Skywiremob.printString(getTag() + " Cannot use socket " + e.getMessage());
+        } catch (Exception e) {
+            HelperFunctions.logError(getTag() + " Cannot use socket", e);
         } finally {
             if (iface != null) {
                 try {
                     iface.close();
                 } catch (IOException e) {
-                    Skywiremob.printString(getTag() + " Unable to close interface " + e.getMessage());
+                    HelperFunctions.logError(getTag() + " Unable to close interface", e);
                 }
             }
+
+            if (sendingProcedureSubscription != null) {
+                sendingProcedureSubscription.dispose();
+            }
+            if (receivingProcedureSubscription != null) {
+                receivingProcedureSubscription.dispose();
+            }
         }
+
         return connected;
     }
 
