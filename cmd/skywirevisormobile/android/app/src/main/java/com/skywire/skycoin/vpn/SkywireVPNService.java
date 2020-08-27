@@ -16,7 +16,6 @@ import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,6 +37,7 @@ public class SkywireVPNService extends VpnService {
         public static int VISOR_READY = 40;
         public static int STARTING_VPN_CONNECTION = 50;
         public static int CONNECTED = 100;
+        public static int RECONNECTING = 110;
         public static int DISCONNECTING = 200;
         public static int DISCONNECTED = 300;
         public static int ERROR = 400;
@@ -58,6 +58,8 @@ public class SkywireVPNService extends VpnService {
             return R.string.vpn_state_connecting;
         } else if (state == States.CONNECTED) {
             return R.string.vpn_state_connected;
+        } else if (state == States.RECONNECTING) {
+            return R.string.vpn_state_reconnecting;
         } else if (state == States.DISCONNECTING) {
             return R.string.vpn_state_disconnecting;
         } else if (state == States.DISCONNECTED) {
@@ -91,6 +93,8 @@ public class SkywireVPNService extends VpnService {
     private Disposable visorSubscription;
     private Disposable startVpnSubscription;
     private Disposable vpnConnectionSubscription;
+
+    private boolean diconnected = false;
 
     @Override
     public void onCreate() {
@@ -136,7 +140,6 @@ public class SkywireVPNService extends VpnService {
                 Skywiremob.printString("STOPPING ANDROID VPN SERVICE");
                 disconnect();
                 updateState(States.DISCONNECTING);
-                visor.stopVisor();
             }
             return START_NOT_STICKY;
         } else if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
@@ -167,6 +170,7 @@ public class SkywireVPNService extends VpnService {
                         lastErrorMsg = err.getLocalizedMessage();
                         updateState(States.ERROR);
                     }, () -> {
+                        // TODO: after making the changes to stop and restart the visor, this may need changes.
                         if (currentState != States.ERROR) {
                             updateState(States.DISCONNECTED);
                         }
@@ -191,8 +195,6 @@ public class SkywireVPNService extends VpnService {
     public void onDestroy() {
         Skywiremob.printString("Closing service");
         disconnect();
-        visorSubscription.dispose();
-        startVpnSubscription.dispose();
     }
 
     private void connect() {
@@ -210,7 +212,7 @@ public class SkywireVPNService extends VpnService {
                 emitter.onComplete();
             } catch (Exception e) {
                 if (emitter.isDisposed()) { return; }
-                emitter.onError(new Exception(e));
+                emitter.onError(e);
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(
             val -> {},
@@ -220,32 +222,41 @@ public class SkywireVPNService extends VpnService {
             }, () -> {
                 Skywiremob.printString("VPN IS READY, LET'S TRY IT OUT");
 
-                startConnection(new SkywireVPNConnection(
-                        this, mNextConnectionId.getAndIncrement(), "localhost", 7890));
+                startConnection();
             }
         );
     }
 
-    private void startConnection(final SkywireVPNConnection connection) {
-        this.connectionRunnable = connection;
-        // Handler to mark as connected once onEstablish is called.
-        connection.setConfigureIntent(mConfigureIntent);
-        connection.setOnEstablishListener(tunInterface -> {
-            updateState(States.CONNECTED);
-            setConnection(tunInterface);
-        });
-
-        // Cancel any previous connection thread.
+    private void startConnection() {
+        // Cancel any previous connection threads.
         if (vpnConnectionSubscription != null) {
             vpnConnectionSubscription.dispose();
         }
+        if (this.connectionRunnable != null) {
+            this.connectionRunnable.dispose();
+        }
+
+        final SkywireVPNConnection connection = new SkywireVPNConnection(
+            this,
+            mNextConnectionId.getAndIncrement(),
+            "localhost",
+            7890,
+            mConfigureIntent
+        );
+
+        this.connectionRunnable = connection;
 
         vpnConnectionSubscription = connection.getObservable()
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                val -> {},
-                err -> {
+                val -> {
+                    if (val) {
+                        updateState(States.CONNECTED);
+                    } else {
+                        updateState(States.RECONNECTING);
+                    }
+                }, err -> {
                     lastErrorMsg = err.getLocalizedMessage();
                     updateState(States.ERROR);
                     disconnect();
@@ -256,25 +267,30 @@ public class SkywireVPNService extends VpnService {
             );
     }
 
-    private void setConnection(final ParcelFileDescriptor connection) {
-        final ParcelFileDescriptor oldConnection = mConnection.getAndSet(connection);
-        if (oldConnection != null) {
-            try {
-                oldConnection.close();
-            } catch (IOException e) {
-                HelperFunctions.logError(SkywireVPNService.class.getSimpleName() + " Closing VPN interface", e);
-            }
-        }
-    }
     private void disconnect() {
-        if (this.currentState != States.ERROR) {
-            updateState(States.DISCONNECTING);
+        if (!diconnected) {
+            if (this.currentState != States.ERROR) {
+                updateState(States.DISCONNECTING);
+            }
+
+            // NOTE: if this is done, the subscription will not know when the visor has been stopped.
+            //if (visorSubscription != null) {
+            //    visorSubscription.dispose();
+            //}
+
+            if (vpnConnectionSubscription != null) {
+                vpnConnectionSubscription.dispose();
+            }
+            if (startVpnSubscription != null) {
+                startVpnSubscription.dispose();
+            }
+            stopForeground(true);
+
+            //TODO: reactivate when making the changes to stop and restart the visor.
+            //visor.stopVisor();
+
+            diconnected = true;
         }
-        if (vpnConnectionSubscription != null) {
-            vpnConnectionSubscription.dispose();
-        }
-        setConnection(null);
-        stopForeground(true);
     }
 
     private void updateForegroundNotification() {
