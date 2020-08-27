@@ -13,7 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/skycoin/dmsg"
 	"github.com/skycoin/dmsg/cipher"
-	"github.com/skycoin/dmsg/cmdutil"
 	"github.com/skycoin/skycoin/src/util/logging"
 
 	"github.com/skycoin/skywire/internal/vpn"
@@ -115,16 +114,15 @@ func IsVPNReady() bool {
 var log = logging.NewMasterLogger()
 
 var (
-	globalVisor *visor.Visor
+	globalVisorMx     sync.Mutex
+	globalVisor       *visor.Visor
+	globalVisorDone   = make(chan struct{})
+	globalVisorReady  = make(chan error, 2)
+	globalVisorCancel func()
 
-	stopVisorFuncMx sync.Mutex
-	stopVisorFunc   func()
+	vpnClientMx sync.Mutex
+	vpnClient   *vpn.ClientMobile
 
-	keyPairMx sync.Mutex
-	visorSK   cipher.SecKey
-	visorPK   cipher.PubKey
-
-	vpnClient  *vpn.ClientMobile
 	tunCredsMx sync.Mutex
 	tunIP      net.IP
 	tunGateway net.IP
@@ -159,14 +157,51 @@ func PrepareVisor() string {
 
 	log.Infoln("Initialized config")
 
-	v, ok := visor.NewVisor(conf, nil)
-	if !ok {
-		return errors.New("failed to start visor").Error()
-	}
+	v := visor.NewVisor(conf, nil)
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	globalVisorMx.Lock()
 	globalVisor = v
+	globalVisorCancel = cancel
+	globalVisorMx.Unlock()
 
-	log.Infoln("Started visor")
+	go func() {
+		<-ctx.Done()
+		v.Close()
+		globalVisorMx.Lock()
+		close(globalVisorDone)
+		globalVisorMx.Unlock()
+	}()
+
+	go func(ctx context.Context) {
+		var err error
+		if ok := v.Start(ctx); !ok {
+			log.Errorln("Failed to start visor")
+			err = errors.New("failed to start visor")
+		} else {
+			log.Infoln("Started visor")
+		}
+
+		globalVisorMx.Lock()
+		globalVisorReady <- err
+		close(globalVisorReady)
+		globalVisorMx.Unlock()
+	}(ctx)
+
+	return ""
+}
+
+func WaitVisorReady() string {
+	globalVisorMx.Lock()
+	ready := globalVisorReady
+	globalVisorMx.Unlock()
+
+	err := <-ready
+
+	if err != nil {
+		return err.Error()
+	}
 
 	return ""
 }
@@ -196,7 +231,15 @@ func getNextDmsgSocketIdx(ln int) int {
 // NextDmsgSocket returns next file descriptor of Dmsg socket. If no descriptors
 // left or in case of error returns 0.
 func NextDmsgSocket() int {
-	allSessions := globalVisor.Network().Dmsg().AllSessions()
+	globalVisorMx.Lock()
+	v := globalVisor
+	globalVisorMx.Unlock()
+
+	if v == nil {
+		return 0
+	}
+
+	allSessions := v.Network().Dmsg().AllSessions()
 	log.Infof("Dmsg sockets count: %d\n", len(allSessions))
 
 	nextDmsgSocketIdx := getNextDmsgSocketIdx(len(allSessions))
@@ -233,12 +276,20 @@ func NextDmsgSocket() int {
 
 // PrepareVPNClient creates and runs VPN client instance.
 func PrepareVPNClient(srvPKStr, passcode string) string {
+	globalVisorMx.Lock()
+	v := globalVisor
+	globalVisorMx.Unlock()
+
+	if v == nil {
+		return "visor is not ready yet"
+	}
+
 	var srvPK cipher.PubKey
 	if err := srvPK.UnmarshalText([]byte(srvPKStr)); err != nil {
 		return fmt.Errorf("invalid remote PK: %w", err).Error()
 	}
 
-	if _, err := globalVisor.SaveTransport(context.Background(), srvPK, dmsg.Type); err != nil {
+	if _, err := v.SaveTransport(context.Background(), srvPK, dmsg.Type); err != nil {
 		return fmt.Errorf("failed to save transport to VPN server: %w", err).Error()
 	}
 
@@ -264,16 +315,8 @@ func PrepareVPNClient(srvPKStr, passcode string) string {
 
 	log.Infoln("Wrapped app conn")
 
-	keyPairMx.Lock()
-	localSK := visorSK
-	localPK := visorPK
-	keyPairMx.Unlock()
-
-	noiseCreds := vpn.NewNoiseCredentials(localSK, localPK)
-
 	vpnClientCfg := vpn.ClientConfig{
-		Passcode:    passcode,
-		Credentials: noiseCreds,
+		Passcode: passcode,
 	}
 
 	vpnCl, err := vpn.NewClientMobile(vpnClientCfg, logrus.New(), conn)
@@ -281,7 +324,9 @@ func PrepareVPNClient(srvPKStr, passcode string) string {
 		return fmt.Errorf("failed to create VPN client: %w", err).Error()
 	}
 
+	vpnClientMx.Lock()
 	vpnClient = vpnCl
+	vpnClientMx.Unlock()
 
 	log.Infoln("Created VPN client")
 
@@ -290,7 +335,15 @@ func PrepareVPNClient(srvPKStr, passcode string) string {
 
 // ShakeHands performs VPN client/server handshake.
 func ShakeHands() string {
-	tunIPInternal, tunGatewayInternal, _, err := vpnClient.ShakeHands()
+	vpnClientMx.Lock()
+	vpnCl := vpnClient
+	vpnClientMx.Unlock()
+
+	if vpnCl == nil {
+		return "vpn client is not ready"
+	}
+
+	tunIPInternal, tunGatewayInternal, err := vpnCl.ShakeHands()
 	if err != nil {
 		return fmt.Errorf("handshake error: %w", err).Error()
 	}
@@ -333,48 +386,61 @@ func TUNGateway() string {
 
 // StopVisor stops running visor. Returns non-empty error string on failure.
 func StopVisor() string {
-	stopVisorFuncMx.Lock()
-	stopFunc := stopVisorFunc
-	stopVisorFunc = nil
-	stopVisorFuncMx.Unlock()
+	globalVisorMx.Lock()
+	v := globalVisor
+	cancel := globalVisorCancel
+	vDone := globalVisorDone
+	ready := globalVisorReady
+	globalVisorMx.Unlock()
 
-	if stopFunc == nil {
+	if v == nil || cancel == nil {
 		return "visor is not running"
 	}
 
-	stopFunc()
+	cancel()
+	<-vDone
+	<-ready
 
-	vpnClient.Close()
-	if err := udpConn.Close(); err != nil {
-		log.WithError(err).Errorln("Failed to close mobile app UDP conn")
+	vpnClientMx.Lock()
+	if vpnClient != nil {
+		vpnClient.Close()
+	}
+	vpnClient = nil
+	vpnClientMx.Unlock()
+
+	if udpConn != nil {
+		if err := udpConn.Close(); err != nil {
+			log.WithError(err).Errorln("Failed to close mobile app UDP conn")
+		}
+
+		udpConn = nil
 	}
 
-	return ""
-}
+	atomic.StoreInt32(&isVPNReady, 0)
 
-// WaitForVisorToStop blocks until visor exits. Returns non-empty error string on failure.
-func WaitForVisorToStop() string {
-	ctx, cancel := cmdutil.SignalContext(context.Background(), log)
-	stopVisorFuncMx.Lock()
-	stopVisorFunc = cancel
-	stopVisorFuncMx.Unlock()
+	nextDmsgSocketIdxMx.Lock()
+	nextDmsgSocketIdx = -1
+	nextDmsgSocketIdxMx.Unlock()
 
-	// Wait.
-	<-ctx.Done()
-
-	if err := globalVisor.Close(); err != nil {
-		return fmt.Errorf("failed to close visor: %w", err).Error()
+	select {
+	case <-mobileAppAddrCh:
+	default:
+		close(mobileAppAddrCh)
 	}
+	mobileAppAddrCh = make(chan *net.UDPAddr, 2)
+
+	globalVisorMx.Lock()
+	globalVisor = nil
+	globalVisorCancel = nil
+	globalVisorDone = make(chan struct{})
+	globalVisorReady = make(chan error, 2)
+	globalVisorMx.Unlock()
 
 	return ""
 }
 
 func initConfig(mLog *logging.MasterLogger, confPath string) (*visorconfig.V1, error) {
 	pk, sk := cipher.GenerateKeyPair()
-	keyPairMx.Lock()
-	visorPK = pk
-	visorSK = sk
-	keyPairMx.Unlock()
 
 	parsedConf := strings.ReplaceAll(visorConfig, "${SK}", sk.String())
 	parsedConf = strings.ReplaceAll(parsedConf, "${PK}", pk.String())
@@ -413,18 +479,28 @@ func SetMobileAppAddr(addr string) {
 var udpConn *net.UDPConn
 
 // ServeVPN starts handling VPN traffic.
-func ServeVPN() {
+func ServeVPN() string {
+	vpnClientMx.Lock()
+	vpnCl := vpnClient
+	vpnClientMx.Unlock()
+
+	if vpnCl == nil {
+		return "vpn client is not ready"
+	}
+
 	go func() {
 		tunAddr := <-mobileAppAddrCh
 		log.Infof("Got mobile app UDP addr: %s\n", tunAddr.String())
 		wr := vpn.NewUDPConnWriter(udpConn, tunAddr)
 
-		if err := vpnClient.Serve(wr); err != nil {
+		if err := vpnCl.Serve(wr); err != nil {
 			log.WithError(err).Errorln("Failed to serve VPN")
 		}
 	}()
 
 	atomic.StoreInt32(&isVPNReady, 1)
+
+	return ""
 }
 
 // StartListeningUDP starts listening UDP.

@@ -77,6 +77,8 @@ github.com/klauspost/pgzip
 github.com/klauspost/reedsolomon
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/kz/discordrus v1.2.0
+github.com/kz/discordrus
 # github.com/mattn/go-colorable v0.1.7
 ## explicit
 github.com/mattn/go-colorable
@@ -126,7 +128,7 @@ github.com/prometheus/client_golang/prometheus/internal
 github.com/prometheus/client_golang/prometheus/promhttp
 # github.com/prometheus/client_model v0.2.0
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.11.1
+# github.com/prometheus/common v0.13.0
 ## explicit
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
@@ -152,13 +154,14 @@ github.com/shirou/gopsutil/process
 ## explicit
 github.com/sirupsen/logrus
 github.com/sirupsen/logrus/hooks/syslog
-# github.com/skycoin/dmsg v0.0.0-20200805192450-553eed6249cf
+# github.com/skycoin/dmsg v0.0.0-20200820123211-abbd79d1ac43
 ## explicit
 github.com/skycoin/dmsg
 github.com/skycoin/dmsg/buildinfo
 github.com/skycoin/dmsg/cipher
 github.com/skycoin/dmsg/cmdutil
 github.com/skycoin/dmsg/disc
+github.com/skycoin/dmsg/discord
 github.com/skycoin/dmsg/dmsgctrl
 github.com/skycoin/dmsg/dmsgpty
 github.com/skycoin/dmsg/dmsgtest
@@ -249,7 +252,7 @@ golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/nettest
 golang.org/x/net/proxy
-# golang.org/x/sys v0.0.0-20200805065543-0cf7623e9dbd
+# golang.org/x/sys v0.0.0-20200819171115-d785dc25833f
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader

@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/profile"
 	"github.com/skycoin/dmsg/buildinfo"
 	"github.com/skycoin/dmsg/cmdutil"
+	"github.com/skycoin/dmsg/discord"
 	"github.com/skycoin/skycoin/src/util/logging"
 	"github.com/spf13/cobra"
 
@@ -106,8 +107,9 @@ var rootCmd = &cobra.Command{
 
 		conf := initConfig(log, args, confPath)
 
-		v, ok := visor.NewVisor(conf, restartCtx)
-		if !ok {
+		v := visor.NewVisor(conf, restartCtx)
+
+		if ok := v.Start(context.Background()); !ok {
 			log.Fatal("Failed to start visor.")
 		}
 
@@ -117,9 +119,7 @@ var rootCmd = &cobra.Command{
 		// Wait.
 		<-ctx.Done()
 
-		if err := v.Close(); err != nil {
-			log.WithError(err).Error("Visor closed with error.")
-		}
+		v.Close()
 	},
 	Version: buildinfo.Version(),
 }
@@ -142,6 +142,11 @@ func initLogger(tag string, syslogAddr string) *logging.MasterLogger {
 			log.AddHook(hook)
 			log.Out = ioutil.Discard
 		}
+	}
+
+	if discordWebhookURL := discord.GetWebhookURLFromEnv(); discordWebhookURL != "" {
+		hook := discord.NewHook(tag, discordWebhookURL)
+		log.AddHook(hook)
 	}
 
 	return log
