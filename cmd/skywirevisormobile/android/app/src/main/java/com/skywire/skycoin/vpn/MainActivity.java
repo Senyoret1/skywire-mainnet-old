@@ -35,19 +35,31 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     private Handler serviceCommunicationHandler;
     private int communicationID;
 
+    private boolean showingError = false;
+
     private SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.what != SkywireVPNService.States.ERROR) {
+        if (msg.what != SkywireVPNService.States.ERROR && msg.what != SkywireVPNService.States.DISCONNECTED) {
             int stateText = SkywireVPNService.getTextForState(msg.what);
             if (stateText != -1) {
                 textStatus.setText(stateText);
                 return true;
             }
+        } else if (msg.what == SkywireVPNService.States.DISCONNECTED) {
+            if (!showingError) {
+                textStatus.setText(R.string.vpn_state_disconnected);
+            }
+
+            displayInitialState();
+
+            return true;
         } else {
             textStatus.setText(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
-            displayFinishedState();
+            displayErrorState();
+
+            return true;
         }
 
         return false;
@@ -150,10 +162,12 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     }
 
     private void stop() {
+        buttonStop.setEnabled(false);
         startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
     }
 
     private void displayInitialState() {
+        showingError = false;
         editTextRemotePK.setEnabled(true);
         editTextPasscode.setEnabled(true);
         buttonStart.setEnabled(true);
@@ -169,7 +183,8 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         textFinishAlert.setVisibility(View.GONE);
     }
 
-    private void displayFinishedState() {
+    private void displayErrorState() {
+        showingError = true;
         editTextRemotePK.setEnabled(false);
         editTextPasscode.setEnabled(false);
         buttonStart.setEnabled(false);

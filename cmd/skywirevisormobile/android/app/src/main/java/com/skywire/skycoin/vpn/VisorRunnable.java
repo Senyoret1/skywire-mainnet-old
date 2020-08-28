@@ -36,9 +36,17 @@ public class VisorRunnable {
                 Skywiremob.printString(err);
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(err));
-                emitter.onComplete();
                 return;
             }
+
+            err = Skywiremob.waitVisorReady();
+            if (!err.isEmpty()) {
+                Skywiremob.printString(err);
+                if (emitter.isDisposed()) { return; }
+                emitter.onError(new Exception(err));
+                return;
+            }
+
             Skywiremob.printString("Prepared visor");
             if (emitter.isDisposed()) { return; }
             emitter.onNext(SkywireVPNService.States.PREPARING_VPN_CLIENT);
@@ -54,7 +62,6 @@ public class VisorRunnable {
                 Skywiremob.printString(err);
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(err));
-                emitter.onComplete();
                 return;
             }
             Skywiremob.printString("Prepared VPN client");
@@ -67,7 +74,6 @@ public class VisorRunnable {
                 Skywiremob.printString(err);
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(err));
-                emitter.onComplete();
                 return;
             }
 
@@ -77,28 +83,20 @@ public class VisorRunnable {
                 Skywiremob.printString(err);
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(err));
-                emitter.onComplete();
                 return;
             }
 
             if (emitter.isDisposed()) { return; }
-            Skywiremob.serveVPN();
-
-            if (emitter.isDisposed()) { return; }
-            emitter.onNext(SkywireVPNService.States.VISOR_READY);
-
-            if (emitter.isDisposed()) { return; }
-            err = Skywiremob.waitForVisorToStop();
+            err = Skywiremob.serveVPN();
             if (!err.isEmpty()) {
                 Skywiremob.printString(err);
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(err));
-                emitter.onComplete();
                 return;
             }
-            Skywiremob.printString("Wait finished");
 
             if (emitter.isDisposed()) { return; }
+            emitter.onNext(SkywireVPNService.States.VISOR_READY);
             emitter.onComplete();
         });
     }

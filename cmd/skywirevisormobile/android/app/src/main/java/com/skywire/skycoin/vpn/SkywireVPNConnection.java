@@ -74,6 +74,11 @@ public class SkywireVPNConnection implements Disposable {
                     // tries to recreate the tunnel without shutting down everything.
                     // In this demo, all we need to know is the server address.
                     final SocketAddress serverAddress = new InetSocketAddress(serverName, serverPort);
+
+                    // TODO: this code has ben deactivated because it is not really posible to start the conection again
+                    // and inform the visor about the new socket as just after calling Skywiremob.setMobileAppAddr for the
+                    //second time there is a panic.
+                    /*
                     // We try to create the tunnel several times.
                     // Here we just use a counter to keep things simple.
                     for (int attempt = 0; attempt < 10; ++attempt) {
@@ -87,13 +92,21 @@ public class SkywireVPNConnection implements Disposable {
                         if (emitter.isDisposed()) { return; }
                         Thread.sleep(3000);
                     }
-                    Skywiremob.printString(getTag() + " Maximum number of retries reached");
+                    */
 
-                    if (emitter.isDisposed()) { return; }
+                    run(serverAddress, emitter);
+
+                    // Use this msg again if the code for retying the connection is reactivated.
+                    // Skywiremob.printString(getTag() + " Maximum number of retries reached");
+
                     if (lastError == null) {
-                        emitter.onError(new Exception("Maximum number of retries reached"));
+                        Skywiremob.printString(getTag() + " Connection failed.");
+                        if (emitter.isDisposed()) { return; }
+                        emitter.onError(new Exception("Connection failed."));
                     } else {
-                        emitter.onError(new Exception("Maximum number of retries reached. Last status message: " + lastError));
+                        Skywiremob.printString(getTag() + " Connection failed. Last status message: " + lastError);
+                        if (emitter.isDisposed()) { return; }
+                        emitter.onError(new Exception("Connection failed. Last status message: " + lastError));
                     }
                 } catch (Exception e) {
                     HelperFunctions.logError(getTag() + " Connection failed, exiting", e);
@@ -125,8 +138,12 @@ public class SkywireVPNConnection implements Disposable {
                 throw new IllegalStateException("Cannot protect the tunnel");
             }
 
-            // TODO: use something better for detecting the state of the subscription.
-            for (int fd = (int) Skywiremob.nextDmsgSocket(); fd != 0; fd = (int) Skywiremob.nextDmsgSocket()) {
+            while(true) {
+                if (parentEmitter.isDisposed()) { return connected; }
+
+                int fd = (int) Skywiremob.nextDmsgSocket();
+                if (fd == 0) { break; }
+
                 Skywiremob.printString("PRINTING FD " + fd);
                 if (!service.protect(fd)) {
                     throw new IllegalStateException("Cannot protect the tunnel");
@@ -202,9 +219,6 @@ public class SkywireVPNConnection implements Disposable {
             }
         } finally {
             closeConnection();
-            if (!parentEmitter.isDisposed()) {
-                parentEmitter.onNext(false);
-            }
         }
 
         return connected;
