@@ -24,6 +24,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.BooleanSupplier;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
@@ -281,18 +282,30 @@ public class SkywireVPNService extends VpnService {
                 this.connectionRunnable.dispose();
             }
 
-            if (visor != null) {
-                visor.stopVisor();
-            }
+            Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+                if (visor != null) {
+                    visor.stopVisor();
+                }
+                emitter.onComplete();
+            }).subscribeOn(Schedulers.io()).subscribe();
 
-            Observable.just(0).delay(5000, TimeUnit.MILLISECONDS)
+            Observable.timer(100, TimeUnit.MILLISECONDS)
+                .repeatUntil(new BooleanSupplier() {
+                    @Override
+                    public boolean getAsBoolean() throws Exception {
+                        if (!Skywiremob.isVisorStarting() && !Skywiremob.isVisorRunning()) {
+                            updateState(States.DISCONNECTED);
+                            stopSelf();
+
+                            return true;
+                        }
+
+                        return false;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(val -> {
-                    updateState(States.DISCONNECTED);
-
-                    stopSelf();
-                });
+                .subscribe();
         }
     }
 
