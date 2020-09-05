@@ -4,6 +4,8 @@
     <string name="general_notification_channel_description">SkywireVPN status notifications.</string>
     <string name="general_service_description">SkywireVPN networking service.</string>
 
+    <string name="tmp_general_service_stopping_error">The SkywireVPN is being stopped, the operation has been ignored.</string>
+
     <string name="vpn_state_initializing">Initializing SkywireVPN</string>
     <string name="vpn_state_starting_visor">Starting SkywireVPN visor</string>
     <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector</string>
@@ -13,5 +15,10 @@
     <string name="vpn_state_disconnecting">Closing VPN connection</string>
     <string name="vpn_state_disconnected">VPN connection closed</string>
     <string name="vpn_state_error">There has been a connection error</string>
+
+    <string name="tmp_main_page_start">Start</string>
+    <string name="tmp_main_page_stop">Stop</string>
+    <string name="tmp_main_page_stoping">Stopping the service...</string>
+    <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
 
 </resources>

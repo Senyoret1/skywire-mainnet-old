@@ -76,6 +76,7 @@ public class SkywireVPNService extends VpnService {
     public static final String ACTION_STOP_COMUNNICATION = "com.skywire.android.vpn.STOP_COMM";
 
     public static final String ERROR_MSG_PARAM = "ErrorMsg";
+    public static final String STARTED_BY_THE_SYSTEM_PARAM = "StartedByTheSystem";
 
     private NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     private SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -96,6 +97,7 @@ public class SkywireVPNService extends VpnService {
     private Disposable startVpnSubscription;
     private Disposable vpnConnectionSubscription;
 
+    private boolean startedByTheSystem = false;
     private boolean disconnectionStarted = false;
 
     @Override
@@ -113,10 +115,11 @@ public class SkywireVPNService extends VpnService {
         Message msg = Message.obtain();
         msg.what = newState;
 
+        Bundle dataBundle = new Bundle();
+        dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, startedByTheSystem);
+
         if (newState == States.ERROR) {
-            Bundle b = new Bundle();
-            b.putString(ERROR_MSG_PARAM, lastErrorMsg);
-            msg.setData(b);
+            dataBundle.putString(ERROR_MSG_PARAM, lastErrorMsg);
 
             settings.edit()
                 .putString(Globals.StorageVars.LAST_ERROR, lastErrorMsg)
@@ -130,6 +133,8 @@ public class SkywireVPNService extends VpnService {
                 HelperFunctions.showToast(getString(getTextForState(newState)), false);
             }
         }
+
+        msg.setData(dataBundle);
 
         currentState = newState;
 
@@ -150,35 +155,62 @@ public class SkywireVPNService extends VpnService {
             }
             disconnect();
         } else if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
-            // Become a foreground service. Background services can be VPN services too, but they can
-            // be killed by background check before getting a chance to receive onRevoke().
-            makeForeground();
-
             if (intent.hasExtra("ID") && intent.hasExtra("Messenger")) {
                 messengers.put(intent.getIntExtra("ID", 0), intent.getParcelableExtra("Messenger"));
                 updateState(currentState);
             }
 
-            if (visor == null) {
-                Skywiremob.printString("STARTING ANDROID VPN SERVICE");
+            startVisorIfNeeded();
+        } else if (intent != null && ACTION_STOP_COMUNNICATION.equals(intent.getAction())) {
+            if (intent.hasExtra("ID")) {
+                messengers.remove(intent.getIntExtra("ID", 0));
+            }
+        } else if (intent != null) {
+            startedByTheSystem = true;
+            updateState(currentState);
 
-                settings.edit()
-                    .remove(Globals.StorageVars.LAST_ERROR)
-                    .apply();
+            if (!disconnectionStarted) {
+                startVisorIfNeeded();
+            } else {
+                // Done as precaution.
+                HelperFunctions.showToast(getString(R.string.tmp_general_service_stopping_error), false);
+            }
+        }
 
-                visor = new VisorRunnable();
+        return START_NOT_STICKY;
+    }
 
-                visorSubscription = visor.run()
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(state -> {
-                        updateState(state);
+    @Override
+    public void onDestroy() {
+        Skywiremob.printString("Closing service");
+        disconnect();
+    }
 
-                        if (visorTimeoutSubscription != null) {
-                            visorTimeoutSubscription.dispose();
-                        }
+    private void startVisorIfNeeded() {
+        // Become a foreground service. Background services can be VPN services too, but they can
+        // be killed by background check before getting a chance to receive onRevoke().
+        makeForeground();
 
-                        visorTimeoutSubscription = Observable.just(0).delay(45000, TimeUnit.MILLISECONDS)
+        if (visor == null) {
+            Skywiremob.printString("STARTING ANDROID VPN SERVICE");
+
+            settings.edit()
+                .remove(Globals.StorageVars.LAST_ERROR)
+                .apply();
+
+            visor = new VisorRunnable();
+
+            visorSubscription = visor.run()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(state -> {
+                    updateState(state);
+
+                    if (visorTimeoutSubscription != null) {
+                        visorTimeoutSubscription.dispose();
+                    }
+
+                    visorTimeoutSubscription = Observable.just(0).delay(45000, TimeUnit.MILLISECONDS)
                             .subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(val -> {
@@ -186,28 +218,15 @@ public class SkywireVPNService extends VpnService {
                                 updateState(States.ERROR);
                                 disconnect();
                             });
-                    }, err -> {
-                        lastErrorMsg = err.getLocalizedMessage();
-                        updateState(States.ERROR);
-                        disconnect();
-                    }, () -> {
-                        visorTimeoutSubscription.dispose();
-                        connect();
-                    });
-            }
-        } else if (intent != null && ACTION_STOP_COMUNNICATION.equals(intent.getAction())) {
-            if (intent.hasExtra("ID")) {
-                messengers.remove(intent.getIntExtra("ID", 0));
-            }
+                }, err -> {
+                    lastErrorMsg = err.getLocalizedMessage();
+                    updateState(States.ERROR);
+                    disconnect();
+                }, () -> {
+                    visorTimeoutSubscription.dispose();
+                    connect();
+                });
         }
-
-        return disconnectionStarted ? START_NOT_STICKY : START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        Skywiremob.printString("Closing service");
-        disconnect();
     }
 
     private void connect() {

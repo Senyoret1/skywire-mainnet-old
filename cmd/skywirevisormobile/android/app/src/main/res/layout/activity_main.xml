@@ -33,13 +33,13 @@
         android:id="@+id/buttonStart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start" />
+        android:text="@string/tmp_main_page_start" />
 
     <Button
         android:id="@+id/buttonStop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Stop" />
+        android:text="@string/tmp_main_page_stop" />
 
     <TextView
         android:id="@+id/textStatus"
@@ -49,11 +49,19 @@
         android:text="Status" />
 
     <TextView
+        android:id="@+id/textStopAlert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/tmp_main_page_can_not_stop"
+        android:textColor="#FF0000" />
+
+    <TextView
         android:id="@+id/textFinishAlert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="Stopping the service..."
+        android:text="@string/tmp_main_page_stoping"
         android:textColor="#FF0000" />
 
 </LinearLayout>

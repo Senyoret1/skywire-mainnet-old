@@ -32,6 +32,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     private Button buttonStop;
     private TextView textStatus;
     private TextView textFinishAlert;
+    private TextView textStopAlert;
 
     private Handler serviceCommunicationHandler;
     private int communicationID;
@@ -44,6 +45,12 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     public boolean handleMessage(Message msg) {
         if (msg.what != SkywireVPNService.States.ERROR && msg.what != SkywireVPNService.States.DISCONNECTED) {
             int stateText = SkywireVPNService.getTextForState(msg.what);
+
+            if (msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM)) {
+                this.buttonStop.setEnabled(false);
+                textStopAlert.setVisibility(View.VISIBLE);
+            }
+
             if (stateText != -1) {
                 textStatus.setText(stateText);
                 return true;
@@ -77,6 +84,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         buttonStop = findViewById(R.id.buttonStop);
         textStatus = findViewById(R.id.textStatus);
         textFinishAlert = findViewById(R.id.textFinishAlert);
+        textStopAlert = findViewById(R.id.textStopAlert);
 
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
@@ -202,7 +210,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
 
     private void displayInitialState(boolean restartStatusText) {
         if (restartStatusText) {
-            textStatus.setText("");
+            textStatus.setText(R.string.vpn_state_disconnected);
         }
 
         showingError = false;
@@ -211,6 +219,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         buttonStart.setEnabled(true);
         buttonStop.setEnabled(false);
         textFinishAlert.setVisibility(View.GONE);
+        textStopAlert.setVisibility(View.GONE);
     }
 
     private void displayWorkingState() {
@@ -219,6 +228,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(true);
         textFinishAlert.setVisibility(View.GONE);
+        textStopAlert.setVisibility(View.GONE);
     }
 
     private void displayErrorState() {
@@ -228,5 +238,6 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(false);
         textFinishAlert.setVisibility(View.VISIBLE);
+        textStopAlert.setVisibility(View.GONE);
     }
 }
