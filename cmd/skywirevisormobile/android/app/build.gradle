@@ -12,12 +12,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "com.skywire.skycoin.vpn"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
@@ -34,7 +34,9 @@ android {
 
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation "androidx.appcompat:appcompat:1.2.0"
+    implementation "androidx.preference:preference:1.1.1"
+
     implementation(name:'skywire', ext:'aar')
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.0'

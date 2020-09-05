@@ -2,6 +2,7 @@
 <resources>
     <string name="general_app_name">SkywireVPN</string>
     <string name="general_notification_channel_description">SkywireVPN status notifications.</string>
+    <string name="general_service_description">SkywireVPN networking service.</string>
 
     <string name="vpn_state_initializing">Initializing SkywireVPN</string>
     <string name="vpn_state_starting_visor">Starting SkywireVPN visor</string>

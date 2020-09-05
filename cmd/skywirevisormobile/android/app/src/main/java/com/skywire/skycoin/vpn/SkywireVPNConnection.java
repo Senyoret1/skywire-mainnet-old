@@ -3,7 +3,6 @@ package com.skywire.skycoin.vpn;
 import android.app.PendingIntent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
@@ -173,7 +172,7 @@ public class SkywireVPNConnection implements Disposable {
             Skywiremob.printString(getTag() + " is forwarding packets on Android");
 
             sendingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, true)
-                .subscribeOn(Schedulers.io()).subscribe(
+                .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
                         synchronized (service) {
@@ -184,7 +183,7 @@ public class SkywireVPNConnection implements Disposable {
                     }
                 );
             receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, false)
-                .subscribeOn(Schedulers.io()).subscribe(
+                .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
                         synchronized (service) {
@@ -267,7 +266,7 @@ public class SkywireVPNConnection implements Disposable {
         // Create a new interface using the builder and save the parameters.
         final ParcelFileDescriptor vpnInterface;
 
-        builder.setSession(serverName).setConfigureIntent(configureIntent);
+        builder.setConfigureIntent(configureIntent);
         synchronized (service) {
             vpnInterface = builder.establish();
         }

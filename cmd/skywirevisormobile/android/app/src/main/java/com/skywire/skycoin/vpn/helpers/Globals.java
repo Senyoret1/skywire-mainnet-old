@@ -6,5 +6,6 @@ public class Globals {
     public static class StorageVars {
         public static final String SERVER_PK = "serverPK";
         public static final String SERVER_PASSWORD = "serverPass";
+        public static final String LAST_ERROR = "lastError";
     }
 }

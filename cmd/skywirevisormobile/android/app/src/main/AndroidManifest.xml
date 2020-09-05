@@ -7,6 +7,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".helpers.App"
@@ -14,6 +15,7 @@
         android:label="@string/general_app_name"
     >
         <service android:name=".SkywireVPNService"
+            android:description="@string/general_service_description"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>

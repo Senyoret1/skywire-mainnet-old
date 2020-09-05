@@ -9,11 +9,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.preference.PreferenceManager;
 
 import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
@@ -52,7 +53,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
                 textStatus.setText(R.string.vpn_state_disconnected);
             }
 
-            displayInitialState();
+            displayInitialState(false);
 
             return true;
         } else {
@@ -80,14 +81,47 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
 
-        displayInitialState();
-
         serviceCommunicationHandler = new Handler(this);
         communicationID = new Random().nextInt(Integer.MAX_VALUE);
+
+        String savedPk = settings.getString(Globals.StorageVars.SERVER_PK, null);
+        String savedPassword = settings.getString(Globals.StorageVars.SERVER_PASSWORD, null);
+
+        if (savedPk != null && savedPassword != null) {
+            editTextRemotePK.setText(savedPk);
+            editTextPasscode.setText(savedPassword);
+        }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        editTextRemotePK.setText(savedInstanceState.getString("pk"));
+        editTextPasscode.setText(savedInstanceState.getString("password"));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("pk", editTextRemotePK.getText().toString());
+        savedInstanceState.putString("password", editTextPasscode.getText().toString());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        displayInitialState(true);
 
         if (HelperFunctions.isServiceRunning()) {
             displayWorkingState();
             onActivityResult(0, RESULT_OK, null);
+        } else {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+            String savedError = settings.getString(Globals.StorageVars.LAST_ERROR, null);
+
+            if (savedError != null) {
+                textStatus.setText(savedError);
+            }
         }
     }
 
@@ -121,7 +155,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
                 startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
             }
         } else {
-            displayInitialState();
+            displayInitialState(true);
         }
     }
 
@@ -166,7 +200,11 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
     }
 
-    private void displayInitialState() {
+    private void displayInitialState(boolean restartStatusText) {
+        if (restartStatusText) {
+            textStatus.setText("");
+        }
+
         showingError = false;
         editTextRemotePK.setEnabled(true);
         editTextPasscode.setEnabled(true);

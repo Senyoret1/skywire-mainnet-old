@@ -2,8 +2,6 @@ package com.skywire.skycoin.vpn;
 
 import android.os.ParcelFileDescriptor;
 
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;

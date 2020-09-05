@@ -1,7 +1,8 @@
 package com.skywire.skycoin.vpn;
 
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
