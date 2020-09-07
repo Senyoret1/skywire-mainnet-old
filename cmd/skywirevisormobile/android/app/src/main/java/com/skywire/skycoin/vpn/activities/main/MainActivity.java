@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.activities.main;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,6 +16,9 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceManager;
 
+import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.SkywireVPNService;
+import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
 import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
@@ -30,6 +33,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
     private EditText editTextPasscode;
     private Button buttonStart;
     private Button buttonStop;
+    private Button buttonSelect;
     private TextView textStatus;
     private TextView textFinishAlert;
     private TextView textStopAlert;
@@ -82,12 +86,14 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         editTextPasscode = findViewById(R.id.editTextPasscode);
         buttonStart = findViewById(R.id.buttonStart);
         buttonStop = findViewById(R.id.buttonStop);
+        buttonSelect = findViewById(R.id.buttonSelect);
         textStatus = findViewById(R.id.textStatus);
         textFinishAlert = findViewById(R.id.textFinishAlert);
         textStopAlert = findViewById(R.id.textStopAlert);
 
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
+        buttonSelect.setOnClickListener(this);
 
         serviceCommunicationHandler = new Handler(this);
         communicationID = new Random().nextInt(Integer.MAX_VALUE);
@@ -151,19 +157,30 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
             case R.id.buttonStop:
                 stop();
                 break;
+            case R.id.buttonSelect:
+                selectServer();
+                break;
         }
     }
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
-        if (result == RESULT_OK) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
+        if (request == 0) {
+            if (result == RESULT_OK) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
+                } else {
+                    startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
+                }
             } else {
-                startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
+                displayInitialState(true);
             }
-        } else {
-            displayInitialState(true);
+        } else if (request == 1 && data != null) {
+            String address = data.getStringExtra(ServersActivity.ADDRESS_DATA_PARAM);
+            if (address != null) {
+                editTextRemotePK.setText(address);
+                editTextPasscode.setText("");
+            }
         }
     }
 
@@ -208,6 +225,11 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
     }
 
+    private void selectServer() {
+        Intent intent = new Intent(this, ServersActivity.class);
+        startActivityForResult(intent, 1);
+    }
+
     private void displayInitialState(boolean restartStatusText) {
         if (restartStatusText) {
             textStatus.setText(R.string.vpn_state_disconnected);
@@ -218,6 +240,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         editTextPasscode.setEnabled(true);
         buttonStart.setEnabled(true);
         buttonStop.setEnabled(false);
+        buttonSelect.setEnabled(true);
         textFinishAlert.setVisibility(View.GONE);
         textStopAlert.setVisibility(View.GONE);
     }
@@ -227,6 +250,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         editTextPasscode.setEnabled(false);
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(true);
+        buttonSelect.setEnabled(false);
         textFinishAlert.setVisibility(View.GONE);
         textStopAlert.setVisibility(View.GONE);
     }
@@ -237,6 +261,7 @@ public class MainActivity extends Activity implements Handler.Callback, View.OnC
         editTextPasscode.setEnabled(false);
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(false);
+        buttonSelect.setEnabled(false);
         textFinishAlert.setVisibility(View.VISIBLE);
         textStopAlert.setVisibility(View.GONE);
     }

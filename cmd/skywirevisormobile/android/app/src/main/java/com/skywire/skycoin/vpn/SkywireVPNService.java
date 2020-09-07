@@ -14,6 +14,7 @@ import android.os.Messenger;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
+import com.skywire.skycoin.vpn.activities.main.MainActivity;
 import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
@@ -45,7 +46,7 @@ public class SkywireVPNService extends VpnService {
         public static int ERROR = 400;
     }
 
-    static int getTextForState(int state) {
+    public static int getTextForState(int state) {
         if (state == States.STARTING) {
             return R.string.vpn_state_initializing;
         } else if (state == States.PREPARING_VISOR) {

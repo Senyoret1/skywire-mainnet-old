@@ -18,7 +18,10 @@
 
     <string name="tmp_main_page_start">Start</string>
     <string name="tmp_main_page_stop">Stop</string>
+    <string name="tmp_main_page_select">Select server</string>
     <string name="tmp_main_page_stoping">Stopping the service...</string>
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
+
+    <string name="tmp_select_server_title">Select VPN server</string>
 
 </resources>
