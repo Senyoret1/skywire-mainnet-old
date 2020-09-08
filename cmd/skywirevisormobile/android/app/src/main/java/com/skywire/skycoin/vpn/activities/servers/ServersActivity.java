@@ -81,21 +81,21 @@ public class ServersActivity extends Activity implements VpnServersAdapter.VpnSe
         ArrayList<VpnServer> response = new ArrayList<>();
 
         VpnServer testServer = new VpnServer();
-        testServer.addr = "Test address 1";
+        testServer.addr = "024ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
         testServer.geo = new GeoInfo();
         testServer.geo.country = "US";
         testServer.geo.region = "NY";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.addr = "Test address 2";
+        testServer.addr = "0348c941c5015a05c455ff238af2e57fb8f914c399aab604e9abb5b32b91a4c1fe";
         testServer.geo = new GeoInfo();
         testServer.geo.country = "US";
         testServer.geo.region = "CA";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.addr = "Test address 3";
+        testServer.addr = "031b80cd5773143a39d940dc0710b93dcccc262a85108018a7a95ab9af734f8055";
         testServer.geo = new GeoInfo();
         testServer.geo.country = "CA";
         testServer.geo.region = "ON";

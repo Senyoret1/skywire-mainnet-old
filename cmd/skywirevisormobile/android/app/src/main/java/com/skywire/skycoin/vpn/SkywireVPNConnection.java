@@ -127,6 +127,8 @@ public class SkywireVPNConnection implements Disposable {
         lastError = null;
         operationError = null;
 
+        String protectErrorMsg =  "The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.";
+
         // Create a DatagramChannel as the VPN tunnel.
         try {
             tunnel = DatagramChannel.open();
@@ -134,7 +136,8 @@ public class SkywireVPNConnection implements Disposable {
             if (parentEmitter.isDisposed()) { return connected; }
             // Protect the tunnel before connecting to avoid loopback.
             if (!service.protect(tunnel.socket())) {
-                throw new IllegalStateException("Cannot protect the tunnel");
+                Skywiremob.printString("Cannot protect the app-visor socket");
+                throw new IllegalStateException(protectErrorMsg);
             }
 
             while(true) {
@@ -145,7 +148,8 @@ public class SkywireVPNConnection implements Disposable {
 
                 Skywiremob.printString("PRINTING FD " + fd);
                 if (!service.protect(fd)) {
-                    throw new IllegalStateException("Cannot protect the tunnel");
+                    Skywiremob.printString("Cannot protect the socket for " + fd);
+                    throw new IllegalStateException(protectErrorMsg);
                 }
             }
 

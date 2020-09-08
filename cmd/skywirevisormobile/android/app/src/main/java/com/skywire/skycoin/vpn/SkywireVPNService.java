@@ -6,7 +6,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -187,6 +192,13 @@ public class SkywireVPNService extends VpnService {
         disconnect();
     }
 
+    @Override
+    public void onRevoke() {
+        super.onRevoke();
+        Skywiremob.printString("onRevoke called");
+        this.stopSelf();
+    }
+
     private void startVisorIfNeeded() {
         // Become a foreground service. Background services can be VPN services too, but they can
         // be killed by background check before getting a chance to receive onRevoke().
@@ -194,6 +206,36 @@ public class SkywireVPNService extends VpnService {
 
         if (visor == null) {
             Skywiremob.printString("STARTING ANDROID VPN SERVICE");
+
+            // Check if the device has network connectivity.
+            boolean validNetwork = true;
+            ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Network activeNetwork = connectivityManager.getActiveNetwork();
+                if (activeNetwork == null) {
+                    validNetwork = false;
+                } else {
+                    NetworkCapabilities networkInfo = connectivityManager.getNetworkCapabilities(activeNetwork);
+                    validNetwork =
+                        networkInfo != null && (
+                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)
+                        )
+                    ;
+                }
+            } else {
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                validNetwork = networkInfo != null && networkInfo.isConnected();
+            }
+
+            if (!validNetwork) {
+                lastErrorMsg = "No network available.";
+                updateState(States.ERROR);
+                disconnect();
+                return;
+            }
 
             settings.edit()
                 .remove(Globals.StorageVars.LAST_ERROR)
