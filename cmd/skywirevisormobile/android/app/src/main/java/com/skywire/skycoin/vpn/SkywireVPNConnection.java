@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 
+import com.skywire.skycoin.vpn.helpers.App;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.io.IOException;
@@ -99,13 +100,12 @@ public class SkywireVPNConnection implements Disposable {
                     // Skywiremob.printString(getTag() + " Maximum number of retries reached");
 
                     if (lastError == null) {
-                        Skywiremob.printString(getTag() + " Connection failed.");
+                        HelperFunctions.logError(getTag(), "The connection has been closed unexpectedly.");
                         if (emitter.isDisposed()) { return; }
-                        emitter.onError(new Exception("Connection failed."));
+                        emitter.onError(new Exception(App.getContext().getString(R.string.vpn_connection_finished_error)));
                     } else {
-                        Skywiremob.printString(getTag() + " Connection failed. Last status message: " + lastError);
                         if (emitter.isDisposed()) { return; }
-                        emitter.onError(new Exception("Connection failed. Last status message: " + lastError));
+                        emitter.onError(new Exception(App.getContext().getString(R.string.vpn_connection_failed_error) + lastError));
                     }
                 } catch (Exception e) {
                     HelperFunctions.logError(getTag() + " Connection failed, exiting", e);
@@ -127,7 +127,7 @@ public class SkywireVPNConnection implements Disposable {
         lastError = null;
         operationError = null;
 
-        String protectErrorMsg =  "The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.";
+        String protectErrorMsg = App.getContext().getString(R.string.vpn_socket_protection_error);
 
         // Create a DatagramChannel as the VPN tunnel.
         try {
@@ -136,7 +136,7 @@ public class SkywireVPNConnection implements Disposable {
             if (parentEmitter.isDisposed()) { return connected; }
             // Protect the tunnel before connecting to avoid loopback.
             if (!service.protect(tunnel.socket())) {
-                Skywiremob.printString("Cannot protect the app-visor socket");
+                HelperFunctions.logError(getTag(), "Cannot protect the app-visor socket");
                 throw new IllegalStateException(protectErrorMsg);
             }
 
@@ -148,7 +148,7 @@ public class SkywireVPNConnection implements Disposable {
 
                 Skywiremob.printString("PRINTING FD " + fd);
                 if (!service.protect(fd)) {
-                    Skywiremob.printString("Cannot protect the socket for " + fd);
+                    HelperFunctions.logError(getTag(), "Cannot protect the socket for " + fd);
                     throw new IllegalStateException(protectErrorMsg);
                 }
             }

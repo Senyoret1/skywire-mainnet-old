@@ -6,6 +6,7 @@
 
     <string name="tmp_general_service_stopping_error">The SkywireVPN is being stopped, the operation has been ignored.</string>
 
+    <string name="vpn_state_off">SkywireVPN disconnected</string>
     <string name="vpn_state_initializing">Initializing SkywireVPN</string>
     <string name="vpn_state_starting_visor">Starting SkywireVPN visor</string>
     <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector</string>
@@ -14,13 +15,22 @@
     <string name="vpn_state_connected">VPN connected</string>
     <string name="vpn_state_disconnecting">Closing VPN connection</string>
     <string name="vpn_state_disconnected">VPN connection closed</string>
-    <string name="vpn_state_error">There has been a connection error</string>
+    <string name="vpn_state_error">There has been an error with the SkywireVPN service</string>
+
+    <string name="vpn_coordinator_invalid_credentials_error">Invalid public key: </string>
+
+    <string name="vpn_service_no_network_error">No network available.</string>
+    <string name="vpn_timerout_error">Unable to connect to the VPN server.</string>
+    <string name="vpn_connection_finished_error">The VPN connection has been closed unexpectedly.</string>
+    <string name="vpn_connection_failed_error">The VPN connection failed. Last status message: </string>
+    <string name="vpn_socket_protection_error">The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.</string>
 
     <string name="tmp_main_page_start">Start</string>
     <string name="tmp_main_page_stop">Stop</string>
     <string name="tmp_main_page_select">Select server</string>
     <string name="tmp_main_page_stoping">Stopping the service...</string>
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
+    <string name="tmp_main_page_last_error">The last attempt to start the service failed with the following error:</string>
 
     <string name="tmp_select_server_title">Select VPN server</string>
 

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 import skywiremob.Skywiremob;
@@ -18,6 +19,9 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this;
+
+        // Ensure the singleton is initialized early.
+        VPNCoordinator.getInstance();
 
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library

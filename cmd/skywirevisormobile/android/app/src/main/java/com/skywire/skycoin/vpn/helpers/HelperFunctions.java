@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.skywire.skycoin.vpn.SkywireVPNService;
+import java.util.List;
 
 import skywiremob.Skywiremob;
 
@@ -24,6 +24,11 @@ public class HelperFunctions {
         Skywiremob.printString(errorMsg);
     }
 
+    public static void logError(String prefix, String errorText) {
+        String errorMsg = prefix + ": " + errorText;
+        Skywiremob.printString(errorMsg);
+    }
+
     public static void showToast(String text, boolean shortDuration) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -35,13 +40,20 @@ public class HelperFunctions {
         });
     }
 
-    public static boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) App.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (SkywireVPNService.class.getName().equals(service.service.getClassName())) {
+    public static boolean appIsOnForeground() {
+        ActivityManager activityManager = (ActivityManager) App.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appsRunning = activityManager.getRunningAppProcesses();
+        if (appsRunning == null) {
+            return false;
+        }
+
+        final String packageName = App.getContext().getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appsRunning) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
                 return true;
             }
         }
+
         return false;
     }
 }

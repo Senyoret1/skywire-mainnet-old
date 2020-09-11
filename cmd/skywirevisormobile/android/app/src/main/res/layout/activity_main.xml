@@ -55,6 +55,20 @@
         android:text="Status" />
 
     <TextView
+        android:id="@+id/textLastError1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/tmp_main_page_last_error"
+        android:textColor="#FF0000" />
+
+    <TextView
+        android:id="@+id/textLastError2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000" />
+
+    <TextView
         android:id="@+id/textStopAlert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
