@@ -12,6 +12,7 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.VPNStates;
+import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
 
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -23,6 +24,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button buttonStart;
     private Button buttonStop;
     private Button buttonSelect;
+    private Button buttonApps;
     private TextView textLastError1;
     private TextView textLastError2;
     private TextView textStatus;
@@ -41,6 +43,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         buttonStart = findViewById(R.id.buttonStart);
         buttonStop = findViewById(R.id.buttonStop);
         buttonSelect = findViewById(R.id.buttonSelect);
+        buttonApps = findViewById(R.id.buttonApps);
         textStatus = findViewById(R.id.textStatus);
         textFinishAlert = findViewById(R.id.textFinishAlert);
         textLastError1 = findViewById(R.id.textLastError1);
@@ -50,6 +53,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
         buttonSelect.setOnClickListener(this);
+        buttonApps.setOnClickListener(this);
 
         String savedPk = VPNPersistentData.getPublicKey(null);
         String savedPassword = VPNPersistentData.getPassword(null);
@@ -130,6 +134,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.buttonSelect:
                 selectServer();
                 break;
+            case R.id.buttonApps:
+                selectApps();
+                break;
         }
     }
 
@@ -163,6 +170,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         startActivityForResult(intent, 1);
     }
 
+    private void selectApps() {
+        Intent intent = new Intent(this, AppsActivity.class);
+        startActivity(intent);
+    }
+
     private void displayInitialState() {
         textStatus.setText(R.string.vpn_state_off);
 
@@ -171,6 +183,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         buttonStart.setEnabled(true);
         buttonStop.setEnabled(false);
         buttonSelect.setEnabled(true);
+        buttonApps.setEnabled(true);
         textFinishAlert.setVisibility(View.GONE);
         textStopAlert.setVisibility(View.GONE);
 
@@ -191,6 +204,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(true);
         buttonSelect.setEnabled(false);
+        buttonApps.setEnabled(false);
         textFinishAlert.setVisibility(View.GONE);
         textStopAlert.setVisibility(View.GONE);
 
@@ -204,6 +218,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         buttonStart.setEnabled(false);
         buttonStop.setEnabled(false);
         buttonSelect.setEnabled(false);
+        buttonApps.setEnabled(false);
         textFinishAlert.setVisibility(View.VISIBLE);
         textStopAlert.setVisibility(View.GONE);
 

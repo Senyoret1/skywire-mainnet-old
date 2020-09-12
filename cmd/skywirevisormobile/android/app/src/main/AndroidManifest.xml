@@ -41,6 +41,13 @@
             android:screenOrientation="portrait"
             android:label="@string/tmp_select_server_title" >
         </activity>
+
+        <activity
+            android:name=".activities.apps.AppsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:label="@string/tmp_select_apps_title" >
+        </activity>
     </application>
 
 </manifest>

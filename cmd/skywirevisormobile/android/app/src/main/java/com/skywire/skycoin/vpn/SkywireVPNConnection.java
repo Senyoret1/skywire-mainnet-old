@@ -5,12 +5,14 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 
 import com.skywire.skycoin.vpn.helpers.App;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
+import java.util.HashSet;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -266,6 +268,21 @@ public class SkywireVPNConnection implements Disposable {
         builder.addRoute("0.0.0.0", 1);
         builder.addRoute("128.0.0.0", 1);
         builder.setBlocking(true);
+
+        Globals.AppFilteringModes appsSelectionMode = VPNPersistentData.getAppsSelectionMode();
+        if (appsSelectionMode != Globals.AppFilteringModes.PROTECT_ALL) {
+            for (String packageName : HelperFunctions.filterAvailableApps(VPNPersistentData.getAppList(new HashSet<>()))) {
+                try {
+                    if (appsSelectionMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
+                        builder.addAllowedApplication(packageName);
+                    } else {
+                        builder.addDisallowedApplication(packageName);
+                    }
+                } catch (Exception e){
+                    HelperFunctions.logError("Unable to add " + packageName + " to the VPN service", e);
+                }
+            }
+        }
 
         // Create a new interface using the builder and save the parameters.
         final ParcelFileDescriptor vpnInterface;

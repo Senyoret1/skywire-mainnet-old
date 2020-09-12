@@ -10,7 +10,6 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
-import skywiremob.Skywiremob;
 
 public class App extends Application {
     private static Context appContext;

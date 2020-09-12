@@ -2,10 +2,13 @@ package com.skywire.skycoin.vpn.helpers;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
+import java.util.HashSet;
 import java.util.List;
 
 import skywiremob.Skywiremob;
@@ -55,5 +58,27 @@ public class HelperFunctions {
         }
 
         return false;
+    }
+
+    public static List<ResolveInfo> getDeviceAppsList() {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        return App.getContext().getPackageManager().queryIntentActivities( mainIntent, 0);
+    }
+
+    public static HashSet<String> filterAvailableApps(HashSet<String> apps) {
+        HashSet<String> availableApps = new HashSet<>();
+        for (ResolveInfo app : getDeviceAppsList()) {
+            availableApps.add(app.activityInfo.packageName);
+        }
+
+        HashSet<String> response = new HashSet<>();
+        for (String app : apps) {
+            if (availableApps.contains(app)) {
+                response.add(app);
+            }
+        }
+
+        return response;
     }
 }

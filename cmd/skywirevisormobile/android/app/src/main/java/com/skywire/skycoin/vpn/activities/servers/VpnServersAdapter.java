@@ -5,26 +5,15 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.skywire.skycoin.vpn.helpers.ClickWithIndexEvent;
+import com.skywire.skycoin.vpn.helpers.ListViewHolder;
 import com.skywire.skycoin.vpn.network.models.VpnServer;
 
 import java.util.List;
 
-public class VpnServersAdapter extends RecyclerView.Adapter<VpnServersAdapter.ListViewHolder> implements ServerListButton.ClickWithIndexEvent {
+public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<ServerListButton>> implements ClickWithIndexEvent<Void> {
     public interface VpnServerSelectedListener {
         void onVpnServerSelected(VpnServer selectedServer);
-    }
-
-    public static class ListViewHolder extends RecyclerView.ViewHolder {
-        ServerListButton view;
-
-        public ListViewHolder(ServerListButton v) {
-            super(v);
-            view = v;
-        }
-
-        public ServerListButton getButtonView() {
-            return view;
-        }
     }
 
     private Context context;
@@ -41,14 +30,14 @@ public class VpnServersAdapter extends RecyclerView.Adapter<VpnServersAdapter.Li
     }
 
     @Override
-    public ListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ListViewHolder<ServerListButton> onCreateViewHolder(ViewGroup parent, int viewType) {
         ServerListButton view = new ServerListButton(context);
         view.setClickWithIndexEventListener(this);
-        return new ListViewHolder(view);
+        return new ListViewHolder<>(view);
     }
 
     @Override
-    public void onBindViewHolder(ListViewHolder holder, int position) {
+    public void onBindViewHolder(ListViewHolder<ServerListButton> holder, int position) {
         String location = "-";
         if (data.get(position).geo != null) {
             location = "";
@@ -65,8 +54,8 @@ public class VpnServersAdapter extends RecyclerView.Adapter<VpnServersAdapter.Li
             }
         }
 
-        holder.getButtonView().changeTexts(data.get(position).addr, location);
         holder.getButtonView().setIndex(position);
+        holder.getButtonView().changeData(data.get(position).addr, location);
     }
 
     @Override
@@ -75,9 +64,9 @@ public class VpnServersAdapter extends RecyclerView.Adapter<VpnServersAdapter.Li
     }
 
     @Override
-    public void onClickWithIndex(int index) {
+    public void onClickWithIndex(int index, Void data) {
         if (vpnSelectedListener != null) {
-            vpnSelectedListener.onVpnServerSelected(data.get(index));
+            vpnSelectedListener.onVpnServerSelected(this.data.get(index));
         }
     }
 }

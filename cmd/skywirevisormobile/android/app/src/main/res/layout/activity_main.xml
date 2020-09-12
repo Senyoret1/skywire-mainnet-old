@@ -47,6 +47,12 @@
         android:layout_height="wrap_content"
         android:text="@string/tmp_main_page_select" />
 
+    <Button
+        android:id="@+id/buttonApps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/tmp_main_page_select_apps" />
+
     <TextView
         android:id="@+id/textStatus"
         android:layout_width="match_parent"
