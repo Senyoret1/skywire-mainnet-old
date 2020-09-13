@@ -54,8 +54,8 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
             }
         }
 
-        holder.getButtonView().setIndex(position);
-        holder.getButtonView().changeData(data.get(position).addr, location);
+        ((ServerListButton)holder.itemView).setIndex(position);
+        ((ServerListButton)holder.itemView).changeData(data.get(position).addr, location);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.skywire.skycoin.vpn.helpers;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,9 @@ import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+
+import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.VPNCoordinator;
 
 import java.util.HashSet;
 import java.util.List;
@@ -80,5 +84,16 @@ public class HelperFunctions {
         }
 
         return response;
+    }
+
+    public static boolean closeActivityIfServiceRunning(Activity activity) {
+        if (VPNCoordinator.getInstance().isServiceRunning()) {
+            HelperFunctions.showToast(App.getContext().getString(R.string.vpn_already_running_warning), true);
+            activity.finish();
+
+            return true;
+        }
+
+        return false;
     }
 }

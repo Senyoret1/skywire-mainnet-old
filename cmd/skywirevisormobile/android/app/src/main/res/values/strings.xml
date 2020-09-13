@@ -24,6 +24,9 @@
     <string name="vpn_connection_finished_error">The VPN connection has been closed unexpectedly.</string>
     <string name="vpn_connection_failed_error">The VPN connection failed. Last status message: </string>
     <string name="vpn_socket_protection_error">The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.</string>
+    <string name="vpn_already_running_warning">The VPN is already running.</string>
+    <string name="vpn_no_apps_to_protect_warning">You have not selected specific applications to protect. All applications will be protected.</string>
+    <string name="vpn_no_apps_to_ignore_warning">You have not selected specific applications to ignore. All applications will be protected.</string>
 
     <string name="tmp_main_page_start">Start</string>
     <string name="tmp_main_page_stop">Stop</string>
@@ -39,5 +42,7 @@
     <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
     <string name="tmp_select_apps_protect_selected_button">Protect selected apps only</string>
     <string name="tmp_select_apps_unprotect_selected_button">Do not protect the selected apps</string>
+    <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
+    <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
 
 </resources>

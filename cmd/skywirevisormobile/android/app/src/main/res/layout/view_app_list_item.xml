@@ -20,12 +20,18 @@
         android:layout_height="48dp"
         android:layout_gravity="center_vertical" />
 
+    <FrameLayout
+        android:id="@+id/layoutSeparator"
+        android:layout_width="16dp"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
     <TextView
         android:id="@+id/textAppName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dp"
         android:layout_marginRight="10dp"
         android:layout_weight="1" />
 

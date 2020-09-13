@@ -14,6 +14,10 @@ import com.skywire.skycoin.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.VPNStates;
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
+import com.skywire.skycoin.vpn.helpers.Globals;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+
+import java.util.HashSet;
 
 import io.reactivex.rxjava3.disposables.Disposable;
 
@@ -154,6 +158,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void start() {
+        Globals.AppFilteringModes selectedMode = VPNPersistentData.getAppsSelectionMode();
+        if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
+            HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNPersistentData.getAppList(new HashSet<>()));
+
+            if (selectedApps.size() == 0) {
+                if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
+                    HelperFunctions.showToast(getString(R.string.vpn_no_apps_to_protect_warning), false);
+                } else {
+                    HelperFunctions.showToast(getString(R.string.vpn_no_apps_to_ignore_warning), false);
+                }
+            }
+        }
+
         VPNCoordinator.getInstance().startVPN(
             this,
             editTextRemotePK.getText().toString(),

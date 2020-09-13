@@ -20,8 +20,14 @@ import java.util.HashSet;
 import java.util.List;
 
 public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> implements ClickWithIndexEvent<Void> {
+    public interface AppListChangedListener {
+        boolean onAppListChanged();
+    }
+
     private Context context;
     private List<ResolveInfo> appList;
+    private List<String> uninstalledApps;
+    private AppListChangedListener appListChangedListener;
 
     private HashSet<String> selectedApps;
     private Globals.AppFilteringModes selectedOption;
@@ -38,9 +44,24 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
 
         appList = HelperFunctions.getDeviceAppsList();
 
+        HashSet<String> filteredApps = HelperFunctions.filterAvailableApps(selectedApps);
+        if (filteredApps.size() != selectedApps.size()) {
+            uninstalledApps = new ArrayList<>();
+
+            for (String app : selectedApps) {
+                if (!filteredApps.contains(app)) {
+                    uninstalledApps.add(app);
+                }
+            }
+        }
+
         optionTexts.put(0, R.string.tmp_select_apps_protect_all_button);
         optionTexts.put(1, R.string.tmp_select_apps_protect_selected_button);
         optionTexts.put(2, R.string.tmp_select_apps_unprotect_selected_button);
+    }
+
+    public void setAppListChangedEventListener(AppListChangedListener listener) {
+        appListChangedListener = listener;
     }
 
     @Override
@@ -49,23 +70,35 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             return 0;
         }
 
+        if (uninstalledApps == null) {
+            return 1;
+        }
+
+        if (position == 3 || position == 4 + appList.size()) {
+            return 2;
+        }
+
         return 1;
     }
 
     @Override
     public ListViewHolder<View> onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == 0) {
-            AppListOptionButton option = new AppListOptionButton(context);
-            option.setClickWithIndexEventListener(this);
-            optionButtons.add(option);
+            AppListOptionButton view = new AppListOptionButton(context);
+            view.setClickWithIndexEventListener(this);
+            optionButtons.add(view);
 
-            return new ListViewHolder<>(option);
+            return new ListViewHolder<>(view);
+        } else if (viewType == 1) {
+            AppListButton view = new AppListButton(context);
+            view.setClickWithIndexEventListener(this);
+            view.setEnabled(selectedOption != Globals.AppFilteringModes.PROTECT_ALL);
+            appButtons.add(view);
+
+            return new ListViewHolder<>(view);
         }
 
-        AppListButton view = new AppListButton(context);
-        view.setClickWithIndexEventListener(this);
-        view.setEnabled(selectedOption != Globals.AppFilteringModes.PROTECT_ALL);
-        appButtons.add(view);
+        AppListSeparator view = new AppListSeparator(context);
 
         return new ListViewHolder<>(view);
     }
@@ -79,26 +112,53 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             if (position == 2 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED) { showChecked = true; }
 
             int optionText = optionTexts.get(position);
-            ((AppListOptionButton)(holder.getButtonView())).setIndex(position);
-            ((AppListOptionButton)(holder.getButtonView())).changeData(optionText);
-            ((AppListOptionButton)(holder.getButtonView())).setChecked(showChecked);
+            ((AppListOptionButton)(holder.itemView)).setIndex(position);
+            ((AppListOptionButton)(holder.itemView)).changeData(optionText);
+            ((AppListOptionButton)(holder.itemView)).setChecked(showChecked);
+
+            return;
+        } else if (holder.getItemViewType() == 2) {
+            if (position == 3) {
+                ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_installed_apps_title);
+            } else {
+                ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_uninstalled_apps_title);
+            }
 
             return;
         }
 
-        String element = appList.get(position - 3).activityInfo.packageName;
-        ((AppListButton)(holder.getButtonView())).setIndex(position);
-        ((AppListButton)(holder.getButtonView())).changeData(appList.get(position - 3));
-        ((AppListButton)(holder.getButtonView())).setChecked(selectedApps.contains(element));
+        int initialAppButtonsIndex = uninstalledApps == null ? 3 : 4;
+
+        if (position < initialAppButtonsIndex + appList.size()) {
+            String element = appList.get(position - initialAppButtonsIndex).activityInfo.packageName;
+            ((AppListButton) (holder.itemView)).setIndex(position);
+            ((AppListButton) (holder.itemView)).changeData(appList.get(position - initialAppButtonsIndex));
+            ((AppListButton) (holder.itemView)).setChecked(selectedApps.contains(element));
+        } else {
+            String element = uninstalledApps.get(position - (initialAppButtonsIndex + appList.size() + 1));
+            ((AppListButton) (holder.itemView)).setIndex(position);
+            ((AppListButton) (holder.itemView)).changeData(element);
+            ((AppListButton) (holder.itemView)).setChecked(selectedApps.contains(element));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return appList.size() + 3;
+        if (uninstalledApps == null) {
+            return appList.size() + 3;
+        } else {
+            return appList.size() + 3 + 2 + uninstalledApps.size();
+        }
     }
 
     @Override
     public void onClickWithIndex(int index, Void data) {
+        if (appListChangedListener != null) {
+            if (!appListChangedListener.onAppListChanged()) {
+                return;
+            }
+        }
+
         if (index < 3) {
             if (index == 0) {
                 changeSelectedOption(Globals.AppFilteringModes.PROTECT_ALL);
@@ -138,13 +198,31 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     }
 
     private void processAppClicked(int index) {
-        String element = appList.get(index - 3).activityInfo.packageName;
-        if (selectedApps.contains(element)) {
-            selectedApps.remove(element);
-            appButtons.get((index - 3)).setChecked(false);
+        String app;
+
+        int initialAppButtonsIndex = uninstalledApps == null ? 3 : 4;
+        if (index < initialAppButtonsIndex + appList.size()) {
+            app = appList.get(index - initialAppButtonsIndex).activityInfo.packageName;
         } else {
-            selectedApps.add(element);
-            appButtons.get((index - 3)).setChecked(true);
+            app = uninstalledApps.get(index - (3 + 2 + appList.size()));
+        }
+
+        if (selectedApps.contains(app)) {
+            selectedApps.remove(app);
+
+            for (AppListButton appButton : appButtons) {
+                if (appButton.getAppPackageName().equals(app)) {
+                    appButton.setChecked(false);
+                }
+            }
+        } else {
+            selectedApps.add(app);
+
+            for (AppListButton appButton : appButtons) {
+                if (appButton.getAppPackageName().equals(app)) {
+                    appButton.setChecked(true);
+                }
+            }
         }
 
         VPNPersistentData.setAppList(selectedApps);

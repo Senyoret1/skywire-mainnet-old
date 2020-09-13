@@ -7,8 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
-public class AppsActivity extends Activity {
+public class AppsActivity extends Activity implements AppsAdapter.AppListChangedListener {
     private RecyclerView recycler;
 
     @Override
@@ -24,6 +25,18 @@ public class AppsActivity extends Activity {
         // recycler.setHasFixedSize(true);
 
         AppsAdapter adapter = new AppsAdapter(this);
+        adapter.setAppListChangedEventListener(this);
         recycler.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        HelperFunctions.closeActivityIfServiceRunning(this);
+    }
+
+    @Override
+    public boolean onAppListChanged() {
+        return !HelperFunctions.closeActivityIfServiceRunning(this);
     }
 }

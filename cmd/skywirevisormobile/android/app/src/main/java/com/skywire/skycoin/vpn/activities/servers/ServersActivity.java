@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.network.models.GeoInfo;
 import com.skywire.skycoin.vpn.network.models.VpnServer;
@@ -61,6 +62,12 @@ public class ServersActivity extends Activity implements VpnServersAdapter.VpnSe
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        HelperFunctions.closeActivityIfServiceRunning(this);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -71,6 +78,10 @@ public class ServersActivity extends Activity implements VpnServersAdapter.VpnSe
 
     @Override
     public void onVpnServerSelected(VpnServer selectedServer) {
+        if (HelperFunctions.closeActivityIfServiceRunning(this)) {
+            return;
+        }
+
         Intent resultIntent = new Intent();
         resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.addr);
         setResult(RESULT_OK, resultIntent);
