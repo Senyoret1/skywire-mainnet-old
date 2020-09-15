@@ -60,7 +60,6 @@ public class SkywireVPNService extends VpnService {
     private VisorRunnable visor;
     private Disposable visorSubscription;
     private Disposable visorTimeoutSubscription;
-    private Disposable startVpnSubscription;
     private Disposable vpnConnectionSubscription;
 
     private boolean startedByTheSystem = false;
@@ -221,38 +220,9 @@ public class SkywireVPNService extends VpnService {
                     putInErrorState(err.getLocalizedMessage());
                 }, () -> {
                     visorTimeoutSubscription.dispose();
-                    connect();
+                    startConnection();
                 });
         }
-    }
-
-    private void connect() {
-        updateState(VPNStates.STARTING_VPN_CONNECTION);
-
-        startVpnSubscription = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-            try {
-                if (emitter.isDisposed()) { return; }
-                while (!Skywiremob.isVPNReady()) {
-                    Skywiremob.printString("VPN STILL NOT READY, WAITING...");
-                    Thread.sleep(1000);
-                    if (emitter.isDisposed()) { return; }
-                }
-
-                emitter.onComplete();
-            } catch (Exception e) {
-                if (emitter.isDisposed()) { return; }
-                emitter.onError(e);
-            }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(
-            val -> {},
-            err -> {
-                putInErrorState(err.getLocalizedMessage());
-            }, () -> {
-                Skywiremob.printString("VPN IS READY, LET'S TRY IT OUT");
-
-                startConnection();
-            }
-        );
     }
 
     private void startConnection() {
@@ -261,7 +231,7 @@ public class SkywireVPNService extends VpnService {
             mNextConnectionId.getAndIncrement(),
             "localhost",
             7890,
-            mConfigureIntent,
+            visor,
             vpnInterface
         );
 
@@ -272,7 +242,7 @@ public class SkywireVPNService extends VpnService {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 val -> {
-                    updateState(VPNStates.CONNECTED);
+                    updateState(val);
                 }, err -> {
                     putInErrorState(err.getLocalizedMessage());
                 }, () -> {
@@ -296,9 +266,6 @@ public class SkywireVPNService extends VpnService {
             }
             if (visorTimeoutSubscription != null) {
                 visorTimeoutSubscription.dispose();
-            }
-            if (startVpnSubscription != null) {
-                startVpnSubscription.dispose();
             }
             if (vpnConnectionSubscription != null) {
                 vpnConnectionSubscription.dispose();

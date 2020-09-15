@@ -1,18 +1,14 @@
 package com.skywire.skycoin.vpn;
 
-import android.app.PendingIntent;
 import android.net.VpnService;
-import android.os.ParcelFileDescriptor;
 
 import com.skywire.skycoin.vpn.helpers.App;
-import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
-import java.util.HashSet;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -28,7 +24,7 @@ public class SkywireVPNConnection implements Disposable {
     private final int connectionId;
     private final String serverName;
     private final int serverPort;
-    private final PendingIntent configureIntent;
+    private final VisorRunnable visorRunnable;
 
     private VPNWorkInterface vpnInterface = null;
     private DatagramChannel tunnel = null;
@@ -36,7 +32,7 @@ public class SkywireVPNConnection implements Disposable {
     private String lastError = null;
     private Throwable operationError = null;
 
-    private Observable<Boolean> observable;
+    private Observable<Integer> observable;
 
     private Disposable sendingProcedureSubscription;
     private Disposable receivingProcedureSubscription;
@@ -46,14 +42,14 @@ public class SkywireVPNConnection implements Disposable {
         int connectionId,
         String serverName,
         int serverPort,
-        PendingIntent configureIntent,
+        VisorRunnable visorRunnable,
         VPNWorkInterface vpnInterface
     ) {
         this.service = service;
         this.connectionId = connectionId;
         this.serverName = serverName;
         this.serverPort= serverPort;
-        this.configureIntent = configureIntent;
+        this.visorRunnable = visorRunnable;
         this.vpnInterface = vpnInterface;
     }
 
@@ -68,9 +64,9 @@ public class SkywireVPNConnection implements Disposable {
         return disposed;
     }
 
-    public Observable<Boolean> getObservable() {
+    public Observable<Integer> getObservable() {
         if (observable == null) {
-            observable = Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
+            observable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
                 try {
                     Skywiremob.printString(getTag() + " Starting");
                     // If anything needs to be obtained using the network, get it now.
@@ -125,7 +121,7 @@ public class SkywireVPNConnection implements Disposable {
         return observable;
     }
 
-    private boolean run(SocketAddress server, ObservableEmitter<Boolean> parentEmitter) {
+    private boolean run(SocketAddress server, ObservableEmitter<Integer> parentEmitter) {
         boolean connected = false;
 
         lastError = null;
@@ -135,6 +131,13 @@ public class SkywireVPNConnection implements Disposable {
 
         // Create a DatagramChannel as the VPN tunnel.
         try {
+            visorRunnable.runVpnClient(parentEmitter).subscribe(val -> {
+                parentEmitter.onNext(val);
+            }, err -> {
+                throw err;
+            });
+
+            if (parentEmitter.isDisposed()) { return connected; }
             tunnel = DatagramChannel.open();
 
             if (parentEmitter.isDisposed()) { return connected; }
@@ -174,7 +177,7 @@ public class SkywireVPNConnection implements Disposable {
             vpnInterface.configure();
             // Now we are connected. Set the flag.
             connected = true;
-            parentEmitter.onNext(true);
+            parentEmitter.onNext(VPNStates.CONNECTED);
 
             // We keep forwarding packets till something goes wrong.
             Skywiremob.printString(getTag() + " is forwarding packets on Android");
@@ -238,6 +241,8 @@ public class SkywireVPNConnection implements Disposable {
         if (receivingProcedureSubscription != null) {
             receivingProcedureSubscription.dispose();
         }
+
+        visorRunnable.stopVpnConnection();
 
         if (tunnel != null) {
             try {
