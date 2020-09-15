@@ -401,6 +401,21 @@ func TUNGateway() string {
 	return tunGateway.String()
 }
 
+// StopVPNClient stops VPN client.
+func StopVPNClient() {
+	vpnClientMx.Lock()
+	if vpnClient != nil {
+		vpnClient.Close()
+	}
+	vpnClient = nil
+	vpnClientMx.Unlock()
+
+	atomic.StoreInt32(&isVPNReady, 0)
+
+	close(mobileAppAddrCh)
+	mobileAppAddrCh = make(chan *net.UDPAddr, 2)
+}
+
 // StopVisor stops running visor. Returns non-empty error string on failure.
 func StopVisor() string {
 	globalVisorMx.Lock()
@@ -421,33 +436,13 @@ func StopVisor() string {
 	atomic.StoreInt32(&isVisorStarting, 0)
 	atomic.StoreInt32(&isVisorRunning, 0)
 
-	vpnClientMx.Lock()
-	if vpnClient != nil {
-		vpnClient.Close()
-	}
-	vpnClient = nil
-	vpnClientMx.Unlock()
+	StopVPNClient()
 
-	if udpConn != nil {
-		if err := udpConn.Close(); err != nil {
-			log.WithError(err).Errorln("Failed to close mobile app UDP conn")
-		}
-
-		udpConn = nil
-	}
-
-	atomic.StoreInt32(&isVPNReady, 0)
+	StopListeningUDP()
 
 	nextDmsgSocketIdxMx.Lock()
 	nextDmsgSocketIdx = -1
 	nextDmsgSocketIdxMx.Unlock()
-
-	select {
-	case <-mobileAppAddrCh:
-	default:
-		close(mobileAppAddrCh)
-	}
-	mobileAppAddrCh = make(chan *net.UDPAddr, 2)
 
 	globalVisorMx.Lock()
 	globalVisor = nil
@@ -493,10 +488,12 @@ func SetMobileAppAddr(addr string) {
 		Port: addrPort,
 		Zone: "",
 	}
-	close(mobileAppAddrCh)
 }
 
-var udpConn *net.UDPConn
+var (
+	globalUDPConnMu sync.Mutex
+	globalUDPConn   *net.UDPConn
+)
 
 // ServeVPN starts handling VPN traffic.
 func ServeVPN() string {
@@ -509,8 +506,22 @@ func ServeVPN() string {
 	}
 
 	go func() {
-		tunAddr := <-mobileAppAddrCh
+		tunAddr, ok := <-mobileAppAddrCh
+		if !ok {
+			log.Infoln("DIDN'T GET UDP ADDR, VISOR IS STOPPED, RETURNING...")
+			return
+		}
+
 		log.Infof("Got mobile app UDP addr: %s\n", tunAddr.String())
+
+		globalUDPConnMu.Lock()
+		udpConn := globalUDPConn
+		globalUDPConnMu.Unlock()
+
+		if udpConn == nil {
+			return
+		}
+
 		wr := vpn.NewUDPConnWriter(udpConn, tunAddr)
 
 		if err := vpnCl.Serve(wr); err != nil {
@@ -525,6 +536,12 @@ func ServeVPN() string {
 
 // StartListeningUDP starts listening UDP.
 func StartListeningUDP() string {
+	globalUDPConnMu.Lock()
+	if globalUDPConn != nil {
+		globalUDPConnMu.Unlock()
+		return errors.New("UDP connection is already open").Error()
+	}
+
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{
 		IP:   net.IP{127, 0, 0, 1},
 		Port: 7890,
@@ -533,9 +550,23 @@ func StartListeningUDP() string {
 		return fmt.Errorf("failed to listen UDP: %w", err).Error()
 	}
 
-	udpConn = conn
+	globalUDPConn = conn
+	globalUDPConnMu.Unlock()
 
 	log.Infoln("Listening UDP")
 
 	return ""
+}
+
+// StopListeningUDP closes UDP socket.
+func StopListeningUDP() {
+	globalUDPConnMu.Lock()
+	if globalUDPConn != nil {
+		if err := globalUDPConn.Close(); err != nil {
+			log.WithError(err).Errorln("Failed to close mobile app UDP conn")
+		}
+
+		globalUDPConn = nil
+	}
+	globalUDPConnMu.Unlock()
 }
