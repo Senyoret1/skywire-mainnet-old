@@ -37,7 +37,7 @@ public class VPNCoordinator implements Handler.Callback {
     private VPNCoordinator() {
         serviceCommunicationHandler = new Handler(this);
 
-        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null));
+        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, false));
 
         if (isServiceRunning()) {
             onActivityResult(0, RESULT_OK, null);
@@ -49,7 +49,8 @@ public class VPNCoordinator implements Handler.Callback {
         VPNStates.StateInfo state = new VPNStates.StateInfo(
             msg.what,
             msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM),
-            msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM)
+            msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM),
+            msg.getData().getBoolean(SkywireVPNService.STOP_REQUESTED_PARAM)
         );
 
         if (msg.what == VPNStates.DISCONNECTED) {
@@ -100,7 +101,7 @@ public class VPNCoordinator implements Handler.Callback {
         VPNPersistentData.setPublicKeyAndPassword(remotePK, passcode);
 
         VPNPersistentData.removeLastError();
-        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, null));
+        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, null, false));
         Intent intent = VpnService.prepare(requestingActivity);
         if (intent != null) {
             requestingActivity.startActivityForResult(intent, VPN_PREPARATION_REQUEST_CODE);
@@ -124,7 +125,7 @@ public class VPNCoordinator implements Handler.Callback {
                     ctx.startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
                 }
             } else {
-                eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null));
+                eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, true));
             }
         }
     }

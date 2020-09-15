@@ -30,7 +30,7 @@ public class SkywireVPNConnection implements Disposable {
     private final int serverPort;
     private final PendingIntent configureIntent;
 
-    private ParcelFileDescriptor vpnInterface = null;
+    private VPNWorkInterface vpnInterface = null;
     private DatagramChannel tunnel = null;
 
     private String lastError = null;
@@ -46,13 +46,15 @@ public class SkywireVPNConnection implements Disposable {
         int connectionId,
         String serverName,
         int serverPort,
-        PendingIntent configureIntent
+        PendingIntent configureIntent,
+        VPNWorkInterface vpnInterface
     ) {
         this.service = service;
         this.connectionId = connectionId;
         this.serverName = serverName;
         this.serverPort= serverPort;
         this.configureIntent = configureIntent;
+        this.vpnInterface = vpnInterface;
     }
 
     @Override
@@ -167,9 +169,9 @@ public class SkywireVPNConnection implements Disposable {
             Skywiremob.setMobileAppAddr(tunnel.socket().getLocalSocketAddress().toString());
 
             tunnel.configureBlocking(true);
-            // Configure the virtual network interface.
+            // Configure the virtual network interface. This starts the VPN protection in the OS.
             if (parentEmitter.isDisposed()) { return connected; }
-            vpnInterface = configure();
+            vpnInterface.configure();
             // Now we are connected. Set the flag.
             connected = true;
             parentEmitter.onNext(true);
@@ -177,7 +179,7 @@ public class SkywireVPNConnection implements Disposable {
             // We keep forwarding packets till something goes wrong.
             Skywiremob.printString(getTag() + " is forwarding packets on Android");
 
-            sendingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, true)
+            sendingProcedureSubscription = VPNDataManager.createObservable(vpnInterface.getVpnInterface(), tunnel, true)
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
@@ -188,7 +190,7 @@ public class SkywireVPNConnection implements Disposable {
                         }
                     }
                 );
-            receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, false)
+            receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface.getVpnInterface(), tunnel, false)
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
@@ -237,15 +239,6 @@ public class SkywireVPNConnection implements Disposable {
             receivingProcedureSubscription.dispose();
         }
 
-        if (vpnInterface != null) {
-            try {
-                vpnInterface.close();
-                vpnInterface = null;
-            } catch (IOException e) {
-                HelperFunctions.logError(getTag() + " Unable to close interface", e);
-            }
-        }
-
         if (tunnel != null) {
             try {
                 tunnel.close();
@@ -254,45 +247,6 @@ public class SkywireVPNConnection implements Disposable {
                 HelperFunctions.logError(getTag() + " Unable to close tunnel", e);
             }
         }
-    }
-
-    private ParcelFileDescriptor configure() throws IllegalArgumentException {
-        // Configure a builder while parsing the parameters.
-        VpnService.Builder builder = service.new Builder();
-
-        builder.setMtu((short)Skywiremob.getMTU());
-        Skywiremob.printString("TUN IP: " + Skywiremob.tunip());
-        builder.addAddress(Skywiremob.tunip(), (int)Skywiremob.getTUNIPPrefix());
-        builder.addDnsServer("8.8.8.8");
-        //builder.addDnsServer("192.168.1.1");
-        builder.addRoute("0.0.0.0", 1);
-        builder.addRoute("128.0.0.0", 1);
-        builder.setBlocking(true);
-
-        Globals.AppFilteringModes appsSelectionMode = VPNPersistentData.getAppsSelectionMode();
-        if (appsSelectionMode != Globals.AppFilteringModes.PROTECT_ALL) {
-            for (String packageName : HelperFunctions.filterAvailableApps(VPNPersistentData.getAppList(new HashSet<>()))) {
-                try {
-                    if (appsSelectionMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
-                        builder.addAllowedApplication(packageName);
-                    } else {
-                        builder.addDisallowedApplication(packageName);
-                    }
-                } catch (Exception e){
-                    HelperFunctions.logError("Unable to add " + packageName + " to the VPN service", e);
-                }
-            }
-        }
-
-        // Create a new interface using the builder and save the parameters.
-        final ParcelFileDescriptor vpnInterface;
-
-        builder.setConfigureIntent(configureIntent);
-        synchronized (service) {
-            vpnInterface = builder.establish();
-        }
-        Skywiremob.printString(getTag() + " New interface: " + vpnInterface);
-        return vpnInterface;
     }
 
     private final String getTag() {

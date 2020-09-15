@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             state -> {
                 if (state.state < 10) {
                     displayInitialState();
-                } else if (state.state != VPNStates.ERROR && state.state != VPNStates.DISCONNECTED) {
+                } else if (state.state != VPNStates.ERROR && state.state != VPNStates.BLOCKING_ERROR && state.state != VPNStates.DISCONNECTED) {
                     int stateText = VPNStates.getTextForState(state.state);
 
                     displayWorkingState();
@@ -101,7 +101,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         textStopAlert.setVisibility(View.VISIBLE);
                     }
 
-                    if (state.state >= 200) {
+                    if (state.stopRequested) {
                         this.buttonStop.setEnabled(false);
                     }
 
@@ -112,8 +112,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     textStatus.setText(R.string.vpn_state_disconnected);
                     displayInitialState();
                 } else {
-                    textStatus.setText(R.string.vpn_state_error);
-                    displayErrorState();
+                    textStatus.setText(VPNStates.getTextForState(state.state));
+                    displayErrorState(state.stopRequested);
                 }
             }
         );
@@ -229,17 +229,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
         textLastError2.setVisibility(View.GONE);
     }
 
-    private void displayErrorState() {
+    private void displayErrorState(boolean stopRequested) {
         editTextRemotePK.setEnabled(false);
         editTextPasscode.setEnabled(false);
         buttonStart.setEnabled(false);
-        buttonStop.setEnabled(false);
+        buttonStop.setEnabled(!stopRequested);
         buttonSelect.setEnabled(false);
         buttonApps.setEnabled(false);
-        textFinishAlert.setVisibility(View.VISIBLE);
+        textFinishAlert.setVisibility(stopRequested ? View.VISIBLE : View.GONE);
         textStopAlert.setVisibility(View.GONE);
 
-        textLastError1.setVisibility(View.GONE);
-        textLastError2.setVisibility(View.GONE);
+        textLastError1.setVisibility(View.VISIBLE);
+        textLastError2.setVisibility(View.VISIBLE);
+
+        String lastError = VPNPersistentData.getLastError(null);
+        textLastError2.setText(lastError);
     }
 }

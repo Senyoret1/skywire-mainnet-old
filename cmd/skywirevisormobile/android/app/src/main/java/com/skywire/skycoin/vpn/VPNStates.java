@@ -12,16 +12,19 @@ public class VPNStates {
     public static int DISCONNECTING = 200;
     public static int DISCONNECTED = 300;
     public static int ERROR = 400;
+    public static int BLOCKING_ERROR = 410;
 
     public static class StateInfo {
         public final int state;
         public final boolean startedByTheSystem;
         public final String errorMsg;
+        public final boolean stopRequested;
 
-        public StateInfo(int state, boolean startedByTheSystem, String errorMsg) {
+        public StateInfo(int state, boolean startedByTheSystem, String errorMsg, boolean stopRequested) {
             this.state = state;
             this.startedByTheSystem = startedByTheSystem;
             this.errorMsg = errorMsg;
+            this.stopRequested = stopRequested;
         }
     }
 
@@ -48,6 +51,8 @@ public class VPNStates {
             return R.string.vpn_state_disconnected;
         } else if (state == ERROR) {
             return R.string.vpn_state_error;
+        } else if (state == BLOCKING_ERROR) {
+            return R.string.vpn_state_blocking_error;
         }
 
         return -1;

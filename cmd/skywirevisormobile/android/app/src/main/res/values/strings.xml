@@ -6,16 +6,17 @@
 
     <string name="tmp_general_service_stopping_error">The SkywireVPN is being stopped, the operation has been ignored.</string>
 
-    <string name="vpn_state_off">SkywireVPN disconnected</string>
-    <string name="vpn_state_initializing">Initializing SkywireVPN</string>
-    <string name="vpn_state_starting_visor">Starting SkywireVPN visor</string>
-    <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector</string>
-    <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization</string>
-    <string name="vpn_state_connecting">Establishing VPN connection</string>
-    <string name="vpn_state_connected">VPN connected</string>
-    <string name="vpn_state_disconnecting">Closing VPN connection</string>
-    <string name="vpn_state_disconnected">VPN connection closed</string>
+    <string name="vpn_state_off">SkywireVPN disconnected.</string>
+    <string name="vpn_state_initializing">Initializing SkywireVPN.</string>
+    <string name="vpn_state_starting_visor">Starting SkywireVPN visor.</string>
+    <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector.</string>
+    <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization.</string>
+    <string name="vpn_state_connecting">Establishing VPN connection.</string>
+    <string name="vpn_state_connected">VPN connected.</string>
+    <string name="vpn_state_disconnecting">Closing VPN connection.</string>
+    <string name="vpn_state_disconnected">VPN connection closed.</string>
     <string name="vpn_state_error">There has been an error with the SkywireVPN service</string>
+    <string name="vpn_state_blocking_error">There has been an error with the SkywireVPN service. The network will be blocked until stopping the service.</string>
 
     <string name="vpn_coordinator_invalid_credentials_error">Invalid public key: </string>
 
