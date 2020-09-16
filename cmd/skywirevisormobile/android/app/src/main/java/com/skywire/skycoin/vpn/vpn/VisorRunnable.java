@@ -1,6 +1,6 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;

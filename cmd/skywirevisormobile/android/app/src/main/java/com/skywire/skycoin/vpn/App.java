@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn.helpers;
+package com.skywire.skycoin.vpn;
 
 import android.app.Application;
 import android.app.NotificationChannel;
@@ -6,8 +6,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
-import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.VPNCoordinator;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 

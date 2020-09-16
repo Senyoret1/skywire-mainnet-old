@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn.helpers;
+package com.skywire.skycoin.vpn.extensible;
 
 import android.view.View;
 

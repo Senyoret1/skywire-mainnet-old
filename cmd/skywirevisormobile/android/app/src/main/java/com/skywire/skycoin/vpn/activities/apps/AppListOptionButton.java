@@ -6,7 +6,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.helpers.ListButtonBase;
+import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 
 public class AppListOptionButton extends ListButtonBase<Void> {
     private TextView textOption;

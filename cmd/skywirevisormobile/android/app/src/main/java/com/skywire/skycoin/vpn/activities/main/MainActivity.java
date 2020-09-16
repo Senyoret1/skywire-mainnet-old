@@ -9,13 +9,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.VPNCoordinator;
-import com.skywire.skycoin.vpn.VPNPersistentData;
-import com.skywire.skycoin.vpn.VPNStates;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
+import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNStates;
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
-import com.skywire.skycoin.vpn.helpers.Globals;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 import java.util.HashSet;
 

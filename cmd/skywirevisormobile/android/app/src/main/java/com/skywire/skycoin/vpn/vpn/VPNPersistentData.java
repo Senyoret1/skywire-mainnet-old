@@ -1,11 +1,11 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
 import android.content.SharedPreferences;
 
 import androidx.preference.PreferenceManager;
 
-import com.skywire.skycoin.vpn.helpers.App;
-import com.skywire.skycoin.vpn.helpers.Globals;
+import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.Globals;
 
 import java.util.HashSet;
 

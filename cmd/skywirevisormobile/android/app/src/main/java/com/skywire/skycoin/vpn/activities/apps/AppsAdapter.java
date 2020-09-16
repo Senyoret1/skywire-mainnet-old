@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.VPNPersistentData;
-import com.skywire.skycoin.vpn.helpers.ClickWithIndexEvent;
-import com.skywire.skycoin.vpn.helpers.Globals;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
-import com.skywire.skycoin.vpn.helpers.ListViewHolder;
+import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
+import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
+import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 
 import java.util.ArrayList;
 import java.util.HashMap;

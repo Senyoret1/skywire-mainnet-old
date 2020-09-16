@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -10,8 +10,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 
-import com.skywire.skycoin.vpn.helpers.App;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;

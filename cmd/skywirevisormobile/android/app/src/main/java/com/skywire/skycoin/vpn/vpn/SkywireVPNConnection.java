@@ -1,10 +1,12 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
 import android.net.VpnService;
 
-import com.skywire.skycoin.vpn.helpers.App;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -17,9 +19,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
-public class SkywireVPNConnection implements Disposable {
-    private boolean disposed = false;
-
+public class SkywireVPNConnection implements Closeable {
     private final VpnService service;
     private final int connectionId;
     private final String serverName;
@@ -54,14 +54,8 @@ public class SkywireVPNConnection implements Disposable {
     }
 
     @Override
-    public void dispose() {
-        disposed = true;
+    public void close() {
         closeConnection();
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return disposed;
     }
 
     public Observable<Integer> getObservable() {

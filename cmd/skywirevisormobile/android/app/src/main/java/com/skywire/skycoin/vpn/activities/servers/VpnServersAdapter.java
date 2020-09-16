@@ -5,8 +5,8 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.skywire.skycoin.vpn.helpers.ClickWithIndexEvent;
-import com.skywire.skycoin.vpn.helpers.ListViewHolder;
+import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
+import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 import com.skywire.skycoin.vpn.network.models.VpnServer;
 
 import java.util.List;

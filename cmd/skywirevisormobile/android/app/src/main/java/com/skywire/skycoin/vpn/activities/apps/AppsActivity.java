@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 public class AppsActivity extends Activity implements AppsAdapter.AppListChangedListener {
     private RecyclerView recycler;

@@ -1,26 +1,22 @@
-package com.skywire.skycoin.vpn;;
+package com.skywire.skycoin.vpn.vpn;;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.VpnService;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 
 import androidx.core.app.NotificationCompat;
 
+import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.main.MainActivity;
-import com.skywire.skycoin.vpn.helpers.App;
-import com.skywire.skycoin.vpn.helpers.Globals;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +29,7 @@ import io.reactivex.rxjava3.functions.BooleanSupplier;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
-import static com.skywire.skycoin.vpn.VPNStates.getTextForState;
+import static com.skywire.skycoin.vpn.vpn.VPNStates.getTextForState;
 
 public class SkywireVPNService extends VpnService {
     public static final String ACTION_CONNECT = "com.skywire.android.vpn.START";
@@ -66,6 +62,8 @@ public class SkywireVPNService extends VpnService {
     private boolean disconnectionStarted = false;
     private boolean disconnectionFinished = false;
     private boolean stopRequested = false;
+
+    private int disconnectionVerifications = 0;
 
     @Override
     public void onCreate() {
@@ -169,28 +167,7 @@ public class SkywireVPNService extends VpnService {
             Skywiremob.printString("STARTING ANDROID VPN SERVICE");
 
             // Check if the device has network connectivity.
-            boolean validNetwork = true;
-            ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Network activeNetwork = connectivityManager.getActiveNetwork();
-                if (activeNetwork == null) {
-                    validNetwork = false;
-                } else {
-                    NetworkCapabilities networkInfo = connectivityManager.getNetworkCapabilities(activeNetwork);
-                    validNetwork =
-                        networkInfo != null && (
-                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
-                            networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)
-                        )
-                    ;
-                }
-            } else {
-                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                validNetwork = networkInfo != null && networkInfo.isConnected();
-            }
-
+            boolean validNetwork = HelperFunctions.checkIfNetworkAvailable();
             if (!validNetwork) {
                 HelperFunctions.logError("VPN service", "Trying to start the VPN service without network connection.");
                 putInErrorState(this.getString(R.string.vpn_service_no_network_error));
@@ -271,7 +248,7 @@ public class SkywireVPNService extends VpnService {
                 vpnConnectionSubscription.dispose();
             }
             if (this.connectionRunnable != null) {
-                this.connectionRunnable.dispose();
+                this.connectionRunnable.close();
             }
 
             Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
@@ -286,10 +263,22 @@ public class SkywireVPNService extends VpnService {
                     @Override
                     public boolean getAsBoolean() {
                         if (!Skywiremob.isVisorStarting() && !Skywiremob.isVisorRunning()) {
-                            disconnectionFinished = true;
-                            finishIfAppropiate();
+                            if (disconnectionVerifications == 2) {
+                                disconnectionFinished = true;
+                                finishIfAppropiate();
 
-                            return true;
+                                return true;
+                            } else {
+                                disconnectionVerifications += 1;
+                            }
+                        } else {
+                            if (disconnectionVerifications != 0) {
+                                if (visor != null) {
+                                    visor.stopVisor();
+                                }
+                            }
+
+                            disconnectionVerifications = 0;
                         }
 
                         return false;

@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.helpers.ListButtonBase;
+import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 
 public class ServerListButton extends ListButtonBase<Void> {
     private TextView textTopLine;

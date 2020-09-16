@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
 import android.os.ParcelFileDescriptor;
 
@@ -12,9 +12,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 
 public class VPNDataManager {
-    private FileOutputStream out;
-    private DatagramChannel tunnel;
-
     static public Observable<Integer> createObservable(ParcelFileDescriptor vpnInterface, DatagramChannel tunnel, boolean forSending) {
         return Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             // Packets to be sent are queued in this input stream.

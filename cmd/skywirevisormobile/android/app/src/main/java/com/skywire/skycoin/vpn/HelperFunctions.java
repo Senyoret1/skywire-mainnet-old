@@ -1,16 +1,20 @@
-package com.skywire.skycoin.vpn.helpers;
+package com.skywire.skycoin.vpn;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.VPNCoordinator;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import java.util.HashSet;
 import java.util.List;
@@ -95,5 +99,26 @@ public class HelperFunctions {
         }
 
         return false;
+    }
+
+    public static boolean checkIfNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager)App.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network activeNetwork = connectivityManager.getActiveNetwork();
+            if (activeNetwork == null) {
+                return false;
+            } else {
+                NetworkCapabilities networkInfo = connectivityManager.getNetworkCapabilities(activeNetwork);
+                return networkInfo != null && (
+                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)
+                );
+            }
+        } else {
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnected();
+        }
     }
 }

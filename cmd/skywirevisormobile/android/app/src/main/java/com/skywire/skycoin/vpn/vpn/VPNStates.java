@@ -1,4 +1,6 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
+
+import com.skywire.skycoin.vpn.R;
 
 public class VPNStates {
     public static int OFF = 1;

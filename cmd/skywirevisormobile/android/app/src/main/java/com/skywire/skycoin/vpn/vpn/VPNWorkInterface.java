@@ -1,11 +1,11 @@
-package com.skywire.skycoin.vpn;
+package com.skywire.skycoin.vpn.vpn;
 
 import android.app.PendingIntent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 
-import com.skywire.skycoin.vpn.helpers.Globals;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.HelperFunctions;
 
 import java.io.Closeable;
 import java.io.IOException;
