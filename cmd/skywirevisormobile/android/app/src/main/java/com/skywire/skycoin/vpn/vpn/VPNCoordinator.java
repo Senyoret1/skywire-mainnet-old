@@ -59,7 +59,7 @@ public class VPNCoordinator implements Handler.Callback {
         }
 
         // Must be dore before informing about the event.
-        if (msg.what == VPNStates.ERROR) {
+        if (msg.what == VPNStates.ERROR || msg.what == VPNStates.BLOCKING_ERROR) {
             VPNPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
         }
 

@@ -15,6 +15,8 @@ public class VPNPersistentData {
     private static final String LAST_ERROR = "lastError";
     private static final String APPS_SELECTION_MODE = "appsMode";
     private static final String APPS_LIST = "appsList";
+    private static final String KILL_SWITCH = "killSwitch";
+    private static final String RESTART_VPN = "restartVpn";
 
     private static final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
@@ -36,6 +38,14 @@ public class VPNPersistentData {
 
     public static void setAppList(HashSet<String> val) {
         settings.edit().putStringSet(APPS_LIST, val).apply();
+    }
+
+    public static void setKillSwitchActivated(boolean val) {
+        settings.edit().putBoolean(KILL_SWITCH, val).apply();
+    }
+
+    public static void setMustRestartVpn(boolean val) {
+        settings.edit().putBoolean(RESTART_VPN, val).apply();
     }
 
     public static String getPublicKey(String defaultValue) {
@@ -66,6 +76,14 @@ public class VPNPersistentData {
 
     public static HashSet<String> getAppList(HashSet<String> defaultValue) {
         return new HashSet<>(settings.getStringSet(APPS_LIST, defaultValue));
+    }
+
+    public static boolean getKillSwitchActivated() {
+        return settings.getBoolean(KILL_SWITCH, true);
+    }
+
+    public static boolean getMustRestartVpn() {
+        return settings.getBoolean(RESTART_VPN, true);
     }
 
     public static void removeLastError() {

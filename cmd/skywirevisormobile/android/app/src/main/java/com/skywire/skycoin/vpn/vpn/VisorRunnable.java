@@ -23,9 +23,11 @@ public class VisorRunnable {
     public void stopVpnConnection() {
         if (vpnClientStarted) {
             Skywiremob.stopVPNClient();
+            vpnClientStarted = false;
         }
         if (listeningUdp) {
             Skywiremob.stopListeningUDP();
+            listeningUdp = false;
         }
         Skywiremob.printString("VPN connection stopped");
     }

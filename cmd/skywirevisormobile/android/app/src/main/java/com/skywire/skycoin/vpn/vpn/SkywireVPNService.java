@@ -59,6 +59,7 @@ public class SkywireVPNService extends VpnService {
     private Disposable vpnConnectionSubscription;
 
     private boolean startedByTheSystem = false;
+    private boolean alreadyConnected = false;
     private boolean disconnectionStarted = false;
     private boolean disconnectionFinished = false;
     private boolean stopRequested = false;
@@ -83,6 +84,18 @@ public class SkywireVPNService extends VpnService {
         Bundle dataBundle = new Bundle();
         dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, startedByTheSystem);
         dataBundle.putBoolean(STOP_REQUESTED_PARAM, stopRequested);
+
+        if (newState == VPNStates.CONNECTED) {
+            alreadyConnected = true;
+
+            if (!HelperFunctions.appIsOnForeground() && currentState != newState) {
+                HelperFunctions.showToast(getString(getTextForState(newState)), false);
+            }
+        }
+
+        if (newState == VPNStates.RESTORING_VPN && !HelperFunctions.appIsOnForeground() && currentState != newState) {
+            HelperFunctions.showToast(getString(getTextForState(newState)), false);
+        }
 
         if (newState == VPNStates.ERROR || newState == VPNStates.BLOCKING_ERROR) {
             dataBundle.putString(ERROR_MSG_PARAM, lastErrorMsg);
@@ -125,7 +138,7 @@ public class SkywireVPNService extends VpnService {
             }
 
             if (vpnInterface == null) {
-                vpnInterface = new VPNWorkInterface(this, mConfigureIntent);
+                vpnInterface = new VPNWorkInterface(this, mConfigureIntent, false);
             }
             startVisorIfNeeded();
         } else if (intent != null) {
@@ -293,9 +306,19 @@ public class SkywireVPNService extends VpnService {
     }
 
     private void finishIfAppropiate() {
-        if (disconnectionFinished && stopRequested) {
+        if (disconnectionFinished && (stopRequested || !VPNPersistentData.getKillSwitchActivated())) {
             if (vpnInterface != null) {
                 vpnInterface.close();
+
+                // Create another interface and close it immediately to avoid a bug in older Android
+                // versions when the app is added to the ignore list.
+                vpnInterface = new VPNWorkInterface(this, mConfigureIntent, true);
+                try {
+                    vpnInterface.configure();
+                } catch (Exception e) { }
+                vpnInterface.close();
+
+                vpnInterface = null;
             }
 
             updateState(VPNStates.DISCONNECTED);
@@ -307,7 +330,7 @@ public class SkywireVPNService extends VpnService {
 
     private void putInErrorState(String errorMsg) {
         lastErrorMsg = errorMsg;
-        if (!vpnInterface.alreadyConfigured()) {
+        if (!vpnInterface.alreadyConfigured() || !VPNPersistentData.getKillSwitchActivated()) {
             stopRequested = true;
             updateState(VPNStates.ERROR);
         } else {
@@ -325,12 +348,30 @@ public class SkywireVPNService extends VpnService {
     }
 
     private Notification createUpdatedNotification() {
+
+        int title = R.string.vpn_service_state_preparing;
+        if (currentState == VPNStates.CONNECTED) {
+            title = getTextForState(currentState);
+        } else {
+            if (currentState >= VPNStates.DISCONNECTING) {
+                title = R.string.vpn_service_state_finishing;
+            } else if (alreadyConnected) {
+                title = R.string.vpn_service_state_restoring;
+            }
+        }
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle()
+            .bigText(getString(getTextForState(currentState)))
+            .setBigContentTitle(getString(title));
+
         return new NotificationCompat.Builder(this, Globals.NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_vpn)
-            .setContentTitle(getString(R.string.general_app_name))
+            .setContentTitle(getString(title))
             .setContentText(getString(getTextForState(currentState)))
+            .setStyle(bigTextStyle)
             .setContentIntent(mConfigureIntent)
             .setOnlyAlertOnce(true)
+            .setSound(null)
             .build();
     }
 }

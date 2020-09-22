@@ -30,6 +30,7 @@ public class App extends Application {
                 NotificationManager.IMPORTANCE_DEFAULT
             );
             channel.setDescription(getString(R.string.general_notification_channel_description));
+            channel.setSound(null,null);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }

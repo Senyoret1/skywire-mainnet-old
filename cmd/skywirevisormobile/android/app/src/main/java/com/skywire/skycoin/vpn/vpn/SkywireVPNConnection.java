@@ -31,6 +31,7 @@ public class SkywireVPNConnection implements Closeable {
 
     private String lastError = null;
     private Throwable operationError = null;
+    private Throwable visorInitializationError = null;
 
     private Observable<Integer> observable;
 
@@ -69,26 +70,30 @@ public class SkywireVPNConnection implements Closeable {
                     // In this demo, all we need to know is the server address.
                     final SocketAddress serverAddress = new InetSocketAddress(serverName, serverPort);
 
-                    // TODO: this code has ben deactivated because it is not really posible to start the conection again
-                    // and inform the visor about the new socket as just after calling Skywiremob.setMobileAppAddr for the
-                    //second time there is a panic.
-                    /*
-                    // We try to create the tunnel several times.
-                    // Here we just use a counter to keep things simple.
-                    for (int attempt = 0; attempt < 10; ++attempt) {
-                        if (emitter.isDisposed()) { return; }
-                        // Reset the counter if we were connected.
-                        if (run(serverAddress, emitter)) {
-                            attempt = 0;
+                    if (VPNPersistentData.getMustRestartVpn()) {
+                        // The code will restart the connection in case of problem, but only if the connection
+                        // was established during the last attempt.
+                        while (true) {
+                            if (emitter.isDisposed()) {
+                                return;
+                            }
+
+                            lastError = null;
+
+                            if (!run(serverAddress, emitter)) {
+                                break;
+                            }
+
+                            emitter.onNext(VPNStates.RESTORING_VPN);
+
+                            if (emitter.isDisposed()) {
+                                return;
+                            }
+                            Thread.sleep(2000);
                         }
-
-                        // Sleep for a while. This also checks if we got interrupted.
-                        if (emitter.isDisposed()) { return; }
-                        Thread.sleep(3000);
+                    } else {
+                        run(serverAddress, emitter);
                     }
-                    */
-
-                    run(serverAddress, emitter);
 
                     // Use this msg again if the code for retying the connection is reactivated.
                     // Skywiremob.printString(getTag() + " Maximum number of retries reached");
@@ -99,7 +104,7 @@ public class SkywireVPNConnection implements Closeable {
                         emitter.onError(new Exception(App.getContext().getString(R.string.vpn_connection_finished_error)));
                     } else {
                         if (emitter.isDisposed()) { return; }
-                        emitter.onError(new Exception(App.getContext().getString(R.string.vpn_connection_failed_error) + lastError));
+                        emitter.onError(new Exception(lastError));
                     }
                 } catch (Exception e) {
                     HelperFunctions.logError(getTag() + " Connection failed, exiting", e);
@@ -121,26 +126,37 @@ public class SkywireVPNConnection implements Closeable {
         lastError = null;
         operationError = null;
 
-        String protectErrorMsg = App.getContext().getString(R.string.vpn_socket_protection_error);
+        // TODO: delete if the code for protecting the sockets is removed.
+        // String protectErrorMsg = App.getContext().getString(R.string.vpn_socket_protection_error);
 
         // Create a DatagramChannel as the VPN tunnel.
         try {
+            visorInitializationError = null;
             visorRunnable.runVpnClient(parentEmitter).subscribe(val -> {
                 parentEmitter.onNext(val);
             }, err -> {
-                throw err;
+                visorInitializationError = err;
             });
+
+            if (visorInitializationError != null) {
+                throw visorInitializationError;
+            }
 
             if (parentEmitter.isDisposed()) { return connected; }
             tunnel = DatagramChannel.open();
 
             if (parentEmitter.isDisposed()) { return connected; }
+
+            // TODO: this code is used for protecting the sockets (make them bypass vpn protection)
+            // needed for configuration, to avoid infinite loops. This is not currently needed
+            // because there is an exception that covers the entire application. The code remains
+            // here as a precaution and should be removed in the future.
+            /*
             // Protect the tunnel before connecting to avoid loopback.
             if (!service.protect(tunnel.socket())) {
                 HelperFunctions.logError(getTag(), "Cannot protect the app-visor socket");
                 throw new IllegalStateException(protectErrorMsg);
             }
-
             while(true) {
                 if (parentEmitter.isDisposed()) { return connected; }
 
@@ -153,6 +169,7 @@ public class SkywireVPNConnection implements Closeable {
                     throw new IllegalStateException(protectErrorMsg);
                 }
             }
+            */
 
             // Connect to the server.
             if (parentEmitter.isDisposed()) { return connected; }
@@ -176,7 +193,7 @@ public class SkywireVPNConnection implements Closeable {
             // We keep forwarding packets till something goes wrong.
             Skywiremob.printString(getTag() + " is forwarding packets on Android");
 
-            sendingProcedureSubscription = VPNDataManager.createObservable(vpnInterface.getVpnInterface(), tunnel, true)
+            sendingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, true)
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
@@ -187,7 +204,7 @@ public class SkywireVPNConnection implements Closeable {
                         }
                     }
                 );
-            receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface.getVpnInterface(), tunnel, false)
+            receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, false)
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {

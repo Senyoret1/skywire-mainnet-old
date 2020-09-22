@@ -1,7 +1,5 @@
 package com.skywire.skycoin.vpn.vpn;
 
-import android.os.ParcelFileDescriptor;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InterruptedIOException;
@@ -12,16 +10,16 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 
 public class VPNDataManager {
-    static public Observable<Integer> createObservable(ParcelFileDescriptor vpnInterface, DatagramChannel tunnel, boolean forSending) {
+    static public Observable<Integer> createObservable(VPNWorkInterface vpnInterface, DatagramChannel tunnel, boolean forSending) {
         return Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             // Packets to be sent are queued in this input stream.
             FileInputStream inStream = null;
             // Packets received need to be written to this output stream.
             FileOutputStream outStream = null;
             if (forSending) {
-                inStream = new FileInputStream(vpnInterface.getFileDescriptor());
+                inStream = vpnInterface.getInputStream();
             } else {
-                outStream = new FileOutputStream(vpnInterface.getFileDescriptor());
+                outStream = vpnInterface.getOutputStream();
             }
             final FileInputStream in = inStream;
             final FileOutputStream out = outStream;

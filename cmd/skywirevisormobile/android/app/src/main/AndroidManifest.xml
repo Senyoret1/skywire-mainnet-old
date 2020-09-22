@@ -14,6 +14,7 @@
         android:name=".App"
         android:allowBackup="true"
         android:label="@string/general_app_name"
+        android:icon="@mipmap/icon"
     >
         <service android:name=".vpn.SkywireVPNService"
             android:description="@string/general_service_description"

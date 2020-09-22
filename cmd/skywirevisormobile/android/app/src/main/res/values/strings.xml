@@ -6,6 +6,10 @@
 
     <string name="tmp_general_service_stopping_error">The SkywireVPN is being stopped, the operation has been ignored.</string>
 
+    <string name="vpn_service_state_preparing">Preparing</string>
+    <string name="vpn_service_state_restoring">Restoring</string>
+    <string name="vpn_service_state_finishing">Finishing</string>
+
     <string name="vpn_state_off">SkywireVPN disconnected.</string>
     <string name="vpn_state_initializing">Initializing SkywireVPN.</string>
     <string name="vpn_state_starting_visor">Starting SkywireVPN visor.</string>
@@ -13,6 +17,7 @@
     <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization.</string>
     <string name="vpn_state_connecting">Establishing VPN connection.</string>
     <string name="vpn_state_connected">VPN connected.</string>
+    <string name="vpn_state_restoring">Restarting VPN connection.</string>
     <string name="vpn_state_disconnecting">Closing VPN connection.</string>
     <string name="vpn_state_disconnected">VPN connection closed.</string>
     <string name="vpn_state_error">There has been an error with the SkywireVPN service</string>
@@ -23,11 +28,11 @@
     <string name="vpn_service_no_network_error">No network available.</string>
     <string name="vpn_timerout_error">Unable to connect to the VPN server.</string>
     <string name="vpn_connection_finished_error">The VPN connection has been closed unexpectedly.</string>
-    <string name="vpn_connection_failed_error">The VPN connection failed. Last status message: </string>
     <string name="vpn_socket_protection_error">The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.</string>
     <string name="vpn_already_running_warning">The VPN is already running.</string>
     <string name="vpn_no_apps_to_protect_warning">You have not selected specific applications to protect. All applications will be protected.</string>
     <string name="vpn_no_apps_to_ignore_warning">You have not selected specific applications to ignore. All applications will be protected.</string>
+    <string name="vpn_service_configuring_app_rules_error">It was not possible to configure the rules for the VPN app.</string>
 
     <string name="tmp_main_page_start">Start</string>
     <string name="tmp_main_page_stop">Stop</string>

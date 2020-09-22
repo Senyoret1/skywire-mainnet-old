@@ -11,6 +11,7 @@ public class VPNStates {
     public static int VISOR_READY = 40;
     public static int STARTING_VPN_CONNECTION = 50;
     public static int CONNECTED = 100;
+    public static int RESTORING_VPN = 150;
     public static int DISCONNECTING = 200;
     public static int DISCONNECTED = 300;
     public static int ERROR = 400;
@@ -47,6 +48,8 @@ public class VPNStates {
             return R.string.vpn_state_connecting;
         } else if (state == CONNECTED) {
             return R.string.vpn_state_connected;
+        } else if (state == RESTORING_VPN) {
+            return R.string.vpn_state_restoring;
         } else if (state == DISCONNECTING) {
             return R.string.vpn_state_disconnecting;
         } else if (state == DISCONNECTED) {
