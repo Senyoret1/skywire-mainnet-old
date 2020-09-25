@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -48,7 +49,6 @@ public class SkywireVPNService extends VpnService {
     private SkywireVPNConnection connectionRunnable;
 
     private AtomicInteger mNextConnectionId = new AtomicInteger(1);
-    private PendingIntent mConfigureIntent;
 
     private int currentState = VPNStates.STARTING;
     private String lastErrorMsg;
@@ -58,7 +58,6 @@ public class SkywireVPNService extends VpnService {
     private Disposable visorTimeoutSubscription;
     private Disposable vpnConnectionSubscription;
 
-    private boolean startedByTheSystem = false;
     private boolean alreadyConnected = false;
     private boolean disconnectionStarted = false;
     private boolean disconnectionFinished = false;
@@ -73,8 +72,6 @@ public class SkywireVPNService extends VpnService {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        mConfigureIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void updateState(int newState) {
@@ -82,7 +79,7 @@ public class SkywireVPNService extends VpnService {
         msg.what = newState;
 
         Bundle dataBundle = new Bundle();
-        dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, startedByTheSystem);
+        dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, false);
         dataBundle.putBoolean(STOP_REQUESTED_PARAM, stopRequested);
 
         if (newState == VPNStates.CONNECTED) {
@@ -138,29 +135,37 @@ public class SkywireVPNService extends VpnService {
             }
 
             if (vpnInterface == null) {
-                vpnInterface = new VPNWorkInterface(this, mConfigureIntent, false);
+                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent(), false);
             }
             startVisorIfNeeded();
+
+            VPNCoordinator.getInstance().informServiceRunning();
         } else if (intent != null) {
-            startedByTheSystem = true;
-            updateState(currentState);
+            HelperFunctions.showToast(getString(R.string.general_unable_to_start_error), false);
 
-            if (!disconnectionStarted) {
-                startVisorIfNeeded();
+            PendingIntent openVpnSettingsPendingIntent = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Intent openVpnSettingsIntent = new Intent(android.provider.Settings.ACTION_VPN_SETTINGS);
+                openVpnSettingsPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openVpnSettingsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                // Done as precaution.
-                HelperFunctions.showToast(getString(R.string.tmp_general_service_stopping_error), false);
+                openVpnSettingsPendingIntent = HelperFunctions.getOpenAppPendingIntent();
             }
-        }
 
-        VPNCoordinator.getInstance().informServiceRunning();
+            HelperFunctions.showAlertNotification(
+                Globals.SYSTEM_START_ALERT_NOTIFICATION_ID,
+                getString(R.string.general_app_name),
+                getString(R.string.general_unavailable_system_feature_error),
+                openVpnSettingsPendingIntent
+            );
+        }
 
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Skywiremob.printString("Closing service");
+        Skywiremob.printString("VPN service destroyed.");
+        stopRequested = true;
         disconnect();
     }
 
@@ -312,7 +317,7 @@ public class SkywireVPNService extends VpnService {
 
                 // Create another interface and close it immediately to avoid a bug in older Android
                 // versions when the app is added to the ignore list.
-                vpnInterface = new VPNWorkInterface(this, mConfigureIntent, true);
+                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent(), true);
                 try {
                     vpnInterface.configure();
                 } catch (Exception e) { }
@@ -324,7 +329,7 @@ public class SkywireVPNService extends VpnService {
             updateState(VPNStates.DISCONNECTED);
             stopForeground(true);
             stopSelf();
-            notificationManager.cancel(1);
+            notificationManager.cancel(Globals.SERVICE_STATUS_NOTIFICATION_ID);
         }
     }
 
@@ -340,11 +345,11 @@ public class SkywireVPNService extends VpnService {
     }
 
     private void updateForegroundNotification() {
-        notificationManager.notify(1, createUpdatedNotification());
+        notificationManager.notify(Globals.SERVICE_STATUS_NOTIFICATION_ID, createUpdatedNotification());
     }
 
     private void makeForeground() {
-        startForeground(1, createUpdatedNotification());
+        startForeground(Globals.SERVICE_STATUS_NOTIFICATION_ID, createUpdatedNotification());
     }
 
     private Notification createUpdatedNotification() {
@@ -369,7 +374,7 @@ public class SkywireVPNService extends VpnService {
             .setContentTitle(getString(title))
             .setContentText(getString(getTextForState(currentState)))
             .setStyle(bigTextStyle)
-            .setContentIntent(mConfigureIntent)
+            .setContentIntent(HelperFunctions.getOpenAppPendingIntent())
             .setOnlyAlertOnce(true)
             .setSound(null)
             .build();

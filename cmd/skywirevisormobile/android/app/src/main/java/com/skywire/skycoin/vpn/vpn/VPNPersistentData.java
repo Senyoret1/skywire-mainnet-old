@@ -17,6 +17,7 @@ public class VPNPersistentData {
     private static final String APPS_LIST = "appsList";
     private static final String KILL_SWITCH = "killSwitch";
     private static final String RESTART_VPN = "restartVpn";
+    private static final String START_ON_BOOT = "startOnBoot";
 
     private static final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
@@ -47,6 +48,10 @@ public class VPNPersistentData {
     public static void setMustRestartVpn(boolean val) {
         settings.edit().putBoolean(RESTART_VPN, val).apply();
     }
+    public static void setStartOnBoot(boolean val) {
+        settings.edit().putBoolean(START_ON_BOOT, val).apply();
+    }
+
 
     public static String getPublicKey(String defaultValue) {
         return settings.getString(SERVER_PK, defaultValue);
@@ -84,6 +89,10 @@ public class VPNPersistentData {
 
     public static boolean getMustRestartVpn() {
         return settings.getBoolean(RESTART_VPN, true);
+    }
+
+    public static boolean getStartOnBoot() {
+        return settings.getBoolean(START_ON_BOOT, false);
     }
 
     public static void removeLastError() {

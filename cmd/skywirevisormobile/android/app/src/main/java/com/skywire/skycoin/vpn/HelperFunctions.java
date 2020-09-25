@@ -2,6 +2,9 @@ package com.skywire.skycoin.vpn;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -14,6 +17,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
+import androidx.core.app.NotificationCompat;
+
+import com.skywire.skycoin.vpn.activities.main.MainActivity;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import java.util.HashSet;
@@ -120,5 +126,31 @@ public class HelperFunctions {
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
             return networkInfo != null && networkInfo.isConnected();
         }
+    }
+
+    public static PendingIntent getOpenAppPendingIntent() {
+        final Intent openAppIntent = new Intent(App.getContext(), MainActivity.class);
+        openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        openAppIntent.setAction(Intent.ACTION_MAIN);
+        openAppIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        return PendingIntent.getActivity(App.getContext(), 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public static void showAlertNotification(int ID, String title, String content, PendingIntent contentIntent) {
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle()
+            .setBigContentTitle(title)
+            .bigText(content);
+
+        Notification notification = new NotificationCompat.Builder(App.getContext(), Globals.ALERT_NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_vpn)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setStyle(bigTextStyle)
+            .setContentIntent(contentIntent)
+            .build();
+
+        NotificationManager notificationManager = (NotificationManager)App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(ID, notification);
     }
 }

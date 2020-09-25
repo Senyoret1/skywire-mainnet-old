@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 
+import com.skywire.skycoin.vpn.Globals;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.HelperFunctions;
@@ -89,6 +90,8 @@ public class VPNCoordinator implements Handler.Callback {
     }
 
     public void startVPN(Activity requestingActivity, String remotePK, String passcode) {
+        remotePK = remotePK.trim();
+
         // Check if the pk is valid.
         String err = Skywiremob.isPKValid(remotePK);
         if (!err.isEmpty()) {
@@ -109,6 +112,29 @@ public class VPNCoordinator implements Handler.Callback {
         } else {
             onActivityResult(VPN_PREPARATION_REQUEST_CODE, RESULT_OK, null);
         }
+    }
+
+    public void activateAutostart() {
+        Intent intent = VpnService.prepare(ctx);
+        if (intent != null) {
+            HelperFunctions.showToast(ctx.getString(R.string.general_autostart_failed_error), false);
+
+            String errorMsg = ctx.getString(R.string.general_no_permissions_error);
+            VPNPersistentData.setLastError(errorMsg);
+
+            HelperFunctions.showAlertNotification(
+                Globals.AUTOSTART_ALERT_NOTIFICATION_ID,
+                ctx.getString(R.string.general_app_name),
+                errorMsg,
+                HelperFunctions.getOpenAppPendingIntent()
+            );
+
+            return;
+        }
+
+        VPNPersistentData.removeLastError();
+
+        onActivityResult(VPN_PREPARATION_REQUEST_CODE, RESULT_OK, null);
     }
 
     public void stopVPN() {

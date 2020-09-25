@@ -33,6 +33,14 @@ public class App extends Application {
             channel.setSound(null,null);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
+
+            NotificationChannel alertsChannel = new NotificationChannel(
+                    Globals.ALERT_NOTIFICATION_CHANNEL_ID,
+                    getString(R.string.general_alert_notification_name),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            alertsChannel.setDescription(getString(R.string.general_alert_notification_channel_description));
+            notificationManager.createNotificationChannel(alertsChannel);
         }
 
         RxJavaPlugins.setErrorHandler(throwable -> {

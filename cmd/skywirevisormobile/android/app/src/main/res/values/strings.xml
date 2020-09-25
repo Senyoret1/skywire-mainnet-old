@@ -2,9 +2,14 @@
 <resources>
     <string name="general_app_name">SkywireVPN</string>
     <string name="general_notification_channel_description">SkywireVPN status notifications.</string>
+    <string name="general_alert_notification_name">SkywireVPN Alerts</string>
+    <string name="general_alert_notification_channel_description">SkywireVPN important alert notifications.</string>
     <string name="general_service_description">SkywireVPN networking service.</string>
 
-    <string name="tmp_general_service_stopping_error">The SkywireVPN is being stopped, the operation has been ignored.</string>
+    <string name="general_unable_to_start_error">Unable to start the VPN protection with the selected method.</string>
+    <string name="general_unavailable_system_feature_error">It is not possible to start the VPN service with the always-on VPN system option. Please deactivate the option and use the app to start the VPN protection.</string>
+    <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
+    <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
 
     <string name="vpn_service_state_preparing">Preparing</string>
     <string name="vpn_service_state_restoring">Restoring</string>
@@ -38,6 +43,7 @@
     <string name="tmp_main_page_stop">Stop</string>
     <string name="tmp_main_page_select">Select server</string>
     <string name="tmp_main_page_select_apps">Select apps</string>
+    <string name="tmp_main_page_settings">Settings</string>
     <string name="tmp_main_page_stoping">Stopping the service...</string>
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
     <string name="tmp_main_page_last_error">The last attempt to start the service failed with the following error:</string>
@@ -51,4 +57,7 @@
     <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
     <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
 
+    <string name="tmp_options_title">Options</string>
+    <string name="tmp_options_kill_switch">Kill switch. This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
+    <string name="tmp_options_start_on_boot">Start on boot. The VPN protection will be automatically started shortly after turning on the device.</string>
 </resources>
