@@ -8,11 +8,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
@@ -20,11 +15,14 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import com.skywire.skycoin.vpn.activities.main.MainActivity;
+import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Observable;
 import skywiremob.Skywiremob;
 
 public class HelperFunctions {
@@ -77,7 +75,17 @@ public class HelperFunctions {
     public static List<ResolveInfo> getDeviceAppsList() {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        return App.getContext().getPackageManager().queryIntentActivities( mainIntent, 0);
+
+        String packageName = App.getContext().getPackageName();
+        ArrayList<ResolveInfo> response = new ArrayList<>();
+
+        for (ResolveInfo app : App.getContext().getPackageManager().queryIntentActivities( mainIntent, 0)) {
+            if (!app.activityInfo.packageName.equals(packageName)) {
+                response.add(app);
+            }
+        }
+
+        return response;
     }
 
     public static HashSet<String> filterAvailableApps(HashSet<String> apps) {
@@ -107,25 +115,22 @@ public class HelperFunctions {
         return false;
     }
 
-    public static boolean checkIfNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager)App.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Network activeNetwork = connectivityManager.getActiveNetwork();
-            if (activeNetwork == null) {
-                return false;
-            } else {
-                NetworkCapabilities networkInfo = connectivityManager.getNetworkCapabilities(activeNetwork);
-                return networkInfo != null && (
-                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
-                    networkInfo.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)
-                );
-            }
-        } else {
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            return networkInfo != null && networkInfo.isConnected();
-        }
+    public static Observable<Boolean> checkInternetConnectivity() {
+        return checkInternetConnectivity(0);
+    }
+
+    public static Observable<Boolean> checkInternetConnectivity(int urlIndex) {
+        return ApiClient.checkConnection(Globals.INTERNET_CHECKING_ADDRESSES[urlIndex])
+            .map(response -> {
+                return true;
+            })
+            .onErrorResumeNext(err -> {
+                if (urlIndex < Globals.INTERNET_CHECKING_ADDRESSES.length - 1) {
+                    return checkInternetConnectivity(urlIndex + 1);
+                }
+
+                return Observable.just(false);
+            });
     }
 
     public static PendingIntent getOpenAppPendingIntent() {
@@ -143,7 +148,7 @@ public class HelperFunctions {
             .bigText(content);
 
         Notification notification = new NotificationCompat.Builder(App.getContext(), Globals.ALERT_NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_vpn)
+            .setSmallIcon(R.drawable.ic_error)
             .setContentTitle(title)
             .setContentText(content)
             .setStyle(bigTextStyle)

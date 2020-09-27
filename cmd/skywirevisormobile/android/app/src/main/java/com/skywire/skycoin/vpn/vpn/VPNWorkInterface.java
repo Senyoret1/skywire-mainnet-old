@@ -18,6 +18,13 @@ import java.util.HashSet;
 import skywiremob.Skywiremob;
 
 public class VPNWorkInterface implements Closeable {
+
+    public enum Modes {
+        BLOCKING,
+        WORKING,
+        DELETING,
+    }
+
     private final VpnService service;
     private final PendingIntent configureIntent;
 
@@ -26,16 +33,12 @@ public class VPNWorkInterface implements Closeable {
     private FileInputStream inStream = null;
     private FileOutputStream outStream = null;
 
-    private boolean createdForCleaning;
-
     public VPNWorkInterface(
         VpnService service,
-        PendingIntent configureIntent,
-        boolean createForCleaning
+        PendingIntent configureIntent
     ) {
         this.service = service;
         this.configureIntent = configureIntent;
-        createdForCleaning = createForCleaning;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class VPNWorkInterface implements Closeable {
         return vpnInterface != null;
     }
 
-    public void configure() throws Exception {
+    public void configure(Modes mode) throws Exception {
         ParcelFileDescriptor oldVpnInterface = null;
         if (vpnInterface != null) {
             oldVpnInterface = vpnInterface;
@@ -63,20 +66,18 @@ public class VPNWorkInterface implements Closeable {
         // Configure a builder while parsing the parameters.
         VpnService.Builder builder = service.new Builder();
         builder.setMtu((short)Skywiremob.getMTU());
-        if (!createdForCleaning) {
+        if (mode == Modes.WORKING) {
             Skywiremob.printString("TUN IP: " + Skywiremob.tunip());
             builder.addAddress(Skywiremob.tunip(), (int) Skywiremob.getTUNIPPrefix());
         } else {
-            builder.addAddress("8.8.8.8", 1);
+            builder.addAddress("8.8.8.8", 32);
         }
         builder.addDnsServer("8.8.8.8");
-        //builder.addDnsServer("192.168.1.1");
-        builder.addRoute("0.0.0.0", 1);
-        builder.addRoute("128.0.0.0", 1);
+        builder.addRoute("0.0.0.0", 0);
         builder.setBlocking(true);
 
         boolean errorIgnoringApps = false;
-        if (!createdForCleaning) {
+        if (mode == Modes.WORKING) {
             String upperCaseAppPackage = App.getContext().getPackageName().toUpperCase();
             Globals.AppFilteringModes appsSelectionMode = VPNPersistentData.getAppsSelectionMode();
 
@@ -111,7 +112,11 @@ public class VPNWorkInterface implements Closeable {
                 }
             }
         } else {
-            builder.addAllowedApplication(App.getContext().getPackageName());
+            if (mode == Modes.BLOCKING) {
+                builder.addDisallowedApplication(App.getContext().getPackageName());
+            } else {
+                builder.addAllowedApplication(App.getContext().getPackageName());
+            }
         }
 
         if (errorIgnoringApps) {

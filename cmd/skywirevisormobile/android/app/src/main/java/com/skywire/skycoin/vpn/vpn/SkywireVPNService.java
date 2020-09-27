@@ -54,6 +54,7 @@ public class SkywireVPNService extends VpnService {
     private String lastErrorMsg;
 
     private VisorRunnable visor;
+    private Disposable checkConnectionSubscription;
     private Disposable visorSubscription;
     private Disposable visorTimeoutSubscription;
     private Disposable vpnConnectionSubscription;
@@ -129,15 +130,22 @@ public class SkywireVPNService extends VpnService {
             stopRequested = true;
             disconnect();
         } else if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
+            if (vpnInterface == null) {
+                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent());
+
+                if (VPNPersistentData.getProtectBeforeConnected()) {
+                    try {
+                        vpnInterface.configure(VPNWorkInterface.Modes.BLOCKING);
+                    } catch (Exception e) { }
+                }
+            }
+
             if (intent.hasExtra(MESSENGER_PARAM)) {
                 messenger = intent.getParcelableExtra(MESSENGER_PARAM);
                 updateState(currentState);
             }
 
-            if (vpnInterface == null) {
-                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent(), false);
-            }
-            startVisorIfNeeded();
+            checkInternetConnectionIfNeeded();
 
             VPNCoordinator.getInstance().informServiceRunning();
         } else if (intent != null) {
@@ -176,21 +184,46 @@ public class SkywireVPNService extends VpnService {
         this.stopSelf();
     }
 
-    private void startVisorIfNeeded() {
+    private void checkInternetConnectionIfNeeded() {
         // Become a foreground service. Background services can be VPN services too, but they can
         // be killed by background check before getting a chance to receive onRevoke().
         makeForeground();
 
-        if (visor == null) {
-            Skywiremob.printString("STARTING ANDROID VPN SERVICE");
+        if (currentState != VPNStates.WAITING_FOR_CONNECTIVITY) {
+            Skywiremob.printString("CHECKING CONNECTION");
+            updateState(VPNStates.CHECKING_CONNECTIVITY);
+        }
 
-            // Check if the device has network connectivity.
-            boolean validNetwork = HelperFunctions.checkIfNetworkAvailable();
-            if (!validNetwork) {
-                HelperFunctions.logError("VPN service", "Trying to start the VPN service without network connection.");
-                putInErrorState(this.getString(R.string.vpn_service_no_network_error));
-                return;
-            }
+        if (checkConnectionSubscription != null) {
+            checkConnectionSubscription.dispose();
+        }
+
+        if (visor == null) {
+            checkConnectionSubscription = HelperFunctions.checkInternetConnectivity()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(hasInternetConnection -> {
+                    checkConnectionSubscription.dispose();
+
+                    if (hasInternetConnection) {
+                        startVisorIfNeeded();
+                    } else {
+                        updateState(VPNStates.WAITING_FOR_CONNECTIVITY);
+
+                        checkConnectionSubscription = Observable.just(0).delay(1000, TimeUnit.MILLISECONDS)
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(val -> {
+                                checkInternetConnectionIfNeeded();
+                            });
+                    }
+                });
+        }
+    }
+
+    private void startVisorIfNeeded() {
+        if (visor == null) {
+            Skywiremob.printString("STARTING VISOR");
 
             visor = new VisorRunnable();
 
@@ -256,6 +289,9 @@ public class SkywireVPNService extends VpnService {
                 updateState(VPNStates.DISCONNECTING);
             }
 
+            if (checkConnectionSubscription != null) {
+                checkConnectionSubscription.dispose();
+            }
             if (visorSubscription != null) {
                 visorSubscription.dispose();
             }
@@ -317,9 +353,9 @@ public class SkywireVPNService extends VpnService {
 
                 // Create another interface and close it immediately to avoid a bug in older Android
                 // versions when the app is added to the ignore list.
-                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent(), true);
+                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent());
                 try {
-                    vpnInterface.configure();
+                    vpnInterface.configure(VPNWorkInterface.Modes.DELETING);
                 } catch (Exception e) { }
                 vpnInterface.close();
 
@@ -330,6 +366,15 @@ public class SkywireVPNService extends VpnService {
             stopForeground(true);
             stopSelf();
             notificationManager.cancel(Globals.SERVICE_STATUS_NOTIFICATION_ID);
+
+            if (!HelperFunctions.appIsOnForeground() && !VPNPersistentData.getKillSwitchActivated() && VPNPersistentData.getLastError(null) != null) {
+                HelperFunctions.showAlertNotification(
+                    Globals.ERROR_NOTIFICATION_ID,
+                    getString(R.string.general_app_name),
+                    getString(R.string.general_connection_error),
+                    HelperFunctions.getOpenAppPendingIntent()
+                );
+            }
         }
     }
 
@@ -365,12 +410,24 @@ public class SkywireVPNService extends VpnService {
             }
         }
 
+        int icon = R.drawable.ic_lines;
+        if (vpnInterface != null && vpnInterface.alreadyConfigured()) {
+            if (currentState == VPNStates.CONNECTED) {
+                icon = R.drawable.ic_filled;
+            } else {
+                icon = R.drawable.ic_alert;
+            }
+        }
+        if (currentState == VPNStates.ERROR || currentState == VPNStates.BLOCKING_ERROR) {
+            icon = R.drawable.ic_error;
+        }
+
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle()
             .bigText(getString(getTextForState(currentState)))
             .setBigContentTitle(getString(title));
 
         return new NotificationCompat.Builder(this, Globals.NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_vpn)
+            .setSmallIcon(icon)
             .setContentTitle(getString(title))
             .setContentText(getString(getTextForState(currentState)))
             .setStyle(bigTextStyle)

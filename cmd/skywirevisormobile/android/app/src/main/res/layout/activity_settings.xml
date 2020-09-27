@@ -20,6 +20,13 @@
             android:text="@string/tmp_options_kill_switch" />
 
         <CheckBox
+            android:id="@+id/checkBoxProtectBeforeConnecting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/tmp_options_protect_before_connecting" />
+
+        <CheckBox
             android:id="@+id/checkBoxStartOnBoot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

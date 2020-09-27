@@ -185,7 +185,7 @@ public class SkywireVPNConnection implements Closeable {
             tunnel.configureBlocking(true);
             // Configure the virtual network interface. This starts the VPN protection in the OS.
             if (parentEmitter.isDisposed()) { return connected; }
-            vpnInterface.configure();
+            vpnInterface.configure(VPNWorkInterface.Modes.WORKING);
             // Now we are connected. Set the flag.
             connected = true;
             parentEmitter.onNext(VPNStates.CONNECTED);

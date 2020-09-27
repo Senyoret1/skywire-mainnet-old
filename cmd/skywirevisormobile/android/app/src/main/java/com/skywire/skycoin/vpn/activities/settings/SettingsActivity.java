@@ -11,6 +11,7 @@ import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 
 public class SettingsActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
     private CheckBox checkBoxKillSwitch;
+    private CheckBox checkBoxProtectBeforeConnecting;
     private CheckBox checkBoxStartOnBoot;
 
     @Override
@@ -19,12 +20,15 @@ public class SettingsActivity extends Activity implements CompoundButton.OnCheck
         setContentView(R.layout.activity_settings);
 
         checkBoxKillSwitch = findViewById(R.id.checkBoxKillSwitch);
+        checkBoxProtectBeforeConnecting = findViewById(R.id.checkBoxProtectBeforeConnecting);
         checkBoxStartOnBoot = findViewById(R.id.checkBoxStartOnBoot);
 
         checkBoxKillSwitch.setChecked(VPNPersistentData.getKillSwitchActivated());
+        checkBoxProtectBeforeConnecting.setChecked(VPNPersistentData.getProtectBeforeConnected());
         checkBoxStartOnBoot.setChecked(VPNPersistentData.getStartOnBoot());
 
         checkBoxKillSwitch.setOnCheckedChangeListener(this);
+        checkBoxProtectBeforeConnecting.setOnCheckedChangeListener(this);
         checkBoxStartOnBoot.setOnCheckedChangeListener(this);
     }
 
@@ -38,6 +42,8 @@ public class SettingsActivity extends Activity implements CompoundButton.OnCheck
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (buttonView.getId() == R.id.checkBoxKillSwitch) {
             VPNPersistentData.setKillSwitchActivated(isChecked);
+        } else if (buttonView.getId() == R.id.checkBoxProtectBeforeConnecting) {
+            VPNPersistentData.setProtectBeforeConnected(isChecked);
         } else {
             VPNPersistentData.setStartOnBoot(isChecked);
         }

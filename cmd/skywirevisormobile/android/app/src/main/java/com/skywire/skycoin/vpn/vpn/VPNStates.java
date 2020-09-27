@@ -5,6 +5,8 @@ import com.skywire.skycoin.vpn.R;
 public class VPNStates {
     public static int OFF = 1;
     public static int STARTING = 10;
+    public static int CHECKING_CONNECTIVITY = 15;
+    public static int WAITING_FOR_CONNECTIVITY = 16;
     public static int PREPARING_VISOR = 20;
     public static int PREPARING_VPN_CLIENT = 30;
     public static int FINAL_PREPARATIONS_FOR_VISOR = 35;
@@ -36,6 +38,10 @@ public class VPNStates {
             return R.string.vpn_state_off;
         } else if (state == STARTING) {
             return R.string.vpn_state_initializing;
+        } else if (state == CHECKING_CONNECTIVITY) {
+            return R.string.vpn_state_checking_connectivity;
+        } else if (state == WAITING_FOR_CONNECTIVITY) {
+            return R.string.vpn_state_waiting_connectivity;
         } else if (state == PREPARING_VISOR) {
             return R.string.vpn_state_starting_visor;
         } else if (state == PREPARING_VPN_CLIENT) {
