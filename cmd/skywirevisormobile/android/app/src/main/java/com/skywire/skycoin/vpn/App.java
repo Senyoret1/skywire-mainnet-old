@@ -10,30 +10,39 @@ import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 
+/**
+ * Class for the main app instance.
+ */
 public class App extends Application {
+    /**
+     * Reference to the current app instance.
+     */
     private static Context appContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        // Save the current app instance.
         appContext = this;
 
         // Ensure the singleton is initialized early.
         VPNCoordinator.getInstance();
 
-        // Create the NotificationChannel, but only on API 26+ because
+        // Create the notification channels, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
+            // Channel for the VPN service state updates.
+            NotificationChannel stateChannel = new NotificationChannel(
                 Globals.NOTIFICATION_CHANNEL_ID,
                 getString(R.string.general_app_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             );
-            channel.setDescription(getString(R.string.general_notification_channel_description));
-            channel.setSound(null,null);
+            stateChannel.setDescription(getString(R.string.general_notification_channel_description));
+            stateChannel.setSound(null,null);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            notificationManager.createNotificationChannel(stateChannel);
 
+            // Channel for alerts.
             NotificationChannel alertsChannel = new NotificationChannel(
                     Globals.ALERT_NOTIFICATION_CHANNEL_ID,
                     getString(R.string.general_alert_notification_name),
@@ -43,11 +52,17 @@ public class App extends Application {
             notificationManager.createNotificationChannel(alertsChannel);
         }
 
+        // Code for precessing errors which were not caught by the normal error management
+        // procedures RxJava has. This prevents the app to be closed by unexpected errors, mainly
+        // code trying to report events in closed observables.
         RxJavaPlugins.setErrorHandler(throwable -> {
             HelperFunctions.logError("ERROR INSIDE RX: ", throwable);
         });
     }
 
+    /**
+     * Gets the current app context.
+     */
     public static Context getContext(){
         return appContext;
     }

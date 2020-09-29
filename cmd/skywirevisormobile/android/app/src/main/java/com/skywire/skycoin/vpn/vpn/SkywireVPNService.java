@@ -20,7 +20,6 @@ import com.skywire.skycoin.vpn.Globals;
 import com.skywire.skycoin.vpn.HelperFunctions;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -47,8 +46,6 @@ public class SkywireVPNService extends VpnService {
 
     private VPNWorkInterface vpnInterface;
     private SkywireVPNConnection connectionRunnable;
-
-    private AtomicInteger mNextConnectionId = new AtomicInteger(1);
 
     private int currentState = VPNStates.STARTING;
     private String lastErrorMsg;
@@ -131,7 +128,7 @@ public class SkywireVPNService extends VpnService {
             disconnect();
         } else if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
             if (vpnInterface == null) {
-                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent());
+                vpnInterface = new VPNWorkInterface(this);
 
                 if (VPNPersistentData.getProtectBeforeConnected()) {
                     try {
@@ -140,14 +137,10 @@ public class SkywireVPNService extends VpnService {
                 }
             }
 
-            if (intent.hasExtra(MESSENGER_PARAM)) {
-                messenger = intent.getParcelableExtra(MESSENGER_PARAM);
-                updateState(currentState);
-            }
+            messenger = VPNCoordinator.getInstance().getCommunicationMessenger();
+            updateState(currentState);
 
             checkInternetConnectionIfNeeded();
-
-            VPNCoordinator.getInstance().informServiceRunning();
         } else if (intent != null) {
             HelperFunctions.showToast(getString(R.string.general_unable_to_start_error), false);
 
@@ -227,7 +220,7 @@ public class SkywireVPNService extends VpnService {
 
             visor = new VisorRunnable();
 
-            visorSubscription = visor.run()
+            visorSubscription = visor.runVisor()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(state -> {
@@ -256,9 +249,6 @@ public class SkywireVPNService extends VpnService {
     private void startConnection() {
         final SkywireVPNConnection connection = new SkywireVPNConnection(
             this,
-            mNextConnectionId.getAndIncrement(),
-            "localhost",
-            7890,
             visor,
             vpnInterface
         );
@@ -307,7 +297,7 @@ public class SkywireVPNService extends VpnService {
 
             Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
                 if (visor != null) {
-                    visor.stopVisor();
+                    visor.startStoppingVisor();
                 }
                 emitter.onComplete();
             }).subscribeOn(Schedulers.newThread()).subscribe(val -> {});
@@ -328,7 +318,7 @@ public class SkywireVPNService extends VpnService {
                         } else {
                             if (disconnectionVerifications != 0) {
                                 if (visor != null) {
-                                    visor.stopVisor();
+                                    visor.startStoppingVisor();
                                 }
                             }
 
@@ -353,7 +343,7 @@ public class SkywireVPNService extends VpnService {
 
                 // Create another interface and close it immediately to avoid a bug in older Android
                 // versions when the app is added to the ignore list.
-                vpnInterface = new VPNWorkInterface(this, HelperFunctions.getOpenAppPendingIntent());
+                vpnInterface = new VPNWorkInterface(this);
                 try {
                     vpnInterface.configure(VPNWorkInterface.Modes.DELETING);
                 } catch (Exception e) { }

@@ -21,33 +21,51 @@ import skywiremob.Skywiremob;
 
 import static android.app.Activity.RESULT_OK;
 
+/**
+ * Class for communication between the app UI and the VPN service. It is accessed via a singleton.
+ */
 public class VPNCoordinator implements Handler.Callback {
+    /**
+     * Value the onActivityResult function will get after asking the user for permission.
+     */
     public static final int VPN_PREPARATION_REQUEST_CODE = 1000100;
 
+    /**
+     * Singleton instance.
+     */
     private static VPNCoordinator instance = new VPNCoordinator();
-    public static VPNCoordinator getInstance() {
-        return instance;
-    }
+    /**
+     * Gets the singleton for using the class.
+     */
+    public static VPNCoordinator getInstance() { return instance; }
 
+    /**
+     * App context.
+     */
     private final Context ctx = App.getContext();
 
+    /**
+     * Handler used for receiving messages from the VPN service.
+     */
     private Handler serviceCommunicationHandler;
+    /**
+     * Subject for sending events via RxJava, indicating the current state of the VPN service.
+     */
     private BehaviorSubject<VPNStates.StateInfo> eventsSubject = BehaviorSubject.create();
-
-    private boolean serviceShouldBeRunning = false;
 
     private VPNCoordinator() {
         serviceCommunicationHandler = new Handler(this);
 
+        // Add a default current state.
         eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, false));
-
-        if (isServiceRunning()) {
-            onActivityResult(0, RESULT_OK, null);
-        }
     }
 
+    /**
+     * Handles the messages received from the VPN service.
+     */
     @Override
     public boolean handleMessage(Message msg) {
+        // Create the state object with the params returned by the VPN service.
         VPNStates.StateInfo state = new VPNStates.StateInfo(
             msg.what,
             msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM),
@@ -55,23 +73,25 @@ public class VPNCoordinator implements Handler.Callback {
             msg.getData().getBoolean(SkywireVPNService.STOP_REQUESTED_PARAM)
         );
 
-        if (msg.what == VPNStates.DISCONNECTED) {
-            serviceShouldBeRunning = false;
-        }
-
-        // Must be dore before informing about the event.
+        // Save the error as the one which made the last execution of the VPN service fail.
+        // Must be dore before sending the event.
         if (msg.what == VPNStates.ERROR || msg.what == VPNStates.BLOCKING_ERROR) {
             VPNPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
         }
 
+        // Inform the new state.
         eventsSubject.onNext(state);
 
         return true;
     }
 
+    /**
+     * Allows to know if the VPN service is currently running.
+     */
     public boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) App.getContext().getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            // Check if any of the running services is the VPN service.
             if (SkywireVPNService.class.getName().equals(service.service.getClassName())) {
                 return true;
             }
@@ -79,89 +99,135 @@ public class VPNCoordinator implements Handler.Callback {
         return false;
     }
 
+    /**
+     * Returns an observable that emits every time the state of the VPN service changes. The
+     * observable does not emit errors and never completes.
+     */
     public Observable<VPNStates.StateInfo> getEventsObservable() {
         return eventsSubject.hide();
     }
 
-    public void informServiceRunning() {
-        if (!serviceShouldBeRunning && isServiceRunning()) {
-            onActivityResult(VPN_PREPARATION_REQUEST_CODE, RESULT_OK, null);
-        }
-    }
-
+    /**
+     * Makes the preparations and starts the VPN service. If it is already running, nothing happens.
+     * @param requestingActivity Activity requesting the service to be started. Please note
+     * that the onActivityResult function of that activity may be called with the value of
+     * VPN_PREPARATION_REQUEST_CODE as the first param. In that case the activity must call the
+     * onActivityResult function of this instance with all the params, to be able to process
+     * permission requests
+     * @param remotePK Public key of the remote visor. If it is not valid, the VPN service will
+     * not be started and a toast notification will be shown.
+     * @param passcode Password of the remote node.
+     */
     public void startVPN(Activity requestingActivity, String remotePK, String passcode) {
-        remotePK = remotePK.trim();
+        if (!isServiceRunning()) {
+            // Check if the pk is valid.
+            remotePK = remotePK.trim();
+            String err = Skywiremob.isPKValid(remotePK);
+            if (!err.isEmpty()) {
+                HelperFunctions.logError("Invalid PK starting service", err);
+                HelperFunctions.showToast(ctx.getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
+                return;
+            } else {
+                Skywiremob.printString("PK is correct");
+            }
 
-        // Check if the pk is valid.
-        String err = Skywiremob.isPKValid(remotePK);
-        if (!err.isEmpty()) {
-            HelperFunctions.logError("Invalid PK starting service", err);
-            HelperFunctions.showToast(ctx.getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
-            return;
-        } else {
-            Skywiremob.printString("PK is correct");
-        }
+            // Save the remote visor pk and password.
+            VPNPersistentData.setPublicKeyAndPassword(remotePK, passcode);
 
-        VPNPersistentData.setPublicKeyAndPassword(remotePK, passcode);
+            // As the service will be started again, erase the error which made it fail the last
+            // time it ran, to indicate that no error has stopped the current instance.
+            VPNPersistentData.removeLastError();
 
-        VPNPersistentData.removeLastError();
-        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, null, false));
-        Intent intent = VpnService.prepare(requestingActivity);
-        if (intent != null) {
-            requestingActivity.startActivityForResult(intent, VPN_PREPARATION_REQUEST_CODE);
-        } else {
-            onActivityResult(VPN_PREPARATION_REQUEST_CODE, RESULT_OK, null);
+            eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, null, false));
+
+            // Get the permission request intent from the OS.
+            Intent intent = VpnService.prepare(requestingActivity);
+            if (intent != null) {
+                // Ask for permission before continuing.
+                requestingActivity.startActivityForResult(intent, VPN_PREPARATION_REQUEST_CODE);
+            } else {
+                starVpnServiceIfNeeded();
+            }
         }
     }
 
+    /**
+     * Function for starting the VPN service after boot. If the service is already running,
+     * nothing happens.
+     */
     public void activateAutostart() {
-        Intent intent = VpnService.prepare(ctx);
-        if (intent != null) {
-            HelperFunctions.showToast(ctx.getString(R.string.general_autostart_failed_error), false);
+        if (!isServiceRunning()) {
+            // Check if permission is needed. If it is, fail.
+            Intent intent = VpnService.prepare(ctx);
+            if (intent != null) {
+                HelperFunctions.showToast(ctx.getString(R.string.general_autostart_failed_error), false);
 
-            String errorMsg = ctx.getString(R.string.general_no_permissions_error);
-            VPNPersistentData.setLastError(errorMsg);
+                String errorMsg = ctx.getString(R.string.general_no_permissions_error);
+                VPNPersistentData.setLastError(errorMsg);
 
-            HelperFunctions.showAlertNotification(
-                Globals.AUTOSTART_ALERT_NOTIFICATION_ID,
-                ctx.getString(R.string.general_app_name),
-                errorMsg,
-                HelperFunctions.getOpenAppPendingIntent()
-            );
+                HelperFunctions.showAlertNotification(
+                        Globals.AUTOSTART_ALERT_NOTIFICATION_ID,
+                        ctx.getString(R.string.general_app_name),
+                        errorMsg,
+                        HelperFunctions.getOpenAppPendingIntent()
+                );
 
-            return;
+                return;
+            }
+
+            // As the service will be started again, erase the error which made it fail the last
+            // time it ran, to indicate that no error has stopped the current instance.
+            VPNPersistentData.removeLastError();
+
+            starVpnServiceIfNeeded();
         }
-
-        VPNPersistentData.removeLastError();
-
-        onActivityResult(VPN_PREPARATION_REQUEST_CODE, RESULT_OK, null);
     }
 
+    /**
+     * Asks the VPN service to stop. It will not be stopped immediately, the state change events
+     * must be checked for knowing when it is really stopped.
+     */
     public void stopVPN() {
-        ctx.startService(getServiceIntent(false).setAction(SkywireVPNService.ACTION_DISCONNECT));
+        ctx.startService(getServiceIntent().setAction(SkywireVPNService.ACTION_DISCONNECT));
     }
 
+    /**
+     * Must be called by the activity used for calling startVPN, if the same function is called
+     * in the activity and the value of VPN_PREPARATION_REQUEST_CODE was received as request.
+     * The same params received in the activity must be provided.
+     */
     public void onActivityResult(int request, int result, Intent data) {
         if (request == VPN_PREPARATION_REQUEST_CODE) {
             if (result == RESULT_OK) {
-                serviceShouldBeRunning = true;
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ctx.startForegroundService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
-                } else {
-                    ctx.startService(getServiceIntent(true).setAction(SkywireVPNService.ACTION_CONNECT));
-                }
+                starVpnServiceIfNeeded();
             } else {
                 eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, true));
             }
         }
     }
 
-    private Intent getServiceIntent(boolean IncludeExtras) {
-        Intent response = new Intent(ctx, SkywireVPNService.class);
-        if (IncludeExtras) {
-            response.putExtra(SkywireVPNService.MESSENGER_PARAM, new Messenger(serviceCommunicationHandler));
+    /**
+     * Starts the VPN service if it is not already running.
+     */
+    private void starVpnServiceIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ctx.startForegroundService(getServiceIntent().setAction(SkywireVPNService.ACTION_CONNECT));
+        } else {
+            ctx.startService(getServiceIntent().setAction(SkywireVPNService.ACTION_CONNECT));
         }
-        return response;
+    }
+
+    /**
+     * Gets the VPN service intent, without action.
+     */
+    private Intent getServiceIntent() {
+        return new Intent(ctx, SkywireVPNService.class);
+    }
+
+    /**
+     * Gets a Messenger object for communicating with this instance.
+     */
+    public Messenger getCommunicationMessenger() {
+        return new Messenger(serviceCommunicationHandler);
     }
 }
