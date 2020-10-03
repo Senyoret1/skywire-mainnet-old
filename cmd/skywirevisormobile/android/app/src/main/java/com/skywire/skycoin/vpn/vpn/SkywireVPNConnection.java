@@ -261,8 +261,6 @@ public class SkywireVPNConnection implements Closeable {
 
                 // Wait before checking again.
                 Thread.sleep(2000);
-                connected = false;
-                throw new Error("123");
             }
         } catch (Throwable e) {
             // Report the error.
