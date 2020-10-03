@@ -20,7 +20,7 @@ public class ApiClient {
         Observable<Response<List<VpnServer>>> getVpnServers(@Query("type") String type);
 
         @GET
-        Observable<Response<String>> checkConnection(@Url String url);
+        Observable<Response<Void>> checkConnection(@Url String url);
     }
 
     public static final String BASE_URL = "https://service.discovery.skycoin.com/api/";
@@ -37,7 +37,7 @@ public class ApiClient {
         return apiService.getVpnServers("vpn");
     }
 
-    public static Observable<Response<String>> checkConnection(String url) {
+    public static Observable<Response<Void>> checkConnection(String url) {
         return apiService.checkConnection(url);
     }
 }

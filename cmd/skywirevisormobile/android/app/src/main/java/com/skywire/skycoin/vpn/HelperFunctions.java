@@ -1,7 +1,6 @@
 package com.skywire.skycoin.vpn;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -55,23 +54,6 @@ public class HelperFunctions {
         });
     }
 
-    public static boolean appIsOnForeground() {
-        ActivityManager activityManager = (ActivityManager) App.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> appsRunning = activityManager.getRunningAppProcesses();
-        if (appsRunning == null) {
-            return false;
-        }
-
-        final String packageName = App.getContext().getPackageName();
-        for (ActivityManager.RunningAppProcessInfo appProcess : appsRunning) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static List<ResolveInfo> getDeviceAppsList() {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -115,18 +97,22 @@ public class HelperFunctions {
         return false;
     }
 
-    public static Observable<Boolean> checkInternetConnectivity() {
-        return checkInternetConnectivity(0);
+    public static Observable<Boolean> checkInternetConnectivity(boolean logError) {
+        return checkInternetConnectivity(0, logError);
     }
 
-    public static Observable<Boolean> checkInternetConnectivity(int urlIndex) {
+    public static Observable<Boolean> checkInternetConnectivity(int urlIndex, boolean logError) {
         return ApiClient.checkConnection(Globals.INTERNET_CHECKING_ADDRESSES[urlIndex])
             .map(response -> {
                 return true;
             })
             .onErrorResumeNext(err -> {
                 if (urlIndex < Globals.INTERNET_CHECKING_ADDRESSES.length - 1) {
-                    return checkInternetConnectivity(urlIndex + 1);
+                    return checkInternetConnectivity(urlIndex + 1, logError);
+                }
+
+                if (logError) {
+                    HelperFunctions.logError("Checking network connectivity", err);
                 }
 
                 return Observable.just(false);

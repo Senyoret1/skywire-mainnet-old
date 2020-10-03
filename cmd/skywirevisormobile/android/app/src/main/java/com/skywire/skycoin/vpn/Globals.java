@@ -30,15 +30,10 @@ public class Globals {
      */
     public static final int SERVICE_STATUS_NOTIFICATION_ID = 1;
     /**
-     * ID of the notification for informing that it was not possible to start the VPN service
-     * using an OS request (always-on VPN).
-     */
-    public static final int SYSTEM_START_ALERT_NOTIFICATION_ID = 10;
-    /**
      * ID of the notification for informing about errors while trying to automatically start the
      * VPN service during boot.
      */
-    public static final int AUTOSTART_ALERT_NOTIFICATION_ID = 11;
+    public static final int AUTOSTART_ALERT_NOTIFICATION_ID = 10;
     /**
      * ID of the generic error notifications.
      */
@@ -49,7 +44,7 @@ public class Globals {
      * addresses, but at least 1, can be used. Addresses will be checked sequentially and only
      * until being able to connect with one.
      */
-    public static final String[] INTERNET_CHECKING_ADDRESSES = new String[]{"https://dmsg.discovery.skywire.skycoin.com"};
+    public static final String[] INTERNET_CHECKING_ADDRESSES = new String[]{"https://dmsg.discovery.skywire.skycoin.com", "https://www.skycoin.com"};
 
     /**
      * Closes all the alert and error notifications created by the app.
@@ -57,7 +52,6 @@ public class Globals {
     public static void removeAllAlertNotifications() {
         NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.cancel(Globals.SYSTEM_START_ALERT_NOTIFICATION_ID);
         notificationManager.cancel(Globals.AUTOSTART_ALERT_NOTIFICATION_ID);
         notificationManager.cancel(Globals.ERROR_NOTIFICATION_ID);
     }

@@ -33,6 +33,10 @@ public class VPNStates {
      */
     public static int STARTING = 10;
     /**
+     * Waiting for the visor to be completely stopped before starting it again.
+     */
+    public static int WAITING_PREVIOUS_INSTANCE_STOP = 12;
+    /**
      * Checking for the first time if the device has internet connectivity.
      */
     public static int CHECKING_CONNECTIVITY = 15;
@@ -65,6 +69,10 @@ public class VPNStates {
      * There was an error with the VPN connection and it is being restored automatically.
      */
     public static int RESTORING_VPN = 150;
+    /**
+     * There was an error and the whole VPN service is being restored automatically.
+     */
+    public static int RESTORING_SERVICE = 155;
     /**
      * The VPN service is being stopped.
      */
@@ -123,6 +131,8 @@ public class VPNStates {
             return R.string.vpn_state_off;
         } else if (state == STARTING) {
             return R.string.vpn_state_initializing;
+        } else if (state == WAITING_PREVIOUS_INSTANCE_STOP) {
+            return R.string.vpn_state_waiting_previous_instance_stop;
         } else if (state == CHECKING_CONNECTIVITY) {
             return R.string.vpn_state_checking_connectivity;
         } else if (state == WAITING_FOR_CONNECTIVITY) {
@@ -139,6 +149,8 @@ public class VPNStates {
             return R.string.vpn_state_connected;
         } else if (state == RESTORING_VPN) {
             return R.string.vpn_state_restoring;
+        } else if (state == RESTORING_SERVICE) {
+            return R.string.vpn_state_restoring_service;
         } else if (state == DISCONNECTING) {
             return R.string.vpn_state_disconnecting;
         } else if (state == DISCONNECTED) {

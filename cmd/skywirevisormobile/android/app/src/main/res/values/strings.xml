@@ -6,8 +6,6 @@
     <string name="general_alert_notification_channel_description">SkywireVPN important alert notifications.</string>
     <string name="general_service_description">SkywireVPN networking service.</string>
 
-    <string name="general_unable_to_start_error">Unable to start the VPN protection with the selected method.</string>
-    <string name="general_unavailable_system_feature_error">It is not possible to start the VPN service with the always-on VPN system option. Please deactivate the option and use the app to start the VPN protection.</string>
     <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
     <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
@@ -18,6 +16,7 @@
 
     <string name="vpn_state_off">SkywireVPN disconnected.</string>
     <string name="vpn_state_initializing">Initializing SkywireVPN.</string>
+    <string name="vpn_state_waiting_previous_instance_stop">Waiting for the visor to be ready.</string>
     <string name="vpn_state_checking_connectivity">Checking network connectivity.</string>
     <string name="vpn_state_waiting_connectivity">Waiting for network connectivity.</string>
     <string name="vpn_state_starting_visor">Starting SkywireVPN visor.</string>
@@ -26,6 +25,7 @@
     <string name="vpn_state_connecting">Establishing VPN connection.</string>
     <string name="vpn_state_connected">VPN connected.</string>
     <string name="vpn_state_restoring">Restarting VPN connection.</string>
+    <string name="vpn_state_restoring_service">Restarting VPN service.</string>
     <string name="vpn_state_disconnecting">Closing VPN connection.</string>
     <string name="vpn_state_disconnected">VPN connection closed.</string>
     <string name="vpn_state_error">There has been an error with the SkywireVPN service.</string>
@@ -33,7 +33,9 @@
 
     <string name="vpn_coordinator_invalid_credentials_error">Invalid public key: </string>
 
+    <string name="vpn_service_network_unavailable_warning">The network will be unavailable while the VPN is starting.</string>
     <string name="vpn_service_no_network_error">No network available.</string>
+    <string name="vpn_service_network_protection_error">It was not possible to protect the network.</string>
     <string name="vpn_timerout_error">Unable to connect to the VPN server.</string>
     <string name="vpn_connection_finished_error">The VPN connection has been closed unexpectedly.</string>
     <string name="vpn_socket_protection_error">The OS rejected the connection. Please make sure you have network connectivity and the application still have the permissions required. If you find no ptoblems, please restart the device.</string>
@@ -62,6 +64,7 @@
 
     <string name="tmp_options_title">Options</string>
     <string name="tmp_options_kill_switch">Kill switch. This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
-    <string name="tmp_options_protect_before_connecting">Protect before finishing connecting. If active no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
+    <string name="tmp_options_reset_after_errors">Reset after errors. If active, the service will be restarted automatically in case of error. You may not have internet connection while the service is being restarted.</string>
+    <string name="tmp_options_protect_before_connecting">Protect before finishing connecting. If active, no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
     <string name="tmp_options_start_on_boot">Start on boot. The VPN protection will be automatically started shortly after turning on the device.</string>
 </resources>

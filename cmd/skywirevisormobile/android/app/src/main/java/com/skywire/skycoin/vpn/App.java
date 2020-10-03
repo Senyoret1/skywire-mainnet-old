@@ -1,10 +1,15 @@
 package com.skywire.skycoin.vpn;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
@@ -14,6 +19,38 @@ import io.reactivex.rxjava3.plugins.RxJavaPlugins;
  * Class for the main app instance.
  */
 public class App extends Application {
+    /**
+     * Class used internally to know when there are activities being displayed.
+     */
+    private static class ActivityLifecycleCallback implements Application.ActivityLifecycleCallbacks {
+
+        // How many activities are being shown.
+        private static int foregroundActivities = 0;
+
+        // Functions for knowing when activities start and stop being shown.
+        @Override
+        public void onActivityResumed(final Activity activity) { foregroundActivities++; }
+        @Override
+        public void onActivityStopped(final Activity activity) { foregroundActivities--; }
+
+        /**
+         * Returns if there is at least one activity being displayed.
+         */
+        public static boolean isApplicationInForeground() { return foregroundActivities > 0; }
+
+        // Other functions needed by the interface.
+        @Override
+        public void onActivityPaused(@NonNull Activity activity) { }
+        @Override
+        public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) { }
+        @Override
+        public void onActivityDestroyed(@NonNull Activity activity) { }
+        @Override
+        public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) { }
+        @Override
+        public void onActivityStarted(@NonNull Activity activity) { }
+    }
+
     /**
      * Reference to the current app instance.
      */
@@ -58,6 +95,9 @@ public class App extends Application {
         RxJavaPlugins.setErrorHandler(throwable -> {
             HelperFunctions.logError("ERROR INSIDE RX: ", throwable);
         });
+
+        // Detect when activities are started and stopped.
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallback());
     }
 
     /**
@@ -65,5 +105,12 @@ public class App extends Application {
      */
     public static Context getContext(){
         return appContext;
+    }
+
+    /**
+     * Gets if the UI is being displayed.
+     */
+    public static boolean displayingUI(){
+        return ActivityLifecycleCallback.isApplicationInForeground();
     }
 }
