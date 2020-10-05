@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     if (stateText != -1) {
                         textStatus.setText(stateText);
                     }
-                } else if (state.state == VPNStates.DISCONNECTED) {
+                } else if (state.state == VPNStates.DISCONNECTED || state.state == VPNStates.OFF) {
                     textStatus.setText(R.string.vpn_state_disconnected);
                     displayInitialState();
                 } else {
