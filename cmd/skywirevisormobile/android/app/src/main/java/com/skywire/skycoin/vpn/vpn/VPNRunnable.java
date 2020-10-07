@@ -1,8 +1,7 @@
 package com.skywire.skycoin.vpn.vpn;
 
-import android.net.VpnService;
-
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.R;
 
 import java.util.concurrent.TimeUnit;
@@ -11,14 +10,12 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.functions.BooleanSupplier;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 import skywiremob.Skywiremob;
 
 public class VPNRunnable {
-    private VpnService service;
-    private VPNWorkInterface vpnInterface;
+    private final VPNWorkInterface vpnInterface;
 
     private VisorRunnable visor;
     private SkywireVPNConnection vpnConnection;
@@ -32,18 +29,17 @@ public class VPNRunnable {
     private boolean disconnectionStarted = false;
     private int disconnectionVerifications = 0;
 
-    private BehaviorSubject<Integer> eventsSubject = BehaviorSubject.create();
-    private Observable<Integer> eventsObservable;
+    private final BehaviorSubject<VPNStates> eventsSubject = BehaviorSubject.create();
+    private Observable<VPNStates> eventsObservable;
 
     private String lastErrorMsg;
 
-    public VPNRunnable(VpnService service, VPNWorkInterface vpnInterface) {
+    public VPNRunnable(VPNWorkInterface vpnInterface) {
         eventsSubject.onNext(VPNStates.OFF);
-        this.service = service;
         this.vpnInterface = vpnInterface;
     }
 
-    public Observable<Integer> start() {
+    public Observable<VPNStates> start() {
         if (eventsObservable == null) {
             eventsSubject.onNext(VPNStates.STARTING);
             eventsObservable = eventsSubject.hide();
@@ -134,7 +130,7 @@ public class VPNRunnable {
                         .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(val -> {
                             HelperFunctions.logError("VPN service", "Timeout preparing the visor.");
-                            putInErrorState(service.getString(R.string.vpn_timerout_error));
+                            putInErrorState(App.getContext().getString(R.string.vpn_timeout_error));
                         });
                 }, err -> {
                     putInErrorState(err.getLocalizedMessage());
@@ -146,7 +142,7 @@ public class VPNRunnable {
     }
 
     private void startConnection() {
-        vpnConnection = new SkywireVPNConnection(service, visor, vpnInterface);
+        vpnConnection = new SkywireVPNConnection(visor, vpnInterface);
 
         waitingSubscription.dispose();
 
@@ -191,27 +187,24 @@ public class VPNRunnable {
                 emitter.onComplete();
             }).subscribeOn(Schedulers.newThread()).subscribe(val -> {});
 
-            Observable.timer(100, TimeUnit.MILLISECONDS).repeatUntil(new BooleanSupplier() {
-                @Override
-                public boolean getAsBoolean() {
-                    if (!Skywiremob.isVisorStarting() && !Skywiremob.isVisorRunning()) {
-                        if (disconnectionVerifications == 2) {
-                            return true;
-                        } else {
-                            disconnectionVerifications += 1;
-                        }
+            Observable.timer(100, TimeUnit.MILLISECONDS).repeatUntil(() -> {
+                if (!Skywiremob.isVisorStarting() && !Skywiremob.isVisorRunning()) {
+                    if (disconnectionVerifications == 2) {
+                        return true;
                     } else {
-                        if (disconnectionVerifications != 0) {
-                            if (visor != null) {
-                                visor.startStoppingVisor();
-                            }
+                        disconnectionVerifications += 1;
+                    }
+                } else {
+                    if (disconnectionVerifications != 0) {
+                        if (visor != null) {
+                            visor.startStoppingVisor();
                         }
-
-                        disconnectionVerifications = 0;
                     }
 
-                    return false;
+                    disconnectionVerifications = 0;
                 }
+
+                return false;
             })
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())

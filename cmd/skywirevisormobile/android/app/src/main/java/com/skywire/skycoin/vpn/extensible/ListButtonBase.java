@@ -6,8 +6,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
-
 public abstract class ListButtonBase<DataType> extends RelativeLayout implements View.OnClickListener {
     public ListButtonBase(Context context) {
         super(context);

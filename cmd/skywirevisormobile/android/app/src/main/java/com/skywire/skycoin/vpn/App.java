@@ -11,6 +11,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Notifications;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
@@ -29,9 +31,9 @@ public class App extends Application {
 
         // Functions for knowing when activities start and stop being shown.
         @Override
-        public void onActivityResumed(final Activity activity) { foregroundActivities++; }
+        public void onActivityResumed(@NonNull final Activity activity) { foregroundActivities++; }
         @Override
-        public void onActivityStopped(final Activity activity) { foregroundActivities--; }
+        public void onActivityStopped(@NonNull final Activity activity) { foregroundActivities--; }
 
         /**
          * Returns if there is at least one activity being displayed.
@@ -70,7 +72,7 @@ public class App extends Application {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Channel for the VPN service state updates.
             NotificationChannel stateChannel = new NotificationChannel(
-                Globals.NOTIFICATION_CHANNEL_ID,
+                Notifications.NOTIFICATION_CHANNEL_ID,
                 getString(R.string.general_app_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             );
@@ -81,7 +83,7 @@ public class App extends Application {
 
             // Channel for alerts.
             NotificationChannel alertsChannel = new NotificationChannel(
-                    Globals.ALERT_NOTIFICATION_CHANNEL_ID,
+                    Notifications.ALERT_NOTIFICATION_CHANNEL_ID,
                     getString(R.string.general_alert_notification_name),
                     NotificationManager.IMPORTANCE_HIGH
             );

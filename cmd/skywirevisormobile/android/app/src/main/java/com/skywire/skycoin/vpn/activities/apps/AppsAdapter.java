@@ -5,13 +5,14 @@ import android.content.pm.ResolveInfo;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
-import com.skywire.skycoin.vpn.Globals;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Globals;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 
 import java.util.ArrayList;
@@ -81,8 +82,9 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
         return 1;
     }
 
+    @NonNull
     @Override
-    public ListViewHolder<View> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ListViewHolder<View> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == 0) {
             AppListOptionButton view = new AppListOptionButton(context);
             view.setClickWithIndexEventListener(this);
@@ -104,7 +106,7 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     }
 
     @Override
-    public void onBindViewHolder(ListViewHolder<View> holder, int position) {
+    public void onBindViewHolder(@NonNull ListViewHolder<View> holder, int position) {
         if (position < 3) {
             boolean showChecked = false;
             if (position == 0 && selectedOption == Globals.AppFilteringModes.PROTECT_ALL) { showChecked = true; }

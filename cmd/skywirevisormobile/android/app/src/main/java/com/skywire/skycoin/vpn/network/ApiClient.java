@@ -15,7 +15,7 @@ import retrofit2.http.Url;
 
 public class ApiClient {
 
-    private static interface ApiInterface {
+    private interface ApiInterface {
         @GET("services")
         Observable<Response<List<VpnServer>>> getVpnServers(@Query("type") String type);
 
@@ -25,13 +25,13 @@ public class ApiClient {
 
     public static final String BASE_URL = "https://service.discovery.skycoin.com/api/";
 
-    private static Retrofit retrofit = new Retrofit.Builder()
+    private static final Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJava3CallAdapterFactory.createSynchronous())
         .build();
 
-    private static ApiInterface apiService = retrofit.create(ApiInterface.class);
+    private static final ApiInterface apiService = retrofit.create(ApiInterface.class);
 
     public static Observable<Response<List<VpnServer>>> getVpnServers() {
         return apiService.getVpnServers("vpn");

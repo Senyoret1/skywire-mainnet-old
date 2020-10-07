@@ -4,8 +4,8 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 
 import com.skywire.skycoin.vpn.App;
-import com.skywire.skycoin.vpn.Globals;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Globals;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.R;
 
 import java.io.Closeable;

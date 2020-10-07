@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import androidx.preference.PreferenceManager;
 
 import com.skywire.skycoin.vpn.App;
-import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.helpers.Globals;
 
 import java.util.HashSet;
 

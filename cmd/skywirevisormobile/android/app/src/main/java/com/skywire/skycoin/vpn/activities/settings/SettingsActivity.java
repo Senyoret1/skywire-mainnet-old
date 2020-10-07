@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 

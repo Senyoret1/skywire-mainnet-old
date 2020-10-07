@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.network.models.GeoInfo;
 import com.skywire.skycoin.vpn.network.models.VpnServer;

@@ -1,6 +1,6 @@
 package com.skywire.skycoin.vpn.vpn;
 
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -53,8 +53,8 @@ public class VisorRunnable {
      * @return Observable that will emit the current state of the process, as variables defined in
      * VPNStates, and will complete after starting the visor.
      */
-    public Observable<Integer> runVisor() {
-        return Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+    public Observable<VPNStates> runVisor() {
+        return Observable.create((ObservableOnSubscribe<VPNStates>) emitter -> {
             if (emitter.isDisposed()) { return; }
             emitter.onNext(VPNStates.PREPARING_VISOR);
 
@@ -91,7 +91,7 @@ public class VisorRunnable {
      * @param parentEmitter Emitter of the observable from which this function was called, to be
      *                      able to emit the state changes.
      */
-    public void runVpnClient(ObservableEmitter<Integer> parentEmitter) throws Exception {
+    public void runVpnClient(ObservableEmitter<VPNStates> parentEmitter) throws Exception {
         // Update the state.
         if (parentEmitter.isDisposed()) { return; }
         parentEmitter.onNext(VPNStates.PREPARING_VPN_CLIENT);

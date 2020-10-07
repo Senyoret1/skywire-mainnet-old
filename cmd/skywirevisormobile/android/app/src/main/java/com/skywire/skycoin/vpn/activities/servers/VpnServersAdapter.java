@@ -3,6 +3,7 @@ package com.skywire.skycoin.vpn.activities.servers;
 import android.content.Context;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
@@ -29,15 +30,16 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
         vpnSelectedListener = listener;
     }
 
+    @NonNull
     @Override
-    public ListViewHolder<ServerListButton> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ListViewHolder<ServerListButton> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ServerListButton view = new ServerListButton(context);
         view.setClickWithIndexEventListener(this);
         return new ListViewHolder<>(view);
     }
 
     @Override
-    public void onBindViewHolder(ListViewHolder<ServerListButton> holder, int position) {
+    public void onBindViewHolder(@NonNull ListViewHolder<ServerListButton> holder, int position) {
         String location = "-";
         if (data.get(position).geo != null) {
             location = "";

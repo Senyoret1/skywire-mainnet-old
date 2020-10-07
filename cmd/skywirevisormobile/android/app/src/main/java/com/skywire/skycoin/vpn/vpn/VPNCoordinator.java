@@ -10,10 +10,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 
-import com.skywire.skycoin.vpn.Globals;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Notifications;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
@@ -33,7 +33,7 @@ public class VPNCoordinator implements Handler.Callback {
     /**
      * Singleton instance.
      */
-    private static VPNCoordinator instance = new VPNCoordinator();
+    private static final VPNCoordinator instance = new VPNCoordinator();
     /**
      * Gets the singleton for using the class.
      */
@@ -47,17 +47,17 @@ public class VPNCoordinator implements Handler.Callback {
     /**
      * Handler used for receiving messages from the VPN service.
      */
-    private Handler serviceCommunicationHandler;
+    private final Handler serviceCommunicationHandler;
     /**
      * Subject for sending events via RxJava, indicating the current state of the VPN service.
      */
-    private BehaviorSubject<VPNStates.StateInfo> eventsSubject = BehaviorSubject.create();
+    private final BehaviorSubject<VPNStates.StateInfo> eventsSubject = BehaviorSubject.create();
 
     private VPNCoordinator() {
         serviceCommunicationHandler = new Handler(this);
 
         // Add a default current state.
-        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, false));
+        eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, false));
     }
 
     /**
@@ -67,15 +67,14 @@ public class VPNCoordinator implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         // Create the state object with the params returned by the VPN service.
         VPNStates.StateInfo state = new VPNStates.StateInfo(
-            msg.what,
+            VPNStates.valueOf(msg.what),
             msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM),
-            msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM),
             msg.getData().getBoolean(SkywireVPNService.STOP_REQUESTED_PARAM)
         );
 
         // Save the error as the one which made the last execution of the VPN service fail.
         // Must be dore before sending the event.
-        if (msg.what == VPNStates.ERROR || msg.what == VPNStates.BLOCKING_ERROR) {
+        if (msg.what == VPNStates.ERROR.val() || msg.what == VPNStates.BLOCKING_ERROR.val()) {
             VPNPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
         }
 
@@ -138,7 +137,7 @@ public class VPNCoordinator implements Handler.Callback {
             // time it ran, to indicate that no error has stopped the current instance.
             VPNPersistentData.removeLastError();
 
-            eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, null, false));
+            eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, false));
 
             // Get the permission request intent from the OS.
             Intent intent = VpnService.prepare(requestingActivity);
@@ -165,8 +164,8 @@ public class VPNCoordinator implements Handler.Callback {
                 String errorMsg = ctx.getString(R.string.general_no_permissions_error);
                 VPNPersistentData.setLastError(errorMsg);
 
-                HelperFunctions.showAlertNotification(
-                        Globals.AUTOSTART_ALERT_NOTIFICATION_ID,
+                Notifications.showAlertNotification(
+                        Notifications.AUTOSTART_ALERT_NOTIFICATION_ID,
                         ctx.getString(R.string.general_app_name),
                         errorMsg,
                         HelperFunctions.getOpenAppPendingIntent()
@@ -201,7 +200,7 @@ public class VPNCoordinator implements Handler.Callback {
             if (result == RESULT_OK) {
                 starVpnServiceIfNeeded();
             } else {
-                eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, null, true));
+                eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, true));
             }
         }
     }

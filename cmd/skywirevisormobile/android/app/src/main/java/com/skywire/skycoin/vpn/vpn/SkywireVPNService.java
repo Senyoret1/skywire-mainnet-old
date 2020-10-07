@@ -1,6 +1,5 @@
-package com.skywire.skycoin.vpn.vpn;;
+package com.skywire.skycoin.vpn.vpn;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -9,12 +8,10 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 
-import androidx.core.app.NotificationCompat;
-
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
-import com.skywire.skycoin.vpn.Globals;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Notifications;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,14 +34,14 @@ public class SkywireVPNService extends VpnService {
     public static int lastInstanceID = 0;
     public int instanceID = 0;
 
-    private NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+    private final NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
     private Messenger messenger;
 
     private VPNRunnable vpnRunnable;
     private VPNWorkInterface vpnInterface;
 
-    private int currentState = VPNStates.STARTING;
+    private VPNStates currentState = VPNStates.STARTING;
 
     private Disposable restartingSubscription;
     private Disposable vpnRunnableSubscription;
@@ -62,13 +59,13 @@ public class SkywireVPNService extends VpnService {
             .subscribe(val -> runVpn());
     }
 
-    private void informNetState(int newState) {
+    private void informNewState(VPNStates newState) {
         if (lastInstanceID != instanceID) {
             return;
         }
 
         Message msg = Message.obtain();
-        msg.what = newState;
+        msg.what = newState.val();
 
         Bundle dataBundle = new Bundle();
         dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, startedByTheSystem);
@@ -103,14 +100,14 @@ public class SkywireVPNService extends VpnService {
         updateForegroundNotification();
     }
 
-    private void updateState(int newState) {
-        int processedState = newState;
+    private void updateState(VPNStates newState) {
+        VPNStates processedState = newState;
 
-        if (processedState >= 200 && processedState < 300 && currentState >= 400 && currentState <= 500) {
+        if (processedState.val() >= 200 && processedState.val() < 300 && currentState.val() >= 400 && currentState.val() <= 500) {
             processedState = currentState;
         }
 
-        if (processedState >= 300 && processedState < 400) {
+        if (processedState.val() >= 300 && processedState.val() < 400) {
             vpnRunnable = null;
             if (vpnRunnableSubscription != null) {
                 vpnRunnableSubscription.dispose();
@@ -118,7 +115,7 @@ public class SkywireVPNService extends VpnService {
         }
 
         if (!stopRequested && !serviceDestroyed) {
-            if (processedState >= 400 && processedState < 500) {
+            if (processedState.val() >= 400 && processedState.val() < 500) {
                 if (VPNPersistentData.getMustRestartVpn()) {
                     processedState = VPNStates.RESTORING_SERVICE;
                 } else if (processedState == VPNStates.ERROR) {
@@ -127,28 +124,28 @@ public class SkywireVPNService extends VpnService {
             }
 
             if (currentState == VPNStates.RESTORING_SERVICE) {
-                if (processedState >= 150 && processedState < 300) {
+                if (processedState.val() >= 150 && processedState.val() < 300) {
                     processedState = VPNStates.RESTORING_SERVICE;
                 }
 
-                if (processedState >= 300 && processedState < 400) {
+                if (processedState.val() >= 300 && processedState.val() < 400) {
                     processedState = VPNStates.RESTORING_SERVICE;
                     restart();
                 }
             } else {
-                if (processedState >= 300 && processedState < 400) {
+                if (processedState.val() >= 300 && processedState.val() < 400) {
                     processedState = currentState;
                     finishIfAppropriate();
                 }
             }
         } else {
-            if (processedState >= 300 && processedState < 400) {
+            if (processedState.val() >= 300 && processedState.val() < 400) {
                 processedState = currentState;
                 finishIfAppropriate();
             }
         }
 
-        informNetState(processedState);
+        informNewState(processedState);
     }
 
     @Override
@@ -229,7 +226,7 @@ public class SkywireVPNService extends VpnService {
 
     private void runVpn() {
         if (vpnRunnable == null) {
-            vpnRunnable = new VPNRunnable(this, vpnInterface);
+            vpnRunnable = new VPNRunnable(vpnInterface);
         }
 
         if (vpnRunnableSubscription != null) {
@@ -240,99 +237,74 @@ public class SkywireVPNService extends VpnService {
     }
 
     private void finishIfAppropriate() {
-        if (vpnRunnable == null && (vpnInterface == null || !vpnInterface.alreadyConfigured() || stopRequested || serviceDestroyed || currentState < 400 || currentState >= 500 || !VPNPersistentData.getKillSwitchActivated())) {
-            if (lastInstanceID == instanceID) {
-                if (vpnInterface != null) {
-                    vpnInterface.close();
+        if (vpnRunnable == null) {
+            if (vpnInterface == null ||
+                !vpnInterface.alreadyConfigured() ||
+                stopRequested ||
+                serviceDestroyed ||
+                currentState.val() < 400 ||
+                currentState.val() >= 500 ||
+                !VPNPersistentData.getKillSwitchActivated()
+            ) {
+                if (lastInstanceID == instanceID) {
+                    if (vpnInterface != null) {
+                        vpnInterface.close();
 
-                    // Create another interface and close it immediately to avoid a bug in older Android
-                    // versions when the app is added to the ignore list.
-                    vpnInterface = new VPNWorkInterface(this);
-                    try {
-                        vpnInterface.configure(VPNWorkInterface.Modes.DELETING);
-                    } catch (Exception e) { }
-                    vpnInterface.close();
+                        // Create another interface and close it immediately to avoid a bug in older Android
+                        // versions when the app is added to the ignore list.
+                        vpnInterface = new VPNWorkInterface(this);
+                        try {
+                            vpnInterface.configure(VPNWorkInterface.Modes.DELETING);
+                        } catch (Exception e) { }
+                        vpnInterface.close();
+                    }
+
+                    notificationManager.cancel(Notifications.SERVICE_STATUS_NOTIFICATION_ID);
+
+                    Observable.just(0).delay(100, TimeUnit.MILLISECONDS)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(val -> updateState(VPNStates.OFF));
+
+                    if (!App.displayingUI() && !VPNPersistentData.getKillSwitchActivated() && VPNPersistentData.getLastError(null) != null) {
+                        Notifications.showAlertNotification(
+                            Notifications.ERROR_NOTIFICATION_ID,
+                            getString(R.string.general_app_name),
+                            getString(R.string.general_connection_error),
+                            HelperFunctions.getOpenAppPendingIntent()
+                        );
+                    }
                 }
 
-                notificationManager.cancel(Globals.SERVICE_STATUS_NOTIFICATION_ID);
+                vpnInterface = null;
 
-                Observable.just(0).delay(100, TimeUnit.MILLISECONDS)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(val -> updateState(VPNStates.OFF));
-
-                if (!App.displayingUI() && !VPNPersistentData.getKillSwitchActivated() && VPNPersistentData.getLastError(null) != null) {
-                    HelperFunctions.showAlertNotification(
-                        Globals.ERROR_NOTIFICATION_ID,
-                        getString(R.string.general_app_name),
-                        getString(R.string.general_connection_error),
-                        HelperFunctions.getOpenAppPendingIntent()
-                    );
+                vpnRunnable = null;
+                if (vpnRunnableSubscription != null) {
+                    vpnRunnableSubscription.dispose();
                 }
-            }
+                if (restartingSubscription != null) {
+                    restartingSubscription.dispose();
+                }
 
-            vpnInterface = null;
-
-            vpnRunnable = null;
-            if (vpnRunnableSubscription != null) {
-                vpnRunnableSubscription.dispose();
+                stopForeground(true);
+                stopSelf();
             }
-            if (restartingSubscription != null) {
-                restartingSubscription.dispose();
-            }
-
-            stopForeground(true);
-            stopSelf();
         }
     }
 
     private void updateForegroundNotification() {
         if (!serviceDestroyed) {
-            notificationManager.notify(Globals.SERVICE_STATUS_NOTIFICATION_ID, createUpdatedNotification());
+            notificationManager.notify(
+                Notifications.SERVICE_STATUS_NOTIFICATION_ID,
+                Notifications.createStatusNotification(currentState, vpnInterface != null && vpnInterface.alreadyConfigured())
+            );
         }
     }
 
     private void makeForeground() {
-        startForeground(Globals.SERVICE_STATUS_NOTIFICATION_ID, createUpdatedNotification());
-    }
-
-    private Notification createUpdatedNotification() {
-
-        int title = R.string.vpn_service_state_preparing;
-        if (currentState == VPNStates.CONNECTED) {
-            title = getTextForState(currentState);
-        } else {
-            if (currentState >= VPNStates.DISCONNECTING) {
-                title = R.string.vpn_service_state_finishing;
-            } else if (currentState >= VPNStates.RESTORING_VPN && currentState < VPNStates.DISCONNECTING) {
-                title = R.string.vpn_service_state_restoring;
-            }
-        }
-
-        int icon = R.drawable.ic_lines;
-        if (vpnInterface != null && vpnInterface.alreadyConfigured()) {
-            if (currentState == VPNStates.CONNECTED) {
-                icon = R.drawable.ic_filled;
-            } else {
-                icon = R.drawable.ic_alert;
-            }
-        }
-        if (currentState == VPNStates.ERROR || currentState == VPNStates.BLOCKING_ERROR) {
-            icon = R.drawable.ic_error;
-        }
-
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle()
-            .bigText(getString(getTextForState(currentState)))
-            .setBigContentTitle(getString(title));
-
-        return new NotificationCompat.Builder(this, Globals.NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(icon)
-            .setContentTitle(getString(title))
-            .setContentText(getString(getTextForState(currentState)))
-            .setStyle(bigTextStyle)
-            .setContentIntent(HelperFunctions.getOpenAppPendingIntent())
-            .setOnlyAlertOnce(true)
-            .setSound(null)
-            .build();
+        startForeground(
+            Notifications.SERVICE_STATUS_NOTIFICATION_ID,
+            Notifications.createStatusNotification(currentState, vpnInterface != null && vpnInterface.alreadyConfigured())
+        );
     }
 }

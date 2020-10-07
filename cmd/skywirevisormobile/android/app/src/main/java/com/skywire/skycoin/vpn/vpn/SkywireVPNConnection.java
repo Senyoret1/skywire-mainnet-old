@@ -1,11 +1,9 @@
 package com.skywire.skycoin.vpn.vpn;
 
-import android.net.VpnService;
-
-import com.skywire.skycoin.vpn.Globals;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -25,22 +23,22 @@ import skywiremob.Skywiremob;
  */
 public class SkywireVPNConnection implements Closeable {
     /**
-     * Current VPN service instance.
-     */
-    private final VpnService service;
-    /**
      * Object for controlling the local visor.
      */
     private final VisorRunnable visorRunnable;
     /**
      * Current VPN work interface.
      */
-    private VPNWorkInterface vpnInterface = null;
+    private VPNWorkInterface vpnInterface;
     /**
      * Tunnel for communicating with the local visor.
      */
     private DatagramChannel tunnel = null;
 
+    /**
+     * Allows to know if any of the procedures for sending and receiving data finished.
+     */
+    private boolean managerFinished = false;
     /**
      * Error message returned during the last call to the function for making the VPN connection
      * work, if any.
@@ -53,17 +51,15 @@ public class SkywireVPNConnection implements Closeable {
     /**
      * Observable used by this instance to make the VPN connection work.
      */
-    private Observable<Integer> observable;
+    private Observable<VPNStates> observable;
 
     private Disposable sendingProcedureSubscription;
     private Disposable receivingProcedureSubscription;
 
     public SkywireVPNConnection(
-        VpnService service,
         VisorRunnable visorRunnable,
         VPNWorkInterface vpnInterface
     ) {
-        this.service = service;
         this.visorRunnable = visorRunnable;
         this.vpnInterface = vpnInterface;
     }
@@ -82,10 +78,10 @@ public class SkywireVPNConnection implements Closeable {
      * @return Observable which emits the current state, using the constants defined in VPNStates.
      * The observable is not expected to complete, just emit and return errors.
      */
-    public Observable<Integer> getObservable() {
+    public Observable<VPNStates> getObservable() {
         // A new observable is created only if needed.
         if (observable == null) {
-            observable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            observable = Observable.create((ObservableOnSubscribe<VPNStates>) emitter -> {
                 try {
                     Skywiremob.printString("Starting VPN connection");
 
@@ -146,8 +142,10 @@ public class SkywireVPNConnection implements Closeable {
      * VPN connection. It is expected to run indefinitely and return only in case of error.
      * @return True if the connections was established before the function finished.
      */
-    private boolean run(ObservableEmitter<Integer> parentEmitter) {
+    private boolean run(ObservableEmitter<VPNStates> parentEmitter) {
         boolean connected = false;
+
+        managerFinished = false;
 
         // Reset the error vars, to indicate that no errors have occurred during this execution of
         // the function.
@@ -198,7 +196,7 @@ public class SkywireVPNConnection implements Closeable {
             // NOTE: this function should work in old Android versions, but there is a bug, at
             // least in Android API 17, which makes the port to always be 0, that is why the app
             // requires Android API 21+ to run. Maybe creating the socket by hand would allow to
-            // upport older versions.
+            // support older versions.
             if (parentEmitter.isDisposed()) { return connected; }
             Skywiremob.setMobileAppAddr(tunnel.socket().getLocalSocketAddress().toString());
 
@@ -220,47 +218,45 @@ public class SkywireVPNConnection implements Closeable {
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
-                        synchronized (service) {
+                        synchronized (this) {
                             // Save the error, to use it below.
                             if (operationError == null) {
                                 operationError = err;
                             }
                         }
-                    }
+
+                        stopWaiting();
+                    },
+                    () -> stopWaiting()
                 );
             // Create an observable for receiving data in another thread.
             receivingProcedureSubscription = VPNDataManager.createObservable(vpnInterface, tunnel, false)
                 .subscribeOn(Schedulers.newThread()).subscribe(
                     val -> {},
                     err -> {
-                        synchronized (service) {
+                        synchronized (this) {
                             // Save the error, to use it below.
                             if (operationError == null) {
                                 operationError = err;
                             }
                         }
-                    }
+
+                        stopWaiting();
+                    },
+                    () -> stopWaiting()
                 );
 
-            // Wait until the emitter stops being valid or any of the previous procedures fail.
-            while (true) {
-                if (parentEmitter.isDisposed()) {
-                    break;
+            synchronized (this) {
+                // Stop the thread until receiving a signal. If the observable is disposed while
+                // the thread is still waiting, an error will be thrown and it will be caught below.
+                if (!managerFinished) {
+                    this.wait();
                 }
 
-                // If there was an error receiving or sending data, or any of those procedures
-                // finished, end the loop.
-                synchronized (service) {
-                    if (operationError != null) {
-                        throw operationError;
-                    }
+                // If an error was saved while the thread was waiting, throw it.
+                if (operationError != null) {
+                    throw operationError;
                 }
-                if (sendingProcedureSubscription.isDisposed() || receivingProcedureSubscription.isDisposed()) {
-                    break;
-                }
-
-                // Wait before checking again.
-                Thread.sleep(2000);
             }
         } catch (Throwable e) {
             // Report the error.
@@ -274,6 +270,19 @@ public class SkywireVPNConnection implements Closeable {
         }
 
         return connected;
+    }
+
+    /**
+     * Reactivates the thread after being stopped in the run() function.
+     */
+    private void stopWaiting() {
+        synchronized (this) {
+            managerFinished = true;
+
+            try {
+                this.notify();
+            } catch (Exception e) { }
+        }
     }
 
     /**
@@ -297,5 +306,7 @@ public class SkywireVPNConnection implements Closeable {
                 HelperFunctions.logError("Unable to close tunnel used by the VPN connection", e);
             }
         }
+
+        stopWaiting();
     }
 }

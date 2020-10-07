@@ -2,6 +2,8 @@ package com.skywire.skycoin.vpn.vpn;
 
 import com.skywire.skycoin.vpn.R;
 
+import java.util.HashMap;
+
 /**
  * Helper class with the possible states of the VPN service.
  *
@@ -23,101 +25,114 @@ import com.skywire.skycoin.vpn.R;
  *
  * State >= 400 : An error occurred.
  */
-public class VPNStates {
+public enum VPNStates {
     /**
      * The service is off.
      */
-    public static int OFF = 1;
+    OFF(1),
     /**
      * Starting the service.
      */
-    public static int STARTING = 10;
+    STARTING(10),
     /**
      * Waiting for the visor to be completely stopped before starting it again.
      */
-    public static int WAITING_PREVIOUS_INSTANCE_STOP = 12;
+    WAITING_PREVIOUS_INSTANCE_STOP(12),
     /**
      * Checking for the first time if the device has internet connectivity.
      */
-    public static int CHECKING_CONNECTIVITY = 15;
+    CHECKING_CONNECTIVITY(15),
     /**
      * No internet connectivity was found and the service is checking again periodically.
      */
-    public static int WAITING_FOR_CONNECTIVITY = 16;
+    WAITING_FOR_CONNECTIVITY(16),
     /**
      * Starting the Skywire visor.
      */
-    public static int PREPARING_VISOR = 20;
+    PREPARING_VISOR(20),
     /**
      * Starting the VPN client, which is part of Skywiremob and running as part of the visor.
      */
-    public static int PREPARING_VPN_CLIENT = 30;
+    PREPARING_VPN_CLIENT(30),
     /**
      * Making final preparations for the VPN client, like performing the handshake and start serving.
      */
-    public static int FINAL_PREPARATIONS_FOR_VISOR = 35;
+    FINAL_PREPARATIONS_FOR_VISOR(35),
     /**
      * The visor and VPN client are ready. Preparations may be needed in the app side.
      */
-    public static int VISOR_READY = 40;
+    VISOR_READY(40),
     /**
      * The VPN connection has been fully established and secure internet connectivity should
      * be available.
      */
-    public static int CONNECTED = 100;
+    CONNECTED(100),
     /**
      * There was an error with the VPN connection and it is being restored automatically.
      */
-    public static int RESTORING_VPN = 150;
+    RESTORING_VPN(150),
     /**
      * There was an error and the whole VPN service is being restored automatically.
      */
-    public static int RESTORING_SERVICE = 155;
+    RESTORING_SERVICE(155),
     /**
      * The VPN service is being stopped.
      */
-    public static int DISCONNECTING = 200;
+    DISCONNECTING(200),
     /**
      * The VPN service has been stopped.
      */
-    public static int DISCONNECTED = 300;
+    DISCONNECTED(300),
     /**
      * There has been an error, the VPN connection is not available and the service is
      * being stopped.
      */
-    public static int ERROR = 400;
+    ERROR(400),
     /**
      * There has been and error and the VPN connection is not available. The network will remain
      * blocked until the user stops the service manually.
      */
-    public static int BLOCKING_ERROR = 410;
+    BLOCKING_ERROR(410);
+
+    /**
+     * Allows to easily get the value related to an specific number.
+     */
+    private static HashMap<Integer, VPNStates> numericValues;
+
+    // Initializes the enum and saves the value.
+    private final int val;
+    VPNStates(int val) {
+        this.val = val;
+    }
+
+    /**
+     * Gets the associated numeric value.
+     */
+    public int val() {
+        return val;
+    }
 
     /**
      * Class with details about the state of the VPN service.
      */
     public static class StateInfo {
         /**
-         * Current state of the service, it is one of the  constants defined in the VPNStates class.
+         * Current state of the service.
          */
-        public final int state;
+        public final VPNStates state;
         /**
          * If the service was started by the OS, which means that the OS is responsible for
          * stopping it.
          */
         public final boolean startedByTheSystem;
         /**
-         * Error message, only if the current state indicates an error.
-         */
-        public final String errorMsg;
-        /**
          * If the user already requested the service to be stopped.
          */
         public final boolean stopRequested;
 
-        public StateInfo(int state, boolean startedByTheSystem, String errorMsg, boolean stopRequested) {
+        public StateInfo(VPNStates state, boolean startedByTheSystem, boolean stopRequested) {
             this.state = state;
             this.startedByTheSystem = startedByTheSystem;
-            this.errorMsg = errorMsg;
             this.stopRequested = stopRequested;
         }
     }
@@ -126,7 +141,7 @@ public class VPNStates {
      * Allows to get the resource ID of the string with the message identifying a state of the
      * VPN service. If no resource is found for the state, -1 is returned.
      */
-    public static int getTextForState(int state) {
+    public static int getTextForState(VPNStates state) {
         if (state == OFF) {
             return R.string.vpn_state_off;
         } else if (state == STARTING) {
@@ -162,5 +177,27 @@ public class VPNStates {
         }
 
         return -1;
+    }
+
+    /**
+     * Allows to get the value associated with a numeric value. If there is no value for the
+     * provided number, the OFF state is returned.
+     * @param value Value to check.
+     */
+    public static VPNStates valueOf(int value) {
+        // Initialize the map for getting the values, if needed.
+        if (numericValues == null) {
+            numericValues = new HashMap<>();
+
+            for (VPNStates v : VPNStates.values()) {
+                numericValues.put(v.val(), v);
+            }
+        }
+
+        if (!numericValues.containsKey(value)) {
+            return OFF;
+        }
+
+        return numericValues.get(value);
     }
 }

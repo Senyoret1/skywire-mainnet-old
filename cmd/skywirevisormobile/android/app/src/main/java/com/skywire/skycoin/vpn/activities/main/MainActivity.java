@@ -8,15 +8,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.settings.SettingsActivity;
+import com.skywire.skycoin.vpn.helpers.Notifications;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
-import com.skywire.skycoin.vpn.Globals;
-import com.skywire.skycoin.vpn.HelperFunctions;
+import com.skywire.skycoin.vpn.helpers.Globals;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.util.HashSet;
 
@@ -79,7 +82,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString("pk", editTextRemotePK.getText().toString());
         savedInstanceState.putString("password", editTextPasscode.getText().toString());
@@ -89,13 +92,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onStart() {
         super.onStart();
 
-        Globals.removeAllAlertNotifications();
+        Notifications.removeAllAlertNotifications();
 
         displayInitialState();
 
         serviceSubscription = VPNCoordinator.getInstance().getEventsObservable().subscribe(
             state -> {
-                if (state.state < 10) {
+                if (state.state.val() < 10) {
                     displayInitialState();
                 } else if (state.state != VPNStates.ERROR && state.state != VPNStates.BLOCKING_ERROR && state.state != VPNStates.DISCONNECTED) {
                     int stateText = VPNStates.getTextForState(state.state);
@@ -114,7 +117,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     if (stateText != -1) {
                         textStatus.setText(stateText);
                     }
-                } else if (state.state == VPNStates.DISCONNECTED || state.state == VPNStates.OFF) {
+                } else if (state.state == VPNStates.DISCONNECTED) {
                     textStatus.setText(R.string.vpn_state_disconnected);
                     displayInitialState();
                 } else {
