@@ -121,9 +121,9 @@ public class VPNCoordinator implements Handler.Callback {
         if (!isServiceRunning()) {
             // Check if the pk is valid.
             remotePK = remotePK.trim();
-            String err = Skywiremob.isPKValid(remotePK);
-            if (!err.isEmpty()) {
-                HelperFunctions.logError("Invalid PK starting service", err);
+            long err = Skywiremob.isPKValid(remotePK);
+            if (err != Skywiremob.ErrCodeNoError) {
+                HelperFunctions.logError("Start VPN from coordinator", "Invalid PK starting service: " + remotePK);
                 HelperFunctions.showToast(ctx.getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
                 return;
             } else {

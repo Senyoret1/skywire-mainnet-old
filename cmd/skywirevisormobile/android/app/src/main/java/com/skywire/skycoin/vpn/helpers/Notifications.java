@@ -11,6 +11,8 @@ import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 
+import skywiremob.Skywiremob;
+
 import static com.skywire.skycoin.vpn.vpn.VPNStates.getTextForState;
 
 /**
@@ -100,6 +102,15 @@ public class Notifications {
             }
         }
 
+        // Main text for the notification.
+        String text = App.getContext().getString(getTextForState(currentState));
+        // If connected, the connection stats are shown as the main text.
+        if (currentState == VPNStates.CONNECTED) {
+            text = "\u2193" + HelperFunctions.computeSpeedString(Skywiremob.vpnBandwidthReceived());
+            text += "  \u2191" + HelperFunctions.computeSpeedString(Skywiremob.vpnBandwidthSent());
+            text += "  \u2194" + Skywiremob.vpnLatency() + App.getContext().getString(R.string.general_milliseconds_abbreviation);
+        }
+
         // The lines icon indicates that the service is disconnected and the network protection is
         // not active. The filed icon indicates that the service is connected and working. The
         // alert icon indicates that the network protection is active, but the VPN service is still
@@ -119,13 +130,13 @@ public class Notifications {
         // Create the style for a multiline notification. It will be ignore if the OS does not
         // support it.
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle()
-            .bigText(App.getContext().getString(getTextForState(currentState)))
+            .bigText(text)
             .setBigContentTitle(App.getContext().getString(title));
 
         return new NotificationCompat.Builder(App.getContext(), NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(icon)
             .setContentTitle(App.getContext().getString(title))
-            .setContentText(App.getContext().getString(getTextForState(currentState)))
+            .setContentText(text)
             .setStyle(bigTextStyle)
             .setContentIntent(HelperFunctions.getOpenAppPendingIntent())
             .setOnlyAlertOnce(true)

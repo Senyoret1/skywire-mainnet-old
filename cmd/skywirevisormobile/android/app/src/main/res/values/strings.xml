@@ -6,9 +6,23 @@
     <string name="general_alert_notification_channel_description">SkywireVPN important alert notifications.</string>
     <string name="general_service_description">SkywireVPN networking service.</string>
 
+    <string name="general_milliseconds_abbreviation">ms</string>
+
     <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
     <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
+
+    <string name="skywiremob_error_invalid_pk">Invalid public key.</string>
+    <string name="skywiremob_error_invalid_visor_config">The local visor configuration is not valid.</string>
+    <string name="skywiremob_error_invalid_addr_resolver_url">It was not possible to access the address resolver. Please make sure you have internet connection or try again in a moment.</string>
+    <string name="skywiremob_error_stcp_init_failed">Error initializing the STCP connection.</string>
+    <string name="skywiremob_error_stcpr_init_failed">Error initializing the STCPR connection.</string>
+    <string name="skywiremob_error_sudph_init_failed">Error initializing the SUDPH connection.</string>
+    <string name="skywiremob_error_dmsg_listen_failed">The DMSG connection failed.</string>
+    <string name="skywiremob_error_tp_disc_unavailable">It was not possible to access the transport discovery service. Please make sure you have internet connection or try again in a moment.</string>
+    <string name="skywiremob_error_failed_to_start_router">It was not possible to start the router. Please make sure you have internet connection or try again in a moment.</string>
+    <string name="skywiremob_error_failed_to_setup_hv_gateway">Failed to start the RPC server for the hypervisor. Please make sure you have internet connection or try again in a moment.</string>
+    <string name="skywiremob_error_unknown">There was an unexpected error. Please make sure you have internet connection and that the data for connecting with the VPN server is valid, or try again in a moment.</string>
 
     <string name="vpn_service_state_preparing">Preparing</string>
     <string name="vpn_service_state_restoring">Restoring</string>

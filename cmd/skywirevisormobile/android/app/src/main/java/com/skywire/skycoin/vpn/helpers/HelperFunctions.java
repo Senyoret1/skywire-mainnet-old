@@ -14,6 +14,7 @@ import com.skywire.skycoin.vpn.activities.main.MainActivity;
 import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,11 @@ import skywiremob.Skywiremob;
  * General helper functions for different parts of the app.
  */
 public class HelperFunctions {
+    // Helpers for showing only a max number of decimals.
+    private static DecimalFormat twoDecimalsFormatter = new DecimalFormat("#.##");
+    private static DecimalFormat oneDecimalsFormatter = new DecimalFormat("#.#");
+    private static DecimalFormat zeroDecimalsFormatter = new DecimalFormat("#");
+
     /**
      * Displays debug information about an error in the console. It includes the several details.
      * @param prefix Text to show before the error details.
@@ -175,5 +181,33 @@ public class HelperFunctions {
         openAppIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
         return PendingIntent.getActivity(App.getContext(), 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * Process a bytes per second speed and returns the string for displaying it in the UI. The
+     * returned speed in in bits and not bytes.
+     * @param bytesPerSecondSpeed Speed to process.
+     */
+    public static String computeSpeedString(long bytesPerSecondSpeed) {
+        double current = bytesPerSecondSpeed * 8;
+        String[] scales = new String[]{"b/s", "Kb/s", "Mb/s", "Gb/s", "Tb/s"};
+
+        // Divide the speed by 1024 until getting an appropriate scale to return.
+        for (int i = 0; i < scales.length - 1; i++) {
+            if (current < 1024) {
+                // Return decimals depending on how long the number is.
+                if (current < 10) {
+                    return twoDecimalsFormatter.format(current) + scales[i];
+                } else if (current < 100) {
+                    return oneDecimalsFormatter.format(current) + scales[i];
+                }
+
+                return zeroDecimalsFormatter.format(current) + scales[i];
+            }
+
+            current /= 1024;
+        }
+
+        return current + scales[scales.length - 1];
     }
 }

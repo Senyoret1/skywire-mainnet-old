@@ -110,6 +110,7 @@ public class SkywireVPNService extends VpnService {
      */
     private String lastErrorMsg = "";
 
+    private Disposable updateNotificationSubscription;
     private Disposable restartingSubscription;
     private Disposable vpnRunnableSubscription;
 
@@ -166,6 +167,18 @@ public class SkywireVPNService extends VpnService {
 
         // Update the notification.
         updateForegroundNotification();
+
+        // Procedure for periodically updating the notification with the connection stats, if the
+        // VPN protection is active.
+        if (updateNotificationSubscription != null) {
+            updateNotificationSubscription.dispose();
+        }
+        if (newState == VPNStates.CONNECTED) {
+            updateNotificationSubscription = Observable.interval(2000, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(val -> updateForegroundNotification());
+        }
     }
 
     /**
@@ -212,10 +225,6 @@ public class SkywireVPNService extends VpnService {
             // If the service is being restored, hide the states about the connection being
             // closed and restored.
             if (currentState == VPNStates.RESTORING_SERVICE) {
-                if (processedState.val() >= 150 && processedState.val() < 400) {
-                    processedState = VPNStates.RESTORING_SERVICE;
-                }
-
                 // Restart the whole VPN connection after a small delay when receiving the state
                 // indicating that vpnRunnable finished.
                 if (processedState.val() >= 300 && processedState.val() < 400) {
@@ -223,6 +232,10 @@ public class SkywireVPNService extends VpnService {
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(val -> runVpn());
+                }
+
+                if (processedState.val() >= 150 && processedState.val() < 400) {
+                    processedState = VPNStates.RESTORING_SERVICE;
                 }
             } else {
                 // If the service is not being restored, close the whole service when receiving
