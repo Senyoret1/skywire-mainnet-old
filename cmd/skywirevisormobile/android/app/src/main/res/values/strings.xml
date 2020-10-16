@@ -12,17 +12,27 @@
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
     <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
 
-    <string name="skywiremob_error_invalid_pk">Invalid public key.</string>
-    <string name="skywiremob_error_invalid_visor_config">The local visor configuration is not valid.</string>
-    <string name="skywiremob_error_invalid_addr_resolver_url">It was not possible to access the address resolver. Please make sure you have internet connection or try again in a moment.</string>
-    <string name="skywiremob_error_stcp_init_failed">Error initializing the STCP connection.</string>
-    <string name="skywiremob_error_stcpr_init_failed">Error initializing the STCPR connection.</string>
-    <string name="skywiremob_error_sudph_init_failed">Error initializing the SUDPH connection.</string>
-    <string name="skywiremob_error_dmsg_listen_failed">The DMSG connection failed.</string>
-    <string name="skywiremob_error_tp_disc_unavailable">It was not possible to access the transport discovery service. Please make sure you have internet connection or try again in a moment.</string>
-    <string name="skywiremob_error_failed_to_start_router">It was not possible to start the router. Please make sure you have internet connection or try again in a moment.</string>
-    <string name="skywiremob_error_failed_to_setup_hv_gateway">Failed to start the RPC server for the hypervisor. Please make sure you have internet connection or try again in a moment.</string>
-    <string name="skywiremob_error_unknown">There was an unexpected error. Please make sure you have internet connection and that the data for connecting with the VPN server is valid, or try again in a moment.</string>
+    <string name="skywiremob_error_invalid_pk">Invalid public key. Are you connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_invalid_visor_config">Unexpected error. The local visor configuration is not valid.</string>
+    <string name="skywiremob_error_invalid_addr_resolver_url">It was not possible to access the address resolver. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_stcp_init_failed">Error initializing the STCP connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_stcpr_init_failed">Error initializing the STCPR connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_sudph_init_failed">Error initializing the SUDPH connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_dmsg_listen_failed">The DMSG connection failed. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_tp_disc_unavailable">It was not possible to access the transport discovery service. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_failed_to_start_router">It was not possible to start the router. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_failed_to_setup_hv_gateway">Failed to start the RPC server for the hypervisor. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_unknown">There was an unexpected error.</string>
+
+    <string name="skywiremob_error_visor_not_running">The local Skywire visor is not running. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_invalid_remote_pk">The remote public key is not valid. Are you are connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_failed_to_save_transport">It was not possible to create a transport to access the VPN server. Do you have internet connection and are connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_vpn_server_unavailable">Unable to connect with the VPN server. It may be temporally unavailable or there may be no network connectivity to access it.</string>
+    <string name="skywiremob_error_vpn_client_not_running">The local VPN client is not running. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_handshake_failed">The handshake procedure with the VPN server failed. This may happen if the server is not compatible with the current version of the app or if the server refused the connection.</string>
+    <string name="skywiremob_error_invalid_addr">There was an error connecting the app with the local visor. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_already_listening_udp">Already listening UDP. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_udp_listen_failed">UPD failed. This error should be automatically solved by restarting the VPN.</string>
 
     <string name="vpn_service_state_preparing">Preparing</string>
     <string name="vpn_service_state_restoring">Restoring</string>

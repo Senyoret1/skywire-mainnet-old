@@ -161,6 +161,24 @@ public class VisorRunnable {
             resource = R.string.skywiremob_error_failed_to_start_router;
         } else if (errorCode == Skywiremob.ErrCodeFailedToSetupHVGateway) {
             resource = R.string.skywiremob_error_failed_to_setup_hv_gateway;
+        } else if (errorCode == Skywiremob.ErrCodeVisorNotRunning) {
+            resource = R.string.skywiremob_error_visor_not_running;
+        } else if (errorCode == Skywiremob.ErrCodeInvalidRemotePK) {
+            resource = R.string.skywiremob_error_invalid_remote_pk;
+        } else if (errorCode == Skywiremob.ErrCodeFailedToSaveTransport) {
+            resource = R.string.skywiremob_error_failed_to_save_transport;
+        } else if (errorCode == Skywiremob.ErrCodeVPNServerUnavailable) {
+            resource = R.string.skywiremob_error_vpn_server_unavailable;
+        } else if (errorCode == Skywiremob.ErrCodeVPNClientNotRunning) {
+            resource = R.string.skywiremob_error_vpn_client_not_running;
+        } else if (errorCode == Skywiremob.ErrCodeHandshakeFailed) {
+            resource = R.string.skywiremob_error_handshake_failed;
+        } else if (errorCode == Skywiremob.ErrCodeInvalidAddr) {
+            resource = R.string.skywiremob_error_invalid_addr;
+        } else if (errorCode == Skywiremob.ErrCodeAlreadyListeningUDP) {
+            resource = R.string.skywiremob_error_already_listening_udp;
+        } else if (errorCode == Skywiremob.ErrCodeUDPListenFailed) {
+            resource = R.string.skywiremob_error_udp_listen_failed;
         }
 
         return App.getContext().getString(resource);
