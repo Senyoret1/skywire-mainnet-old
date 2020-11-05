@@ -6,12 +6,27 @@
     package="com.skywire.skycoin.vpn" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
-        android:label="SkywireVPN">
-        <service android:name=".SkywireVPNService"
+        android:label="@string/general_app_name"
+        android:icon="@mipmap/ic_launcher"
+    >
+
+        <receiver
+            android:directBootAware="true"
+            android:name=".Receiver"
+            android:enabled="true">
+            <intent-filter android:priority="2000000000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".vpn.SkywireVPNService"
+            android:description="@string/general_service_description"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
@@ -19,13 +34,37 @@
         </service>
 
         <activity
-            android:name=".MainActivity"
-            android:label="SkywireVPN" >
+            android:name=".activities.main.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:label="@string/general_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.servers.ServersActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:label="@string/tmp_select_server_title" >
+        </activity>
+
+        <activity
+            android:name=".activities.apps.AppsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:label="@string/tmp_select_apps_title" >
+        </activity>
+
+        <activity
+            android:name=".activities.settings.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:label="@string/tmp_options_title" >
         </activity>
     </application>
 

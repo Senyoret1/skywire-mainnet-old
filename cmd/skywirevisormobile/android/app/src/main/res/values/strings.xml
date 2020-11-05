@@ -1,6 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="connecting">SkywireVPN is connecting…</string>
-    <string name="connected">SkywireVPN is connected!</string>
-    <string name="disconnected">SkywireVPN is disconnected!</string>
+    <string name="general_app_name">SkywireVPN</string>
+    <string name="general_notification_channel_description">SkywireVPN status notifications.</string>
+    <string name="general_alert_notification_name">SkywireVPN Alerts</string>
+    <string name="general_alert_notification_channel_description">SkywireVPN important alert notifications.</string>
+    <string name="general_service_description">SkywireVPN networking service.</string>
+
+    <string name="general_milliseconds_abbreviation">ms</string>
+
+    <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
+    <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
+    <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
+
+    <string name="skywiremob_error_invalid_pk">Invalid public key. Are you connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_invalid_visor_config">Unexpected error. The local visor configuration is not valid.</string>
+    <string name="skywiremob_error_invalid_addr_resolver_url">It was not possible to access the address resolver. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_stcp_init_failed">Error initializing the STCP connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_stcpr_init_failed">Error initializing the STCPR connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_sudph_init_failed">Error initializing the SUDPH connection. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_dmsg_listen_failed">The DMSG connection failed. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_tp_disc_unavailable">It was not possible to access the transport discovery service. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_failed_to_start_router">It was not possible to start the router. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_failed_to_setup_hv_gateway">Failed to start the RPC server for the hypervisor. This may happen if there is no network connectivity or if there are temporal problems accessing any of the service components.</string>
+    <string name="skywiremob_error_unknown">There was an unexpected error.</string>
+
+    <string name="skywiremob_error_visor_not_running">The local Skywire visor is not running. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_invalid_remote_pk">The remote public key is not valid. Are you are connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_failed_to_save_transport">It was not possible to create a transport to access the VPN server. Do you have internet connection and are connecting to a valid VPN server?</string>
+    <string name="skywiremob_error_vpn_server_unavailable">Unable to connect with the VPN server. It may be temporally unavailable or there may be no network connectivity to access it.</string>
+    <string name="skywiremob_error_vpn_client_not_running">The local VPN client is not running. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_handshake_failed">The handshake procedure with the VPN server failed. This may happen if the server is not compatible with the current version of the app or if the server refused the connection.</string>
+    <string name="skywiremob_error_invalid_addr">There was an error connecting the app with the local visor. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_already_listening_udp">Already listening UDP. This error should be automatically solved by restarting the VPN.</string>
+    <string name="skywiremob_error_udp_listen_failed">UPD failed. This error should be automatically solved by restarting the VPN.</string>
+
+    <string name="vpn_service_state_preparing">Preparing</string>
+    <string name="vpn_service_state_restoring">Restoring</string>
+    <string name="vpn_service_state_finishing">Finishing</string>
+
+    <string name="vpn_state_off">SkywireVPN disconnected.</string>
+    <string name="vpn_state_initializing">Initializing SkywireVPN.</string>
+    <string name="vpn_state_waiting_previous_instance_stop">Waiting for the visor to be ready.</string>
+    <string name="vpn_state_checking_connectivity">Checking network connectivity.</string>
+    <string name="vpn_state_waiting_connectivity">Waiting for network connectivity.</string>
+    <string name="vpn_state_starting_visor">Starting SkywireVPN visor.</string>
+    <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector.</string>
+    <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization.</string>
+    <string name="vpn_state_connecting">Establishing VPN connection.</string>
+    <string name="vpn_state_connected">VPN connected.</string>
+    <string name="vpn_state_restoring">Restarting VPN connection.</string>
+    <string name="vpn_state_restoring_service">Restarting VPN service.</string>
+    <string name="vpn_state_disconnecting">Closing VPN connection.</string>
+    <string name="vpn_state_disconnected">VPN connection closed.</string>
+    <string name="vpn_state_error">There has been an error with the SkywireVPN service.</string>
+    <string name="vpn_state_blocking_error">There has been an error with the SkywireVPN service. The network will be blocked until stopping the service.</string>
+
+    <string name="vpn_coordinator_invalid_credentials_error">Invalid public key: </string>
+
+    <string name="vpn_service_network_unavailable_warning">The network will be unavailable while the VPN is starting.</string>
+    <string name="vpn_service_network_protection_error">It was not possible to protect the network.</string>
+    <string name="vpn_timeout_error">Unable to connect to the VPN server.</string>
+    <string name="vpn_connection_finished_error">The VPN connection has been closed unexpectedly.</string>
+    <string name="vpn_already_running_warning">The VPN is already running.</string>
+    <string name="vpn_no_apps_to_protect_warning">You have not selected specific applications to protect. All applications will be protected.</string>
+    <string name="vpn_no_apps_to_ignore_warning">You have not selected specific applications to ignore. All applications will be protected.</string>
+    <string name="vpn_service_configuring_app_rules_error">It was not possible to configure the rules for the VPN app.</string>
+
+    <string name="tmp_main_page_start">Start</string>
+    <string name="tmp_main_page_stop">Stop</string>
+    <string name="tmp_main_page_select">Select server</string>
+    <string name="tmp_main_page_select_apps">Select apps</string>
+    <string name="tmp_main_page_settings">Settings</string>
+    <string name="tmp_main_page_stopping">Stopping the service...</string>
+    <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
+    <string name="tmp_main_page_last_error">The VPN service failed with the following error:</string>
+
+    <string name="tmp_select_server_title">Select VPN server</string>
+
+    <string name="tmp_select_apps_title">Select apps</string>
+    <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
+    <string name="tmp_select_apps_protect_selected_button">Protect selected apps only</string>
+    <string name="tmp_select_apps_unprotect_selected_button">Do not protect the selected apps</string>
+    <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
+    <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
+
+    <string name="tmp_options_title">Options</string>
+    <string name="tmp_options_kill_switch">Kill switch. This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
+    <string name="tmp_options_reset_after_errors">Reset after errors. If active, the service will be restarted automatically in case of error. You may not have internet connection while the service is being restarted.</string>
+    <string name="tmp_options_protect_before_connecting">Protect before finishing connecting. If active, no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
+    <string name="tmp_options_start_on_boot">Start on boot. The VPN protection will be automatically started shortly after turning on the device.</string>
 </resources>
