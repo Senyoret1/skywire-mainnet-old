@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_bar_internal_height"
+        android:background="@color/bar_background"
+        android:orientation="horizontal">
+
+        <com.skywire.skycoin.vpn.controls.TopBarButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="@dimen/top_bar_internal_height"
+            android:layout_weight="1">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/logo" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="@dimen/top_bar_internal_height"
+            android:layout_height="@dimen/top_bar_internal_height">
+
+        </FrameLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/bar_separator">
+
+    </FrameLayout>
+</LinearLayout>

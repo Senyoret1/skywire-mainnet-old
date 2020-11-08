@@ -1,15 +1,15 @@
 package com.skywire.skycoin.vpn.activities.apps;
 
-import android.app.Activity;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
-public class AppsActivity extends Activity implements AppsAdapter.AppListChangedListener {
+public class AppsActivity extends AppCompatActivity implements AppsAdapter.AppListChangedListener {
     private RecyclerView recycler;
 
     @Override

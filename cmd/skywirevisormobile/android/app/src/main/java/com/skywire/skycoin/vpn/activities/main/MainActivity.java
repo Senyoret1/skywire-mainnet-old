@@ -1,6 +1,5 @@
 package com.skywire.skycoin.vpn.activities.main;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.settings.SettingsActivity;
@@ -25,7 +25,7 @@ import java.util.HashSet;
 
 import io.reactivex.rxjava3.disposables.Disposable;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText editTextRemotePK;
     private EditText editTextPasscode;
@@ -158,6 +158,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+
         if (request == VPNCoordinator.VPN_PREPARATION_REQUEST_CODE) {
             VPNCoordinator.getInstance().onActivityResult(request, result, data);
         } else if (request == 1 && data != null) {

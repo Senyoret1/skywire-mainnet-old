@@ -14,6 +14,7 @@
         android:allowBackup="true"
         android:label="@string/general_app_name"
         android:icon="@mipmap/ic_launcher"
+        android:theme="@style/AppTheme"
     >
 
         <receiver
@@ -32,9 +33,22 @@
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
         </service>
-
+<!--
         <activity
             android:name=".activities.main.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:label="@string/general_app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+-->
+        <activity
+            android:name=".activities.start.StartActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"

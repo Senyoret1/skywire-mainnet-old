@@ -1,9 +1,9 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,7 +19,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class ServersActivity extends Activity implements VpnServersAdapter.VpnServerSelectedListener {
+public class ServersActivity extends AppCompatActivity implements VpnServersAdapter.VpnServerSelectedListener {
     public static String ADDRESS_DATA_PARAM = "address";
 
     private RecyclerView recycler;

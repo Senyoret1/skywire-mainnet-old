@@ -1,15 +1,16 @@
 package com.skywire.skycoin.vpn.activities.settings;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 
-public class SettingsActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
+public class SettingsActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
     private CheckBox checkBoxKillSwitch;
     private CheckBox checkBoxResetAfterErrors;
     private CheckBox checkBoxProtectBeforeConnecting;
