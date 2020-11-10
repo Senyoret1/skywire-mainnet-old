@@ -43,6 +43,8 @@ public class TopBarButton extends LinearLayout implements View.OnClickListener {
             } else {
                 textIcon.setText("\ue5c4");
             }
+
+            attributes.recycle();
         } else {
             textIcon.setText("\ue5d2");
         }

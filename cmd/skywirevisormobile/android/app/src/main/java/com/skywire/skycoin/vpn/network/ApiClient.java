@@ -1,6 +1,6 @@
 package com.skywire.skycoin.vpn.network;
 
-import com.skywire.skycoin.vpn.network.models.VpnServer;
+import com.skywire.skycoin.vpn.network.models.VpnServerModel;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class ApiClient {
 
     private interface ApiInterface {
         @GET("services")
-        Observable<Response<List<VpnServer>>> getVpnServers(@Query("type") String type);
+        Observable<Response<List<VpnServerModel>>> getVpnServers(@Query("type") String type);
 
         @GET
         Observable<Response<Void>> checkConnection(@Url String url);
@@ -33,7 +33,7 @@ public class ApiClient {
 
     private static final ApiInterface apiService = retrofit.create(ApiInterface.class);
 
-    public static Observable<Response<List<VpnServer>>> getVpnServers() {
+    public static Observable<Response<List<VpnServerModel>>> getVpnServers() {
         return apiService.getVpnServers("vpn");
     }
 

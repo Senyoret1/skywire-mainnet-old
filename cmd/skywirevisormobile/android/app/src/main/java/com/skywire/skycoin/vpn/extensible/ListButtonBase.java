@@ -2,7 +2,6 @@ package com.skywire.skycoin.vpn.extensible;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -39,11 +38,6 @@ public abstract class ListButtonBase<DataType> extends RelativeLayout implements
 
     public void setClickWithIndexEventListener(ClickWithIndexEvent<DataType> listener) {
         clickListener = listener;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
     }
 
     @Override

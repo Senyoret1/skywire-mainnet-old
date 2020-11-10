@@ -6,4 +6,11 @@
             <enum name="back" value="1"/>
         </attr>
     </declare-styleable>
+    <declare-styleable name="BoxRowLayout" parent="@android:styleable/FrameLayout">
+        <attr name="type" format="enum">
+            <enum name="top" value="0"/>
+            <enum name="middle" value="1"/>
+            <enum name="bottom" value="2"/>
+        </attr>
+    </declare-styleable>
 </resources>

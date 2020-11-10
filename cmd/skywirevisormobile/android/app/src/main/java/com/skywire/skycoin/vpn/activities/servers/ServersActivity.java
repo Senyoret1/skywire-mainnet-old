@@ -9,15 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
-import com.skywire.skycoin.vpn.network.ApiClient;
-import com.skywire.skycoin.vpn.network.models.GeoInfo;
-import com.skywire.skycoin.vpn.network.models.VpnServer;
+import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.util.ArrayList;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class ServersActivity extends AppCompatActivity implements VpnServersAdapter.VpnServerSelectedListener {
     public static String ADDRESS_DATA_PARAM = "address";
@@ -49,6 +45,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
     }
 
     private void requestData() {
+        /*
         serverSubscription = ApiClient.getVpnServers()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -59,6 +56,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
             }, err -> {
                 this.requestData();
             });
+        */
     }
 
     @Override
@@ -83,7 +81,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         }
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.addr);
+        resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.pk);
         setResult(RESULT_OK, resultIntent);
         finish();
     }
@@ -92,24 +90,21 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         ArrayList<VpnServer> response = new ArrayList<>();
 
         VpnServer testServer = new VpnServer();
-        testServer.addr = "024ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
-        testServer.geo = new GeoInfo();
-        testServer.geo.country = "US";
-        testServer.geo.region = "NY";
+        testServer.name = "Server name";
+        testServer.location = "Melbourne";
+        testServer.pk = "024ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.addr = "0348c941c5015a05c455ff238af2e57fb8f914c399aab604e9abb5b32b91a4c1fe";
-        testServer.geo = new GeoInfo();
-        testServer.geo.country = "US";
-        testServer.geo.region = "CA";
+        testServer.name = "Test server 2";
+        testServer.location = "Rio de Janeiro";
+        testServer.pk = "0348c941c5015a05c455ff238af2e57fb8f914c399aab604e9abb5b32b91a4c1fe";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.addr = "031b80cd5773143a39d940dc0710b93dcccc262a85108018a7a95ab9af734f8055";
-        testServer.geo = new GeoInfo();
-        testServer.geo.country = "CA";
-        testServer.geo.region = "ON";
+        testServer.name = "Test server 8";
+        testServer.location = "Santiago";
+        testServer.pk = "031b80cd5773143a39d940dc0710b93dcccc262a85108018a7a95ab9af734f8055";
         response.add(testServer);
 
         return response;

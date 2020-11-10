@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
-import com.skywire.skycoin.vpn.network.models.VpnServer;
+import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
+import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.util.List;
 
@@ -40,24 +41,16 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
 
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder<ServerListButton> holder, int position) {
-        String location = "-";
-        if (data.get(position).geo != null) {
-            location = "";
-            if (data.get(position).geo.country != null) {
-                location += data.get(position).geo.country;
-            }
-
-            if (data.get(position).geo.country != null && data.get(position).geo.region != null) {
-                location += " / ";
-            }
-
-            if (data.get(position).geo.region != null) {
-                location += data.get(position).geo.region;
-            }
-        }
-
         ((ServerListButton)holder.itemView).setIndex(position);
-        ((ServerListButton)holder.itemView).changeData(data.get(position).addr, location);
+        ((ServerListButton)holder.itemView).changeData(data.get(position).name, data.get(position).location, data.get(position).pk, holder.getLayoutPosition());
+
+        if (position == 0) {
+            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+        } else if (position == getItemCount() - 1) {
+            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+        } else {
+            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+        }
     }
 
     @Override
