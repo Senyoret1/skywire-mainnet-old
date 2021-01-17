@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="-4dp"
+        android:layout_marginRight="-18dp"
         android:layout_marginBottom="1dp"
         android:orientation="horizontal">
 
@@ -39,6 +40,7 @@
                 android:id="@+id/textName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Server Name"
@@ -48,21 +50,11 @@
                 android:id="@+id/textLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
                 android:layout_marginBottom="1dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Location"
-                android:textColor="@color/subtle_text"
-                android:textSize="@dimen/small_text_size" />
-
-            <TextView
-                android:id="@+id/textPk"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Public key"
                 android:textColor="@color/subtle_text"
                 android:textSize="@dimen/small_text_size" />
 
@@ -117,7 +109,7 @@
                         android:textSize="@dimen/small_text_size" />
 
                     <TextView
-                        android:id="@+id/textLoad"
+                        android:id="@+id/textCongestion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="5dp"
@@ -141,12 +133,49 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginRight="5dp"
                         android:fontFamily="@font/material_font"
+                        android:text="\ue922"
+                        android:textColor="@color/subtle_text"
+                        android:textSize="@dimen/small_text_size" />
+
+                    <TextView
+                        android:id="@+id/textHops"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="2"
+                        android:textColor="@color/green"
+                        android:textSize="@dimen/small_text_size" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/material_font"
                         android:text="\ue838"
                         android:textColor="@color/subtle_text"
                         android:textSize="@dimen/small_text_size" />
 
                     <TextView
-                        android:id="@+id/textRating"
+                        android:id="@+id/textLatencyRating"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="5dp"
@@ -158,15 +187,85 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/material_font"
+                        android:text="\ue838"
+                        android:textColor="@color/subtle_text"
+                        android:textSize="@dimen/small_text_size" />
+
+                    <TextView
+                        android:id="@+id/textCongestionRating"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Gold"
+                        android:textColor="@color/yellow"
+                        android:textSize="@dimen/small_text_size" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"></LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/noteArea"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/material_font"
+                        android:text="\ue88f"
+                        android:textColor="@color/subtle_text"
+                        android:textSize="@dimen/small_text_size" />
+
+                    <TextView
+                        android:id="@+id/textNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:text="Server note."
+                        android:textColor="@color/subtle_text"
+                        android:textSize="@dimen/small_text_size" />
+
+                </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/material_font"
-            android:text="\ue8b8"
-            android:textSize="20dp" />
+        <com.skywire.skycoin.vpn.controls.SettingsButton
+            android:id="@+id/buttonSettings"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginLeft="-18dp" />
 
     </LinearLayout>
 </com.skywire.skycoin.vpn.controls.BoxRowLayout>

@@ -2,6 +2,7 @@ package com.skywire.skycoin.vpn.helpers;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -27,9 +28,9 @@ import skywiremob.Skywiremob;
  */
 public class HelperFunctions {
     // Helpers for showing only a max number of decimals.
-    private static DecimalFormat twoDecimalsFormatter = new DecimalFormat("#.##");
-    private static DecimalFormat oneDecimalsFormatter = new DecimalFormat("#.#");
-    private static DecimalFormat zeroDecimalsFormatter = new DecimalFormat("#");
+    public static final DecimalFormat twoDecimalsFormatter = new DecimalFormat("#.##");
+    public static final DecimalFormat oneDecimalsFormatter = new DecimalFormat("#.#");
+    public static final DecimalFormat zeroDecimalsFormatter = new DecimalFormat("#");
 
     /**
      * Displays debug information about an error in the console. It includes the several details.
@@ -209,5 +210,20 @@ public class HelperFunctions {
         }
 
         return current + scales[scales.length - 1];
+    }
+
+    public static String getLatencyValue(double latency, Context ctx) {
+        String initialPart;
+        String lastPart;
+
+        if (latency >= 1000) {
+            initialPart = oneDecimalsFormatter.format(latency / 1000);
+            lastPart = ctx.getString(R.string.general_seconds_abbreviation);
+        } else {
+            initialPart = zeroDecimalsFormatter.format(latency);
+            lastPart = ctx.getString(R.string.general_milliseconds_abbreviation);
+        }
+
+        return initialPart + lastPart;
     }
 }

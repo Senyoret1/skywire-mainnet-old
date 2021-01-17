@@ -6,7 +6,12 @@
     <string name="general_alert_notification_channel_description">SkywireVPN important alert notifications.</string>
     <string name="general_service_description">SkywireVPN networking service.</string>
 
-    <string name="general_milliseconds_abbreviation">ms</string>
+    <string name="general_seconds_abbreviation">s.</string>
+    <string name="general_milliseconds_abbreviation">ms.</string>
+
+    <string name="rating_gold">Gold</string>
+    <string name="rating_silver">Silver</string>
+    <string name="rating_bronze">Bronze</string>
 
     <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>

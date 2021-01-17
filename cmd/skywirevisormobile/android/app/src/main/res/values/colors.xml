@@ -13,5 +13,10 @@
 
     <color name="white">#ffffff</color>
     <color name="green">#72c012</color>
-    <color name="yellow">#ba9210</color>
+    <color name="yellow">#ffa500</color>
+    <color name="red">#ff393f</color>
+
+    <color name="gold">#ffa500</color>
+    <color name="silver">#80ffffff</color>
+    <color name="bronze">#995d10</color>
 </resources>

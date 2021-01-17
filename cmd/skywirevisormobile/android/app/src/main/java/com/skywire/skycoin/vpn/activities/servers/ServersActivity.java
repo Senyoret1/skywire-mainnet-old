@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.objects.ServerRatings;
 import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.util.ArrayList;
@@ -90,21 +91,41 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         ArrayList<VpnServer> response = new ArrayList<>();
 
         VpnServer testServer = new VpnServer();
+        testServer.countryCode = "au";
         testServer.name = "Server name";
         testServer.location = "Melbourne";
         testServer.pk = "024ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
+        testServer.congestion = 20;
+        testServer.congestionRating = ServerRatings.Gold;
+        testServer.latency = 123;
+        testServer.latencyRating = ServerRatings.Gold;
+        testServer.hops = 3;
+        testServer.note = "Note";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.name = "Test server 2";
+        testServer.countryCode = "br";
+        testServer.name = "Test server 14";
         testServer.location = "Rio de Janeiro";
-        testServer.pk = "0348c941c5015a05c455ff238af2e57fb8f914c399aab604e9abb5b32b91a4c1fe";
+        testServer.pk = "034ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
+        testServer.congestion = 20;
+        testServer.congestionRating = ServerRatings.Silver;
+        testServer.latency = 12345;
+        testServer.latencyRating = ServerRatings.Gold;
+        testServer.hops = 3;
+        testServer.note = "Note";
         response.add(testServer);
 
         testServer = new VpnServer();
-        testServer.name = "Test server 8";
-        testServer.location = "Santiago";
-        testServer.pk = "031b80cd5773143a39d940dc0710b93dcccc262a85108018a7a95ab9af734f8055";
+        testServer.countryCode = "de";
+        testServer.name = "Test server 20";
+        testServer.location = "Berlin";
+        testServer.pk = "044ec47420176680816e0406250e7156465e4531f5b26057c9f6297bb0303558c7";
+        testServer.congestion = 20;
+        testServer.congestionRating = ServerRatings.Gold;
+        testServer.latency = 123;
+        testServer.latencyRating = ServerRatings.Bronze;
+        testServer.hops = 7;
         response.add(testServer);
 
         return response;
