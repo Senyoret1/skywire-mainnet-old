@@ -11,6 +11,7 @@
         android:orientation="horizontal">
 
         <com.skywire.skycoin.vpn.controls.TopBarButton
+            android:id="@+id/buttonLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -19,7 +20,21 @@
             android:layout_height="@dimen/top_bar_internal_height"
             android:layout_weight="1">
 
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Title"
+                android:textColor="@color/normal_text"
+                android:textSize="@dimen/big_text_size" />
+
             <ImageView
+                android:id="@+id/imageIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_gravity="center"

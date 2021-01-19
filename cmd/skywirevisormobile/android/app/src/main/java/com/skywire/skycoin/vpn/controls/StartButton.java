@@ -23,6 +23,6 @@ public class StartButton extends LinearLayout {
 
     private void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.control_start_button, this, true);
+        inflater.inflate(R.layout.view_start_button, this, true);
     }
 }

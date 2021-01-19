@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/top_bar_internal_height"
-    android:layout_height="@dimen/top_bar_internal_height">
+    android:layout_height="@dimen/top_bar_internal_height"
+    android:background="@drawable/box_ripple">
 
     <TextView
         android:id="@+id/textIcon"

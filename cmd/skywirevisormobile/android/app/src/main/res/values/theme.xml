@@ -2,6 +2,7 @@
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat" xmlns:app="http://schemas.android.com/apk/res-auto">
         <item name="colorPrimaryDark">#243852</item>
+        <item name="colorAccent">#5a98f4</item>
 
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>

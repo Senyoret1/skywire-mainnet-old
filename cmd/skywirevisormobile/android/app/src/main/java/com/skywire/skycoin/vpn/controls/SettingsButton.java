@@ -5,49 +5,32 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.extensible.ClickEvent;
+import com.skywire.skycoin.vpn.extensible.ButtonBase;
 
-public class SettingsButton extends RelativeLayout implements View.OnClickListener, View.OnTouchListener {
+public class SettingsButton extends ButtonBase implements View.OnTouchListener {
     private TextView textIcon;
-
-    private ClickEvent clickListener;
 
     public SettingsButton(Context context) {
         super(context);
-        Initialize(context);
     }
     public SettingsButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Initialize(context);
     }
     public SettingsButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Initialize(context);
     }
 
-    protected void Initialize (Context context) {
+    @Override
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_settings_button, this, true);
 
         textIcon = this.findViewById (R.id.textIcon);
 
-        this.setOnClickListener(this);
         this.setOnTouchListener(this);
-    }
-
-    public void setClickEventListener(ClickEvent listener) {
-        clickListener = listener;
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (clickListener != null) {
-            clickListener.onClick();
-        }
     }
 
     @Override

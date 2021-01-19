@@ -39,7 +39,7 @@ public class BoxRowLayout extends FrameLayout {
                 0, 0
             );
 
-            type = attributes.getInteger(R.styleable.BoxRowLayout_type, 1);
+            type = attributes.getInteger(R.styleable.BoxRowLayout_box_row_type, 1);
 
             attributes.recycle();
         }
@@ -54,6 +54,8 @@ public class BoxRowLayout extends FrameLayout {
             setType(BoxRowTypes.MIDDLE);
         } else if (type == 2) {
             setType(BoxRowTypes.BOTTOM);
+        } else if (type == 3) {
+            setType(BoxRowTypes.SINGLE);
         }
 
         this.setClipToPadding(false);
@@ -76,13 +78,17 @@ public class BoxRowLayout extends FrameLayout {
             getResources().getDisplayMetrics()
         );
 
-        float topPaddingExtra = 0;
         float bottomPaddingExtra = 0;
+        float topPaddingExtra = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                -2,
+                getResources().getDisplayMetrics()
+        );
 
         if (type == BoxRowTypes.TOP) {
             this.setBackgroundResource(R.drawable.background_box1);
 
-            topPaddingExtra = TypedValue.applyDimension(
+            topPaddingExtra += TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 10,
                 getResources().getDisplayMetrics()
@@ -97,8 +103,23 @@ public class BoxRowLayout extends FrameLayout {
 
             bottomPaddingExtra = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                14,
+                17,
                 getResources().getDisplayMetrics()
+            );
+
+            separator.setVisibility(View.GONE);
+        } else if (type == BoxRowTypes.SINGLE) {
+            this.setBackgroundResource(R.drawable.background_box4);
+
+            topPaddingExtra += TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    10,
+                    getResources().getDisplayMetrics()
+            );
+            bottomPaddingExtra = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    17,
+                    getResources().getDisplayMetrics()
             );
 
             separator.setVisibility(View.GONE);

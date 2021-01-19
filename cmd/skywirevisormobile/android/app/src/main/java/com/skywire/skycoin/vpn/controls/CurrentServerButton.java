@@ -3,7 +3,6 @@ package com.skywire.skycoin.vpn.controls;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -27,7 +26,7 @@ public class CurrentServerButton extends LinearLayout {
 
     private void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.control_current_server_button, this, true);
+        inflater.inflate(R.layout.view_current_server_button, this, true);
 
         imageFlag = this.findViewById (R.id.imageFlag);
         imageFlag.setClipToOutline(true);

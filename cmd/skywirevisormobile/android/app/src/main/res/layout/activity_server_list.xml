@@ -28,5 +28,7 @@
 
     <com.skywire.skycoin.vpn.controls.TopBar
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:left_button_icon="back"
+        app:title="@string/tmp_select_server_title" />
 </FrameLayout>

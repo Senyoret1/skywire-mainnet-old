@@ -6,12 +6,17 @@ import android.view.LayoutInflater;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.extensible.ListButtonBase;
+import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
 public class AppListButton extends ListButtonBase<Void> {
+    private BoxRowLayout mainLayout;
+    private LinearLayout internalLayout;
     private ImageView imageIcon;
     private FrameLayout layoutSeparator;
     private TextView textAppName;
@@ -28,6 +33,8 @@ public class AppListButton extends ListButtonBase<Void> {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_app_list_item, this, true);
 
+        mainLayout = this.findViewById (R.id.mainLayout);
+        internalLayout = this.findViewById (R.id.internalLayout);
         imageIcon = this.findViewById (R.id.imageIcon);
         layoutSeparator = this.findViewById (R.id.layoutSeparator);
         textAppName = this.findViewById (R.id.textAppName);
@@ -49,6 +56,10 @@ public class AppListButton extends ListButtonBase<Void> {
         layoutSeparator.setVisibility(GONE);
     }
 
+    public void setBoxRowType(BoxRowTypes type) {
+        mainLayout.setType(type);
+    }
+
     public String getAppPackageName() {
         return appPackageName;
     }
@@ -62,9 +73,9 @@ public class AppListButton extends ListButtonBase<Void> {
         super.setEnabled(enabled);
 
         if (enabled) {
-            this.setAlpha(1f);
+            internalLayout.setAlpha(1f);
         } else {
-            this.setAlpha(0.5f);
+            internalLayout.setAlpha(0.5f);
         }
     }
 }

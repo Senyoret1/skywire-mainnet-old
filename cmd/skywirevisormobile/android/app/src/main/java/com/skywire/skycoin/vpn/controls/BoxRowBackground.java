@@ -55,8 +55,10 @@ public class BoxRowBackground extends View {
             setBackgroundResource(R.drawable.box_row_rounded_box_1);
         } else if (type == BoxRowTypes.MIDDLE) {
             setBackgroundResource(R.drawable.box_row_rounded_box_2);
-        } else {
+        } else if (type == BoxRowTypes.BOTTOM) {
             setBackgroundResource(R.drawable.box_row_rounded_box_3);
+        } else {
+            setBackgroundResource(R.drawable.box_row_rounded_box_4);
         }
 
         this.invalidate();

@@ -86,12 +86,17 @@
     <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
     <string name="tmp_select_apps_protect_selected_button">Protect selected apps only</string>
     <string name="tmp_select_apps_unprotect_selected_button">Do not protect the selected apps</string>
+    <string name="tmp_select_apps_mode_title">Protection mode</string>
     <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
     <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
 
     <string name="tmp_options_title">Options</string>
-    <string name="tmp_options_kill_switch">Kill switch. This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
-    <string name="tmp_options_reset_after_errors">Reset after errors. If active, the service will be restarted automatically in case of error. You may not have internet connection while the service is being restarted.</string>
-    <string name="tmp_options_protect_before_connecting">Protect before finishing connecting. If active, no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
-    <string name="tmp_options_start_on_boot">Start on boot. The VPN protection will be automatically started shortly after turning on the device.</string>
+    <string name="tmp_options_kill_switch_title">Kill switch</string>
+    <string name="tmp_options_kill_switch_description">This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
+    <string name="tmp_options_reset_after_errors_title">Reset after errors.</string>
+    <string name="tmp_options_reset_after_errors_description">If active, the service will be restarted automatically in case of error. You may not have internet connection while the service is being restarted.</string>
+    <string name="tmp_options_protect_before_connecting_title">Protect before finishing connecting.</string>
+    <string name="tmp_options_protect_before_connecting_description">If active, no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
+    <string name="tmp_options_start_on_boot_title">Start on boot.</string>
+    <string name="tmp_options_start_on_boot_description">The VPN protection will be automatically started shortly after turning on the device.</string>
 </resources>

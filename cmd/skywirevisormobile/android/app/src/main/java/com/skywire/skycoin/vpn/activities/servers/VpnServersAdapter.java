@@ -44,7 +44,9 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
         ((ServerListButton)holder.itemView).setIndex(position);
         ((ServerListButton)holder.itemView).changeData(data.get(position), holder.getLayoutPosition());
 
-        if (position == 0) {
+        if (data.size() == 1) {
+            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
+        } else if (position == 0) {
             ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
         } else if (position == getItemCount() - 1) {
             ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);

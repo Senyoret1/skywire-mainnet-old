@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.helpers.Globals;
@@ -67,16 +68,12 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
 
     @Override
     public int getItemViewType(int position) {
-        if (position < 3) {
-            return 0;
-        }
-
-        if (uninstalledApps == null) {
-            return 1;
-        }
-
-        if (position == 3 || position == 4 + appList.size()) {
+        if (position == 0 || position == 4 || position == 5 + appList.size()) {
             return 2;
+        }
+
+        if (position < 4) {
+            return 0;
         }
 
         return 1;
@@ -107,20 +104,30 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
 
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder<View> holder, int position) {
-        if (position < 3) {
+        if (holder.getItemViewType() == 0) {
             boolean showChecked = false;
-            if (position == 0 && selectedOption == Globals.AppFilteringModes.PROTECT_ALL) { showChecked = true; }
-            if (position == 1 && selectedOption == Globals.AppFilteringModes.PROTECT_SELECTED) { showChecked = true; }
-            if (position == 2 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED) { showChecked = true; }
+            if (position == 1 && selectedOption == Globals.AppFilteringModes.PROTECT_ALL) { showChecked = true; }
+            if (position == 2 && selectedOption == Globals.AppFilteringModes.PROTECT_SELECTED) { showChecked = true; }
+            if (position == 3 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED) { showChecked = true; }
 
-            int optionText = optionTexts.get(position);
+            int optionText = optionTexts.get(position - 1);
             ((AppListOptionButton)(holder.itemView)).setIndex(position);
             ((AppListOptionButton)(holder.itemView)).changeData(optionText);
             ((AppListOptionButton)(holder.itemView)).setChecked(showChecked);
 
+            if (position == 1) {
+                ((AppListOptionButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+            } else if (position == 2) {
+                ((AppListOptionButton)holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+            } else {
+                ((AppListOptionButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+            }
+
             return;
         } else if (holder.getItemViewType() == 2) {
-            if (position == 3) {
+            if (position == 0) {
+                ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_mode_title);
+            } else if (position == 4) {
                 ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_installed_apps_title);
             } else {
                 ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_uninstalled_apps_title);
@@ -129,28 +136,51 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             return;
         }
 
-        int initialAppButtonsIndex = uninstalledApps == null ? 3 : 4;
-
-        if (position < initialAppButtonsIndex + appList.size()) {
-            String element = appList.get(position - initialAppButtonsIndex).activityInfo.packageName;
+        int initialInstalledAppsButtonIndex = 5;
+        if (position < initialInstalledAppsButtonIndex + appList.size()) {
+            String element = appList.get(position - initialInstalledAppsButtonIndex).activityInfo.packageName;
             ((AppListButton) (holder.itemView)).setIndex(position);
-            ((AppListButton) (holder.itemView)).changeData(appList.get(position - initialAppButtonsIndex));
+            ((AppListButton) (holder.itemView)).changeData(appList.get(position - initialInstalledAppsButtonIndex));
             ((AppListButton) (holder.itemView)).setChecked(selectedApps.contains(element));
+
+            if (appList.size() == 1) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
+            } else if (position == initialInstalledAppsButtonIndex) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+            } else if (position == initialInstalledAppsButtonIndex + appList.size() - 1) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+            } else {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+            }
         } else {
-            String element = uninstalledApps.get(position - (initialAppButtonsIndex + appList.size() + 1));
+            int initialUninstalledAppsButtonIndex = initialInstalledAppsButtonIndex + appList.size() + 1;
+
+            String element = uninstalledApps.get(position - initialUninstalledAppsButtonIndex);
             ((AppListButton) (holder.itemView)).setIndex(position);
             ((AppListButton) (holder.itemView)).changeData(element);
             ((AppListButton) (holder.itemView)).setChecked(selectedApps.contains(element));
+
+            if (uninstalledApps.size() == 1) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
+            } else if (position == initialUninstalledAppsButtonIndex) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+            } else if (position == initialUninstalledAppsButtonIndex + uninstalledApps.size() - 1) {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+            } else {
+                ((AppListButton)holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        if (uninstalledApps == null) {
-            return appList.size() + 3;
-        } else {
-            return appList.size() + 3 + 2 + uninstalledApps.size();
+        int result = 3 + 2 + appList.size();
+
+        if (uninstalledApps != null) {
+            result += 1 + uninstalledApps.size();
         }
+
+        return result;
     }
 
     @Override
@@ -161,12 +191,12 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             }
         }
 
-        if (index < 3) {
-            if (index == 0) {
+        if (index < 4) {
+            if (index == 1) {
                 changeSelectedOption(Globals.AppFilteringModes.PROTECT_ALL);
-            } else if (index == 1) {
-                changeSelectedOption(Globals.AppFilteringModes.PROTECT_SELECTED);
             } else if (index == 2) {
+                changeSelectedOption(Globals.AppFilteringModes.PROTECT_SELECTED);
+            } else if (index == 3) {
                 changeSelectedOption(Globals.AppFilteringModes.IGNORE_SELECTED);
             }
         } else {
@@ -191,9 +221,9 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
 
             for (AppListOptionButton optionButton : optionButtons) {
                 optionButton.setChecked(
-                    (optionButton.getIndex() == 0 && selectedOption == Globals.AppFilteringModes.PROTECT_ALL) ||
-                    (optionButton.getIndex() == 1 && selectedOption == Globals.AppFilteringModes.PROTECT_SELECTED) ||
-                    (optionButton.getIndex() == 2 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED)
+                    (optionButton.getIndex() == 1 && selectedOption == Globals.AppFilteringModes.PROTECT_ALL) ||
+                    (optionButton.getIndex() == 2 && selectedOption == Globals.AppFilteringModes.PROTECT_SELECTED) ||
+                    (optionButton.getIndex() == 3 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED)
                 );
             }
         }
@@ -202,11 +232,11 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     private void processAppClicked(int index) {
         String app;
 
-        int initialAppButtonsIndex = uninstalledApps == null ? 3 : 4;
+        int initialAppButtonsIndex = 5;
         if (index < initialAppButtonsIndex + appList.size()) {
             app = appList.get(index - initialAppButtonsIndex).activityInfo.packageName;
         } else {
-            app = uninstalledApps.get(index - (3 + 2 + appList.size()));
+            app = uninstalledApps.get(index - (initialAppButtonsIndex + appList.size() + 1));
         }
 
         if (selectedApps.contains(app)) {

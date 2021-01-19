@@ -4,4 +4,5 @@ public enum BoxRowTypes {
     TOP,
     MIDDLE,
     BOTTOM,
+    SINGLE,
 }

@@ -58,7 +58,7 @@ public class ServerListButton extends ListButtonBase<Void> {
 
         imageFlag.setClipToOutline(true);
 
-        buttonSettings.setClickEventListener(() -> Skywiremob.printString("Settings"));
+        buttonSettings.setClickEventListener(view -> Skywiremob.printString("Settings"));
     }
 
     public void changeData(VpnServer serverData, int verticalPosition) {

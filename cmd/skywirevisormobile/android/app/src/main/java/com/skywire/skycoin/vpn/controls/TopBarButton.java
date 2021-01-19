@@ -4,31 +4,29 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.extensible.ButtonBase;
+import com.skywire.skycoin.vpn.helpers.UiMaterialIcons;
 
-public class TopBarButton extends LinearLayout implements View.OnClickListener {
+public class TopBarButton extends ButtonBase {
     public TopBarButton(Context context) {
         super(context);
-        Initialize(context, null);
     }
     public TopBarButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Initialize(context, attrs);
     }
     public TopBarButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Initialize(context, attrs);
     }
 
     private TextView textIcon;
 
-    private void Initialize (Context context, AttributeSet attrs) {
+    @Override
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.control_top_bar_button, this, true);
+        inflater.inflate(R.layout.view_top_bar_button, this, true);
 
         textIcon = this.findViewById (R.id.textIcon);
 
@@ -52,8 +50,11 @@ public class TopBarButton extends LinearLayout implements View.OnClickListener {
         this.setOnClickListener(this);
     }
 
-    @Override
-    public void onClick(View view) {
-
+    public void setIcon(UiMaterialIcons icon) {
+        if (icon == UiMaterialIcons.MENU) {
+            textIcon.setText("\ue5d2");
+        } else {
+            textIcon.setText("\ue5c4");
+        }
     }
 }
