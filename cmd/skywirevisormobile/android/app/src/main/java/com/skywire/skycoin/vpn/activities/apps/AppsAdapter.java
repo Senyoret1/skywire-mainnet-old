@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
-import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +41,8 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     public AppsAdapter(Context context) {
         this.context = context;
 
-        selectedApps = VPNPersistentData.getAppList(new HashSet<>());
-        changeSelectedOption(VPNPersistentData.getAppsSelectionMode());
+        selectedApps = VPNGeneralPersistentData.getAppList(new HashSet<>());
+        changeSelectedOption(VPNGeneralPersistentData.getAppsSelectionMode());
 
         appList = HelperFunctions.getDeviceAppsList();
 
@@ -217,7 +217,7 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             }
 
             selectedOption = option;
-            VPNPersistentData.setAppsSelectionMode(selectedOption);
+            VPNGeneralPersistentData.setAppsSelectionMode(selectedOption);
 
             for (AppListOptionButton optionButton : optionButtons) {
                 optionButton.setChecked(
@@ -257,6 +257,6 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             }
         }
 
-        VPNPersistentData.setAppList(selectedApps);
+        VPNGeneralPersistentData.setAppList(selectedApps);
     }
 }

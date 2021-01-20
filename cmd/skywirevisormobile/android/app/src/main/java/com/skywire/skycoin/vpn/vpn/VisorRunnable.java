@@ -3,6 +3,7 @@ package com.skywire.skycoin.vpn.vpn;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -100,10 +101,10 @@ public class VisorRunnable {
 
         // Prepare the VPN client with the last saved public key and password.
         if (parentEmitter.isDisposed()) { return; }
-        long err = Skywiremob.prepareVPNClient(
-            VPNPersistentData.getPublicKey(""),
-            VPNPersistentData.getPassword("")
-        );
+        LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
+        String savedPk = currentServer != null ? currentServer.pk : "";
+        String savedPassword = VPNServersPersistentData.getInstance().getCurrentServerPassword("");
+        long err = Skywiremob.prepareVPNClient(savedPk, savedPassword);
         if (err != Skywiremob.ErrCodeNoError) {
             throw new Exception(gerErrorMsg(err));
         }

@@ -14,6 +14,8 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.Notifications;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
+import com.skywire.skycoin.vpn.objects.ManualVpnServerData;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
@@ -75,7 +77,7 @@ public class VPNCoordinator implements Handler.Callback {
         // Save the error as the one which made the last execution of the VPN service fail.
         // Must be dore before sending the event.
         if (msg.what == VPNStates.ERROR.val() || msg.what == VPNStates.BLOCKING_ERROR.val()) {
-            VPNPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
+            VPNGeneralPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
         }
 
         // Inform the new state.
@@ -131,11 +133,14 @@ public class VPNCoordinator implements Handler.Callback {
             }
 
             // Save the remote visor pk and password.
-            VPNPersistentData.setPublicKeyAndPassword(remotePK, passcode);
+            ManualVpnServerData intermediaryServerData = new ManualVpnServerData();
+            intermediaryServerData.pk = remotePK;
+            LocalServerData serverData = VPNServersPersistentData.getInstance().processFromManual(intermediaryServerData);
+            VPNServersPersistentData.getInstance().modifyCurrentServer(serverData, passcode);
 
             // As the service will be started again, erase the error which made it fail the last
             // time it ran, to indicate that no error has stopped the current instance.
-            VPNPersistentData.removeLastError();
+            VPNGeneralPersistentData.removeLastError();
 
             eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.STARTING, false, false));
 
@@ -162,7 +167,7 @@ public class VPNCoordinator implements Handler.Callback {
                 HelperFunctions.showToast(ctx.getString(R.string.general_autostart_failed_error), false);
 
                 String errorMsg = ctx.getString(R.string.general_no_permissions_error);
-                VPNPersistentData.setLastError(errorMsg);
+                VPNGeneralPersistentData.setLastError(errorMsg);
 
                 Notifications.showAlertNotification(
                         Notifications.AUTOSTART_ALERT_NOTIFICATION_ID,
@@ -176,7 +181,7 @@ public class VPNCoordinator implements Handler.Callback {
 
             // As the service will be started again, erase the error which made it fail the last
             // time it ran, to indicate that no error has stopped the current instance.
-            VPNPersistentData.removeLastError();
+            VPNGeneralPersistentData.removeLastError();
 
             starVpnServiceIfNeeded();
         }

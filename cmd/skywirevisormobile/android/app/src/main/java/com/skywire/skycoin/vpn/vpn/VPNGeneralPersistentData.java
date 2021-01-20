@@ -10,13 +10,11 @@ import com.skywire.skycoin.vpn.helpers.Globals;
 import java.util.HashSet;
 
 /**
- * Helper class for saving and getting data related to the VPN service to and from the
+ * Helper class for saving and getting general data related to the VPN to and from the
  * persistent storage.
  */
-public class VPNPersistentData {
+public class VPNGeneralPersistentData {
     // Keys for persistent storage.
-    private static final String SERVER_PK = "serverPK";
-    private static final String SERVER_PASSWORD = "serverPass";
     private static final String LAST_ERROR = "lastError";
     private static final String APPS_SELECTION_MODE = "appsMode";
     private static final String APPS_LIST = "appsList";
@@ -30,17 +28,6 @@ public class VPNPersistentData {
     /////////////////////////////////////////////////////////////
     // Setters.
     /////////////////////////////////////////////////////////////
-
-    /**
-     * Saves the public key and password of the visor to which all future connections must be made.
-     */
-    public static void setPublicKeyAndPassword(String pk, String password) {
-        settings
-            .edit()
-            .putString(SERVER_PK, pk)
-            .putString(SERVER_PASSWORD, password)
-            .apply();
-    }
 
     /**
      * Saves the message of the error which caused the VPN service to fail the last time it
@@ -96,22 +83,6 @@ public class VPNPersistentData {
     /////////////////////////////////////////////////////////////
     // Getters.
     /////////////////////////////////////////////////////////////
-
-    /**
-     * Gets the public key of the visor to which all future connections must be made.
-     * @param defaultValue Value to return if no saved data is found.
-     */
-    public static String getPublicKey(String defaultValue) {
-        return settings.getString(SERVER_PK, defaultValue);
-    }
-
-    /**
-     * Gets the password of the visor to which all future connections must be made.
-     * @param defaultValue Value to return if no saved data is found.
-     */
-    public static String getPassword(String defaultValue) {
-        return settings.getString(SERVER_PASSWORD, defaultValue);
-    }
 
     /**
      * Gets the message of the error which caused the VPN service to fail the last time it

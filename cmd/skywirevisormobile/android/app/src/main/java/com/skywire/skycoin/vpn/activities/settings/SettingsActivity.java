@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 
 public class SettingsActivity extends AppCompatActivity implements ClickEvent {
     private SettingsOption optionKillSwitch;
@@ -26,10 +26,10 @@ public class SettingsActivity extends AppCompatActivity implements ClickEvent {
         optionProtectBeforeConnecting = findViewById(R.id.optionProtectBeforeConnecting);
         optionStartOnBoot = findViewById(R.id.optionStartOnBoot);
 
-        optionKillSwitch.setChecked(VPNPersistentData.getKillSwitchActivated());
-        optionResetAfterErrors.setChecked(VPNPersistentData.getMustRestartVpn());
-        optionProtectBeforeConnecting.setChecked(VPNPersistentData.getProtectBeforeConnected());
-        optionStartOnBoot.setChecked(VPNPersistentData.getStartOnBoot());
+        optionKillSwitch.setChecked(VPNGeneralPersistentData.getKillSwitchActivated());
+        optionResetAfterErrors.setChecked(VPNGeneralPersistentData.getMustRestartVpn());
+        optionProtectBeforeConnecting.setChecked(VPNGeneralPersistentData.getProtectBeforeConnected());
+        optionStartOnBoot.setChecked(VPNGeneralPersistentData.getStartOnBoot());
 
         optionKillSwitch.setClickEventListener(this);
         optionResetAfterErrors.setClickEventListener(this);
@@ -48,13 +48,13 @@ public class SettingsActivity extends AppCompatActivity implements ClickEvent {
         ((SettingsOption)view).setChecked(!((SettingsOption)view).isChecked());
 
         if (view.getId() == R.id.optionKillSwitch) {
-            VPNPersistentData.setKillSwitchActivated(((SettingsOption)view).isChecked());
+            VPNGeneralPersistentData.setKillSwitchActivated(((SettingsOption)view).isChecked());
         } else if (view.getId() == R.id.optionResetAfterErrors) {
-            VPNPersistentData.setMustRestartVpn(((SettingsOption)view).isChecked());
+            VPNGeneralPersistentData.setMustRestartVpn(((SettingsOption)view).isChecked());
         } else if (view.getId() == R.id.optionProtectBeforeConnecting) {
-            VPNPersistentData.setProtectBeforeConnected(((SettingsOption)view).isChecked());
+            VPNGeneralPersistentData.setProtectBeforeConnected(((SettingsOption)view).isChecked());
         } else {
-            VPNPersistentData.setStartOnBoot(((SettingsOption)view).isChecked());
+            VPNGeneralPersistentData.setStartOnBoot(((SettingsOption)view).isChecked());
         }
     }
 }

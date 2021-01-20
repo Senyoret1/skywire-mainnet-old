@@ -13,8 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.settings.SettingsActivity;
 import com.skywire.skycoin.vpn.helpers.Notifications;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
-import com.skywire.skycoin.vpn.vpn.VPNPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
@@ -66,8 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonApps.setOnClickListener(this);
         buttonSettings.setOnClickListener(this);
 
-        String savedPk = VPNPersistentData.getPublicKey(null);
-        String savedPassword = VPNPersistentData.getPassword(null);
+        LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
+        String savedPk = currentServer != null ? currentServer.pk : null;
+        String savedPassword = VPNServersPersistentData.getInstance().getCurrentServerPassword(null);
 
         if (savedPk != null && savedPassword != null) {
             editTextRemotePK.setText(savedPk);
@@ -172,9 +175,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void start() {
-        Globals.AppFilteringModes selectedMode = VPNPersistentData.getAppsSelectionMode();
+        Globals.AppFilteringModes selectedMode = VPNGeneralPersistentData.getAppsSelectionMode();
         if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
-            HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNPersistentData.getAppList(new HashSet<>()));
+            HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
 
             if (selectedApps.size() == 0) {
                 if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
@@ -224,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         textFinishAlert.setVisibility(View.GONE);
         textStopAlert.setVisibility(View.GONE);
 
-        String lastError = VPNPersistentData.getLastError(null);
+        String lastError = VPNGeneralPersistentData.getLastError(null);
         if (lastError != null) {
             textLastError1.setVisibility(View.VISIBLE);
             textLastError2.setVisibility(View.VISIBLE);
@@ -264,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         textLastError1.setVisibility(View.VISIBLE);
         textLastError2.setVisibility(View.VISIBLE);
 
-        String lastError = VPNPersistentData.getLastError(null);
+        String lastError = VPNGeneralPersistentData.getLastError(null);
         textLastError2.setText(lastError);
     }
 }

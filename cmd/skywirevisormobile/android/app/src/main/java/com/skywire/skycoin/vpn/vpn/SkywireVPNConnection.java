@@ -85,7 +85,7 @@ public class SkywireVPNConnection implements Closeable {
                 try {
                     Skywiremob.printString("Starting VPN connection");
 
-                    if (VPNPersistentData.getMustRestartVpn()) {
+                    if (VPNGeneralPersistentData.getMustRestartVpn()) {
                         // The code will restart the connection in case of problem, but only if
                         // the connection was established during the last attempt.
                         while (true) {

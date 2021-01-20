@@ -329,7 +329,7 @@ public class VPNRunnable {
         // If the network is already blocked and the kill switch is active, inform that the
         // current error will close the VPN connection but the network will still be blocked until
         // the user stops the service manually. That behavior is not managed by this class.
-        if (!vpnInterface.alreadyConfigured() || !VPNPersistentData.getKillSwitchActivated()) {
+        if (!vpnInterface.alreadyConfigured() || !VPNGeneralPersistentData.getKillSwitchActivated()) {
             eventsSubject.onNext(VPNStates.ERROR);
         } else {
             eventsSubject.onNext(VPNStates.BLOCKING_ERROR);

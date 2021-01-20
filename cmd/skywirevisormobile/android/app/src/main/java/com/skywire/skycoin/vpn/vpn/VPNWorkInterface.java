@@ -124,12 +124,12 @@ public class VPNWorkInterface implements Closeable {
 
         if (mode == Modes.WORKING || mode == Modes.BLOCKING) {
             String upperCaseAppPackage = App.getContext().getPackageName().toUpperCase();
-            Globals.AppFilteringModes appsSelectionMode = VPNPersistentData.getAppsSelectionMode();
+            Globals.AppFilteringModes appsSelectionMode = VPNGeneralPersistentData.getAppsSelectionMode();
 
             if (appsSelectionMode != Globals.AppFilteringModes.PROTECT_ALL) {
                 // Get the package name of all the apps selected by the user which are
                 // currently installed.
-                for (String packageName : HelperFunctions.filterAvailableApps(VPNPersistentData.getAppList(new HashSet<>()))) {
+                for (String packageName : HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()))) {
                     try {
                         if (appsSelectionMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
                             // Protect all selected apps, but ignore this app.

@@ -210,7 +210,7 @@ public class SkywireVPNService extends VpnService {
         if (!stopRequested && !serviceDestroyed) {
             // If the new state is for informing about an error.
             if (processedState.val() >= 400 && processedState.val() < 500) {
-                if (VPNPersistentData.getMustRestartVpn()) {
+                if (VPNGeneralPersistentData.getMustRestartVpn()) {
                     // If the option for restarting the protection automatically is active, update
                     // the state.
                     processedState = VPNStates.RESTORING_SERVICE;
@@ -307,7 +307,7 @@ public class SkywireVPNService extends VpnService {
             // network connections. The action is always made when the service is started by the OS
             // because the OS will only stop the service after the user request it if the interface
             // is configured (appears like a bug in the OS).
-            if (!vpnInterface.alreadyConfigured() && (VPNPersistentData.getProtectBeforeConnected() || intent == null || !ACTION_CONNECT.equals(intent.getAction()))) {
+            if (!vpnInterface.alreadyConfigured() && (VPNGeneralPersistentData.getProtectBeforeConnected() || intent == null || !ACTION_CONNECT.equals(intent.getAction()))) {
                 try {
                     vpnInterface.configure(VPNWorkInterface.Modes.BLOCKING);
                 } catch (Exception e) {
@@ -395,7 +395,7 @@ public class SkywireVPNService extends VpnService {
                 serviceDestroyed ||
                 currentState.val() < 400 ||
                 currentState.val() >= 500 ||
-                !VPNPersistentData.getKillSwitchActivated()
+                !VPNGeneralPersistentData.getKillSwitchActivated()
             ) {
                 // Steps that must be performed only if there is no a newer instance of the service.
                 if (lastInstanceID == instanceID) {
@@ -425,7 +425,7 @@ public class SkywireVPNService extends VpnService {
                     // If there was an error in the last execution, the UI is not being displayed
                     // and the kill switch is not active, show a notification informing that
                     // the VPN protection was terminated due to an error.
-                    if (!App.displayingUI() && !VPNPersistentData.getKillSwitchActivated() && VPNPersistentData.getLastError(null) != null) {
+                    if (!App.displayingUI() && !VPNGeneralPersistentData.getKillSwitchActivated() && VPNGeneralPersistentData.getLastError(null) != null) {
                         Notifications.showAlertNotification(
                             Notifications.ERROR_NOTIFICATION_ID,
                             getString(R.string.general_app_name),
