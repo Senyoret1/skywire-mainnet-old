@@ -35,6 +35,18 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/textDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="-3dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Date"
+                android:textColor="@color/green"
+                android:textSize="@dimen/mini_text_size" />
+
+            <TextView
                 android:id="@+id/textName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,6 +69,7 @@
                 android:textSize="@dimen/small_text_size" />
 
             <LinearLayout
+                android:id="@+id/statsArea1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
@@ -151,6 +164,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/statsArea2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:baselineAligned="false"
@@ -262,8 +276,9 @@
         <com.skywire.skycoin.vpn.controls.SettingsButton
             android:id="@+id/buttonSettings"
             android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginLeft="-18dp" />
+            android:layout_height="48dp"
+            android:layout_marginLeft="-18dp"
+            android:layout_marginBottom="-18dp" />
 
     </LinearLayout>
 </com.skywire.skycoin.vpn.controls.BoxRowLayout>

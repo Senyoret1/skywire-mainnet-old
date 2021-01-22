@@ -34,7 +34,8 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     private HashSet<String> selectedApps;
     private Globals.AppFilteringModes selectedOption;
 
-    private HashMap<Integer, Integer> optionTexts = new HashMap<>();
+    private int[] optionTexts = new int[3];
+    private int[] optionDescriptions = new int[3];
     private ArrayList<AppListOptionButton> optionButtons = new ArrayList<>();
     private ArrayList<AppListButton> appButtons = new ArrayList<>();
 
@@ -57,9 +58,13 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             }
         }
 
-        optionTexts.put(0, R.string.tmp_select_apps_protect_all_button);
-        optionTexts.put(1, R.string.tmp_select_apps_protect_selected_button);
-        optionTexts.put(2, R.string.tmp_select_apps_unprotect_selected_button);
+        optionTexts[0] =  R.string.tmp_select_apps_protect_all_button;
+        optionTexts[1] =  R.string.tmp_select_apps_protect_selected_button;
+        optionTexts[2] =  R.string.tmp_select_apps_unprotect_selected_button;
+
+        optionDescriptions[0] =  R.string.tmp_select_apps_protect_all_button_desc;
+        optionDescriptions[1] =  R.string.tmp_select_apps_protect_selected_button_desc;
+        optionDescriptions[2] =  R.string.tmp_select_apps_unprotect_selected_button_desc;
     }
 
     public void setAppListChangedEventListener(AppListChangedListener listener) {
@@ -110,9 +115,8 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             if (position == 2 && selectedOption == Globals.AppFilteringModes.PROTECT_SELECTED) { showChecked = true; }
             if (position == 3 && selectedOption == Globals.AppFilteringModes.IGNORE_SELECTED) { showChecked = true; }
 
-            int optionText = optionTexts.get(position - 1);
             ((AppListOptionButton)(holder.itemView)).setIndex(position);
-            ((AppListOptionButton)(holder.itemView)).changeData(optionText);
+            ((AppListOptionButton)(holder.itemView)).changeData(optionTexts[position - 1], optionDescriptions[position - 1]);
             ((AppListOptionButton)(holder.itemView)).setChecked(showChecked);
 
             if (position == 1) {
@@ -128,7 +132,11 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             if (position == 0) {
                 ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_mode_title);
             } else if (position == 4) {
-                ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_installed_apps_title);
+                if (this.uninstalledApps != null) {
+                    ((AppListSeparator) holder.itemView).changeTitle(R.string.tmp_select_apps_installed_apps_title);
+                } else {
+                    ((AppListSeparator) holder.itemView).changeTitle(R.string.tmp_select_apps_apps_title);
+                }
             } else {
                 ((AppListSeparator)holder.itemView).changeTitle(R.string.tmp_select_apps_uninstalled_apps_title);
             }

@@ -30,17 +30,17 @@ public class SettingsButton extends ButtonBase implements View.OnTouchListener {
 
         textIcon = this.findViewById (R.id.textIcon);
 
-        this.setOnTouchListener(this);
+        setOnTouchListener(this);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             textIcon.setAlpha(0.5f);
-        } else {
-            textIcon.setAlpha(1);
+        } else if (event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_POINTER_UP || event.getAction() == MotionEvent.ACTION_UP) {
+            textIcon.setAlpha(1.0f);
         }
 
-        return false;
+        return true;
     }
 }

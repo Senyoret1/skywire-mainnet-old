@@ -226,4 +226,22 @@ public class HelperFunctions {
 
         return initialPart + lastPart;
     }
+
+    public static int getFlagResourceId(String countryCode) {
+        if (countryCode.toLowerCase() != "do") {
+            int flagResourceId = App.getContext().getResources().getIdentifier(
+                    countryCode.toLowerCase(),
+                    "drawable",
+                    App.getContext().getPackageName()
+            );
+
+            if (flagResourceId != 0) {
+                return flagResourceId;
+            } else {
+                return R.drawable.zz;
+            }
+        } else {
+            return R.drawable.do_flag;
+        }
+    }
 }

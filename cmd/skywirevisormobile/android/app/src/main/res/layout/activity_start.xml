@@ -28,37 +28,31 @@
                     android:scaleType="centerCrop"
                     app:srcCompat="@drawable/map" />
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/textView2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    android:paddingBottom="@dimen/activity_vertical_margin">
+                    android:layout_marginTop="25dp"
+                    android:layout_marginBottom="10dp"
+                    android:fontFamily="@font/skycoin_font_bold"
+                    android:gravity="center_horizontal"
+                    android:text="@string/tmp_status_title"
+                    android:textSize="20dp" />
 
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:fontFamily="@font/skycoin_font_bold"
-                        android:gravity="center_horizontal"
-                        android:text="START VPN"
-                        android:textSize="20dp" />
+                <com.skywire.skycoin.vpn.activities.start.CurrentServerButton
+                    android:id="@+id/viewCurrentServerButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="25dp" />
 
-                    <com.skywire.skycoin.vpn.controls.StartButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal" />
+                <com.skywire.skycoin.vpn.activities.start.StartButton
+                    android:id="@+id/startButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:translationY="-10dp" />
 
-                    <com.skywire.skycoin.vpn.controls.CurrentServerButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
             </FrameLayout>
 
             <Button
@@ -74,7 +68,7 @@
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="match_parent"
-        android:layout_height="17dp"
+        android:layout_height="@dimen/top_bar_shadow_height"
         android:layout_marginTop="@dimen/top_bar_height"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/top_bar_shadow" />

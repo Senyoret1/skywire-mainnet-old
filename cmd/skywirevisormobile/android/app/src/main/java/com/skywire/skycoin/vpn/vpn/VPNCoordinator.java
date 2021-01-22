@@ -115,28 +115,14 @@ public class VPNCoordinator implements Handler.Callback {
      * VPN_PREPARATION_REQUEST_CODE as the first param. In that case the activity must call the
      * onActivityResult function of this instance with all the params, to be able to process
      * permission requests
-     * @param remotePK Public key of the remote visor. If it is not valid, the VPN service will
-     * not be started and a toast notification will be shown.
+     * @param server Data about the remote visor.
      * @param passcode Password of the remote node.
      */
-    public void startVPN(Activity requestingActivity, String remotePK, String passcode) {
+    public void startVPN(Activity requestingActivity, LocalServerData server, String passcode) {
         if (!isServiceRunning()) {
-            // Check if the pk is valid.
-            remotePK = remotePK.trim();
-            long err = Skywiremob.isPKValid(remotePK);
-            if (err != Skywiremob.ErrCodeNoError) {
-                HelperFunctions.logError("Start VPN from coordinator", "Invalid PK starting service: " + remotePK);
-                HelperFunctions.showToast(ctx.getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
-                return;
-            } else {
-                Skywiremob.printString("PK is correct");
-            }
-
-            // Save the remote visor pk and password.
-            ManualVpnServerData intermediaryServerData = new ManualVpnServerData();
-            intermediaryServerData.pk = remotePK;
-            LocalServerData serverData = VPNServersPersistentData.getInstance().processFromManual(intermediaryServerData);
-            VPNServersPersistentData.getInstance().modifyCurrentServer(serverData, passcode);
+            // Save the remote visor and password.
+            VPNServersPersistentData.getInstance().modifyCurrentServer(server, passcode);
+            VPNServersPersistentData.getInstance().updateHistory();
 
             // As the service will be started again, erase the error which made it fail the last
             // time it ran, to indicate that no error has stopped the current instance.

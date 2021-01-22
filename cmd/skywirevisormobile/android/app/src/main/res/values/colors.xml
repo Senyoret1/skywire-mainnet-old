@@ -11,6 +11,8 @@
     <color name="box_separator">#45a7cbff</color>
     <color name="box_ripple">#415a7d</color>
 
+    <color name="dark_background_separator">#26ffffff</color>
+
     <color name="white">#ffffff</color>
     <color name="green">#72c012</color>
     <color name="yellow">#ffa500</color>

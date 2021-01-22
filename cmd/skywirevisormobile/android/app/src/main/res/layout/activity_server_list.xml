@@ -5,23 +5,23 @@
     android:layout_height="match_parent"
     tools:context=".activities.servers.ServersActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="@dimen/top_bar_height">
+    <ProgressBar
+        android:id="@+id/loadingAnimation"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/recycler"
-            android:scrollbars="vertical" />
-
-    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/top_bar_height"
+        android:id="@+id/recycler"
+        android:scrollbars="vertical" />
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="17dp"
+        android:layout_height="@dimen/top_bar_shadow_height"
         android:layout_marginTop="@dimen/top_bar_height"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/top_bar_shadow" />

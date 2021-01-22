@@ -9,22 +9,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
-import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.util.List;
 
 public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<ServerListButton>> implements ClickWithIndexEvent<Void> {
     public interface VpnServerSelectedListener {
-        void onVpnServerSelected(VpnServer selectedServer);
+        void onVpnServerSelected(VpnServerForList selectedServer);
     }
 
     private Context context;
-    private List<VpnServer> data;
+    private List<VpnServerForList> data;
+    private ServerLists listType = ServerLists.Public;
     private VpnServerSelectedListener vpnSelectedListener;
 
-    public VpnServersAdapter(Context context, List<VpnServer> data) {
+    public VpnServersAdapter(Context context) {
         this.context = context;
+    }
+
+    public void setData(List<VpnServerForList> data, ServerLists listType) {
         this.data = data;
+        this.listType = listType;
+        this.notifyDataSetChanged();
     }
 
     public void setVpnSelectedEventListener(VpnServerSelectedListener listener) {
@@ -42,7 +47,7 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder<ServerListButton> holder, int position) {
         ((ServerListButton)holder.itemView).setIndex(position);
-        ((ServerListButton)holder.itemView).changeData(data.get(position), holder.getLayoutPosition());
+        ((ServerListButton)holder.itemView).changeData(data.get(position), listType);
 
         if (data.size() == 1) {
             ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
@@ -57,7 +62,7 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return data != null ? data.size() : 0;
     }
 
     @Override

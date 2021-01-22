@@ -13,6 +13,7 @@ import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 public class AppListOptionButton extends ListButtonBase<Void> {
     private BoxRowLayout mainLayout;
     private TextView textOption;
+    private TextView textDescription;
     private RadioButton radioSelected;
 
     public AppListOptionButton(Context context) {
@@ -26,6 +27,7 @@ public class AppListOptionButton extends ListButtonBase<Void> {
 
         mainLayout = this.findViewById (R.id.mainLayout);
         textOption = this.findViewById (R.id.textOption);
+        textDescription = this.findViewById (R.id.textDescription);
         radioSelected = this.findViewById (R.id.radioSelected);
 
         radioSelected.setChecked(false);
@@ -35,8 +37,9 @@ public class AppListOptionButton extends ListButtonBase<Void> {
         mainLayout.setType(type);
     }
 
-    public void changeData(int textResource) {
+    public void changeData(int textResource, int descriptionResource) {
         textOption.setText(textResource);
+        textDescription.setText(descriptionResource);
     }
 
     public void setChecked(boolean checked) {

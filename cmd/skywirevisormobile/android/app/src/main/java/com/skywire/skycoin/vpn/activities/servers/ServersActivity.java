@@ -2,6 +2,8 @@ package com.skywire.skycoin.vpn.activities.servers;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -9,10 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
-import com.skywire.skycoin.vpn.objects.VpnServer;
+import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import io.reactivex.rxjava3.disposables.Disposable;
 
@@ -20,6 +24,10 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
     public static String ADDRESS_DATA_PARAM = "address";
 
     private RecyclerView recycler;
+    private ProgressBar loadingAnimation;
+
+    private ServerLists listType = ServerLists.History;
+    private VpnServersAdapter adapter;
 
     private Disposable serverSubscription;
 
@@ -29,6 +37,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         setContentView(R.layout.activity_server_list);
 
         recycler = findViewById(R.id.recycler);
+        loadingAnimation = findViewById(R.id.loadingAnimation);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recycler.setLayoutManager(layoutManager);
@@ -39,13 +48,23 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         // data, but is not used right now as the server is returning empty arrays.
         // requestData()
 
-        // Use test data, for now.
-        VpnServersAdapter adapter = new VpnServersAdapter(this, createTestServers());
+        // Initialize the recycler.
+        adapter = new VpnServersAdapter(this);
+        adapter.setData(new ArrayList<>(), listType);
         adapter.setVpnSelectedEventListener(this);
         recycler.setAdapter(adapter);
+
+        //requestLocalData();
+
+        // Use test data, for now.
+        showTestServers();
     }
 
     private void requestData() {
+        if (serverSubscription != null) {
+            serverSubscription.dispose();
+        }
+
         /*
         serverSubscription = ApiClient.getVpnServers()
             .subscribeOn(Schedulers.io())
@@ -58,6 +77,44 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
                 this.requestData();
             });
         */
+    }
+
+    private void requestLocalData() {
+        if (serverSubscription != null) {
+            serverSubscription.dispose();
+        }
+
+        recycler.setVisibility(View.GONE);
+        loadingAnimation.setVisibility(View.VISIBLE);
+
+        serverSubscription = VPNServersPersistentData.getInstance().history().subscribe(response -> {
+            // TODO: check if the response is empty.
+
+            ArrayList<VpnServerForList> list = new ArrayList<>();
+
+            for (LocalServerData server : response) {
+                VpnServerForList converted = new VpnServerForList();
+
+                converted.countryCode = server.countryCode;
+                converted.name = server.name;
+                converted.customName = server.customName;
+                converted.location = server.location;
+                converted.pk = server.pk;
+                converted.note = server.note;
+                converted.personalNote = server.personalNote;
+                converted.lastUsed = server.lastUsed;
+                converted.inHistory = server.inHistory;
+                converted.flag = server.flag;
+                converted.originalLocalData = server;
+
+                list.add(converted);
+            }
+
+            adapter.setData(list, listType);
+
+            recycler.setVisibility(View.VISIBLE);
+            loadingAnimation.setVisibility(View.GONE);
+        });
     }
 
     @Override
@@ -76,7 +133,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
     }
 
     @Override
-    public void onVpnServerSelected(VpnServer selectedServer) {
+    public void onVpnServerSelected(VpnServerForList selectedServer) {
         if (HelperFunctions.closeActivityIfServiceRunning(this)) {
             return;
         }
@@ -87,10 +144,11 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         finish();
     }
 
-    private ArrayList<VpnServer> createTestServers() {
-        ArrayList<VpnServer> response = new ArrayList<>();
+    private void showTestServers() {
+        ArrayList<VpnServerForList> servers = new ArrayList<>();
 
-        VpnServer testServer = new VpnServer();
+        VpnServerForList testServer = new VpnServerForList();
+        testServer.lastUsed = new Date();
         testServer.countryCode = "au";
         testServer.name = "Server name";
         testServer.location = "Melbourne";
@@ -101,9 +159,10 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         testServer.latencyRating = ServerRatings.Gold;
         testServer.hops = 3;
         testServer.note = "Note";
-        response.add(testServer);
+        servers.add(testServer);
 
-        testServer = new VpnServer();
+        testServer = new VpnServerForList();
+        testServer.lastUsed = new Date();
         testServer.countryCode = "br";
         testServer.name = "Test server 14";
         testServer.location = "Rio de Janeiro";
@@ -114,9 +173,10 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         testServer.latencyRating = ServerRatings.Gold;
         testServer.hops = 3;
         testServer.note = "Note";
-        response.add(testServer);
+        servers.add(testServer);
 
-        testServer = new VpnServer();
+        testServer = new VpnServerForList();
+        testServer.lastUsed = new Date();
         testServer.countryCode = "de";
         testServer.name = "Test server 20";
         testServer.location = "Berlin";
@@ -126,8 +186,11 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         testServer.latency = 123;
         testServer.latencyRating = ServerRatings.Bronze;
         testServer.hops = 7;
-        response.add(testServer);
+        servers.add(testServer);
 
-        return response;
+        adapter.setData(servers, ServerLists.Public);
+
+        recycler.setVisibility(View.VISIBLE);
+        loadingAnimation.setVisibility(View.GONE);
     }
 }

@@ -80,13 +80,20 @@
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
     <string name="tmp_main_page_last_error">The VPN service failed with the following error:</string>
 
+    <string name="tmp_status_title">START VPN</string>
+    <string name="tmp_status_no_server">No server selected!</string>
+
     <string name="tmp_select_server_title">Select VPN server</string>
 
     <string name="tmp_select_apps_title">Select apps</string>
     <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
+    <string name="tmp_select_apps_protect_all_button_desc">All applications on the device will be protected. Selections made on the list will be ignored.</string>
     <string name="tmp_select_apps_protect_selected_button">Protect selected apps only</string>
+    <string name="tmp_select_apps_protect_selected_button_desc">Only the applications that were selected will be protected. All other applications will use the regular network connection.</string>
     <string name="tmp_select_apps_unprotect_selected_button">Do not protect the selected apps</string>
+    <string name="tmp_select_apps_unprotect_selected_button_desc">Applications that were not selected will be protected. The selected applications will use the regular network connection.</string>
     <string name="tmp_select_apps_mode_title">Protection mode</string>
+    <string name="tmp_select_apps_apps_title">Apps</string>
     <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
     <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
 

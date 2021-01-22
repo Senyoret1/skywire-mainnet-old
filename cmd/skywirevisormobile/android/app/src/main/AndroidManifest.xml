@@ -58,6 +58,13 @@
         </activity>
 -->
         <activity
+            android:name=".activities.start.StartActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:label="@string/general_app_name" >
+        </activity>
+
+        <activity
             android:name=".activities.servers.ServersActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"

@@ -14,7 +14,7 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="17dp"
+        android:layout_height="@dimen/top_bar_shadow_height"
         android:layout_marginTop="@dimen/top_bar_height"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/top_bar_shadow" />

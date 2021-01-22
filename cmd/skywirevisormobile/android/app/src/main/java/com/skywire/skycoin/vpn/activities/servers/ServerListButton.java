@@ -8,7 +8,6 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.controls.SettingsButton;
@@ -16,14 +15,19 @@ import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
-import com.skywire.skycoin.vpn.objects.VpnServer;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import skywiremob.Skywiremob;
 
 public class ServerListButton extends ListButtonBase<Void> {
+    private static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
+
     private BoxRowLayout mainLayout;
     private ImageView imageFlag;
-    private TextView textTopLine;
+    private TextView textDate;
+    private TextView textName;
     private TextView textLocation;
     private TextView textLatency;
     private TextView textCongestion;
@@ -31,6 +35,8 @@ public class ServerListButton extends ListButtonBase<Void> {
     private TextView textLatencyRating;
     private TextView textCongestionRating;
     private TextView textNote;
+    private LinearLayout statsArea1;
+    private LinearLayout statsArea2;
     private LinearLayout noteArea;
     private SettingsButton buttonSettings;
 
@@ -45,7 +51,8 @@ public class ServerListButton extends ListButtonBase<Void> {
 
         mainLayout = this.findViewById (R.id.mainLayout);
         imageFlag = this.findViewById (R.id.imageFlag);
-        textTopLine = this.findViewById (R.id.textName);
+        textDate = this.findViewById (R.id.textDate);
+        textName = this.findViewById (R.id.textName);
         textLocation = this.findViewById (R.id.textLocation);
         textLatency = this.findViewById (R.id.textLatency);
         textCongestion = this.findViewById (R.id.textCongestion);
@@ -53,6 +60,8 @@ public class ServerListButton extends ListButtonBase<Void> {
         textLatencyRating = this.findViewById (R.id.textLatencyRating);
         textCongestionRating = this.findViewById (R.id.textCongestionRating);
         textNote = this.findViewById (R.id.textNote);
+        statsArea1 = this.findViewById (R.id.statsArea1);
+        statsArea2 = this.findViewById (R.id.statsArea2);
         noteArea = this.findViewById (R.id.noteArea);
         buttonSettings = this.findViewById (R.id.buttonSettings);
 
@@ -61,17 +70,19 @@ public class ServerListButton extends ListButtonBase<Void> {
         buttonSettings.setClickEventListener(view -> Skywiremob.printString("Settings"));
     }
 
-    public void changeData(VpnServer serverData, int verticalPosition) {
-        textTopLine.setText(serverData.name);
-        textLatency.setText(HelperFunctions.getLatencyValue(serverData.latency, getContext()));
-        textCongestion.setText(HelperFunctions.zeroDecimalsFormatter.format(serverData.congestion) + "%");
-        textHops.setText(serverData.hops + "");
+    public void changeData(VpnServerForList serverData, ServerLists listType) {
+        imageFlag.setImageResource(HelperFunctions.getFlagResourceId(serverData.countryCode));
+        textName.setText(serverData.name);
 
-        String pk = serverData.pk;
-        if (pk.length() > 5) {
-            pk = pk.substring(0, 5);
+        if (serverData.location != null && serverData.location.trim() != "") {
+            String pk = serverData.pk;
+            if (pk.length() > 5) {
+                pk = pk.substring(0, 5);
+            }
+            textLocation.setText("(" + pk + ") " + serverData.location);
+        } else {
+            textLocation.setText(serverData.pk);
         }
-        textLocation.setText("(" + pk + ") " + serverData.location);
 
         if (serverData.note != null && serverData.note.trim() != "") {
             noteArea.setVisibility(VISIBLE);
@@ -80,49 +91,52 @@ public class ServerListButton extends ListButtonBase<Void> {
             noteArea.setVisibility(GONE);
         }
 
-        textLatencyRating.setText(ServerRatings.getTextForRating(serverData.latencyRating));
-        textLatencyRating.setTextColor(getRatingColor(serverData.latencyRating));
-        textCongestionRating.setText(ServerRatings.getTextForRating(serverData.congestionRating));
-        textCongestionRating.setTextColor(getRatingColor(serverData.congestionRating));
+        if (listType == ServerLists.Public) {
+            statsArea1.setVisibility(VISIBLE);
+            statsArea2.setVisibility(VISIBLE);
 
-        if (serverData.congestion < 60) {
-            textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        } else if (serverData.congestion < 90) {
-            textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
-        } else {
-            textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        }
+            textLatency.setText(HelperFunctions.getLatencyValue(serverData.latency, getContext()));
+            textCongestion.setText(HelperFunctions.zeroDecimalsFormatter.format(serverData.congestion) + "%");
+            textHops.setText(serverData.hops + "");
 
-        if (serverData.latency < 200) {
-            textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        } else if (serverData.latency < 350) {
-            textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
-        } else {
-            textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        }
+            textLatencyRating.setText(ServerRatings.getTextForRating(serverData.latencyRating));
+            textLatencyRating.setTextColor(getRatingColor(serverData.latencyRating));
+            textCongestionRating.setText(ServerRatings.getTextForRating(serverData.congestionRating));
+            textCongestionRating.setTextColor(getRatingColor(serverData.congestionRating));
 
-        if (serverData.hops < 5) {
-            textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        } else if (serverData.hops < 9) {
-            textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
-        } else {
-            textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        }
-
-        if (serverData.countryCode.toLowerCase() != "do") {
-            int flagResourceId = getResources().getIdentifier(
-                    serverData.countryCode,
-                    "drawable",
-                    App.getContext().getPackageName()
-            );
-
-            if (flagResourceId != 0) {
-                imageFlag.setImageResource(flagResourceId);
+            if (serverData.congestion < 60) {
+                textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            } else if (serverData.congestion < 90) {
+                textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
             } else {
-                imageFlag.setImageResource(R.drawable.zz);
+                textCongestion.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            }
+
+            if (serverData.latency < 200) {
+                textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            } else if (serverData.latency < 350) {
+                textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
+            } else {
+                textLatency.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            }
+
+            if (serverData.hops < 5) {
+                textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            } else if (serverData.hops < 9) {
+                textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
+            } else {
+                textHops.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
             }
         } else {
-            imageFlag.setImageResource(R.drawable.do_flag);
+            statsArea1.setVisibility(GONE);
+            statsArea2.setVisibility(GONE);
+        }
+
+        if (listType == ServerLists.History) {
+            textDate.setVisibility(VISIBLE);
+            textDate.setText(dateFormat.format(serverData.lastUsed));
+        } else {
+            textDate.setVisibility(GONE);
         }
     }
 

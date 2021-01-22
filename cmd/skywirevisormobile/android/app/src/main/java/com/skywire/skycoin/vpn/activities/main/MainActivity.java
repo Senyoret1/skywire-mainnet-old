@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.settings.SettingsActivity;
+import com.skywire.skycoin.vpn.activities.start.StartActivity;
 import com.skywire.skycoin.vpn.helpers.Notifications;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
+import com.skywire.skycoin.vpn.objects.ManualVpnServerData;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
@@ -26,6 +28,7 @@ import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import java.util.HashSet;
 
 import io.reactivex.rxjava3.disposables.Disposable;
+import skywiremob.Skywiremob;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button buttonSelect;
     private Button buttonApps;
     private Button buttonSettings;
+    private Button buttonStartPage;
     private TextView textLastError1;
     private TextView textLastError2;
     private TextView textStatus;
@@ -56,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonSelect = findViewById(R.id.buttonSelect);
         buttonApps = findViewById(R.id.buttonApps);
         buttonSettings = findViewById(R.id.buttonSettings);
+        buttonStartPage = findViewById(R.id.buttonStartPage);
         textStatus = findViewById(R.id.textStatus);
         textFinishAlert = findViewById(R.id.textFinishAlert);
         textLastError1 = findViewById(R.id.textLastError1);
@@ -67,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonSelect.setOnClickListener(this);
         buttonApps.setOnClickListener(this);
         buttonSettings.setOnClickListener(this);
+        buttonStartPage.setOnClickListener(this);
 
         LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
         String savedPk = currentServer != null ? currentServer.pk : null;
@@ -156,6 +162,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.buttonSettings:
                 openSettings();
                 break;
+            case R.id.buttonStartPage:
+                openStarPage();
+                break;
         }
     }
 
@@ -171,10 +180,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 editTextRemotePK.setText(address);
                 editTextPasscode.setText("");
             }
+
+            start();
         }
     }
 
     private void start() {
+        // Check if the pk is valid.
+        String remotePK = editTextRemotePK.getText().toString().trim();
+        long err = Skywiremob.isPKValid(remotePK);
+        if (err != Skywiremob.ErrCodeNoError) {
+            HelperFunctions.showToast(getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
+            return;
+        } else {
+            Skywiremob.printString("PK is correct");
+        }
+
         Globals.AppFilteringModes selectedMode = VPNGeneralPersistentData.getAppsSelectionMode();
         if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
             HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
@@ -188,9 +209,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+        ManualVpnServerData intermediaryServerData = new ManualVpnServerData();
+        intermediaryServerData.pk = remotePK;
+        LocalServerData server = VPNServersPersistentData.getInstance().processFromManual(intermediaryServerData);
+
         VPNCoordinator.getInstance().startVPN(
             this,
-            editTextRemotePK.getText().toString(),
+            server,
             editTextPasscode.getText().toString()
         );
     }
@@ -211,6 +236,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void openStarPage() {
+        Intent intent = new Intent(this, StartActivity.class);
         startActivity(intent);
     }
 
