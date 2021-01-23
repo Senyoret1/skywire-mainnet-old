@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -12,7 +13,7 @@ import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
 import java.util.List;
 
-public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<ServerListButton>> implements ClickWithIndexEvent<Void> {
+public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>> implements ClickWithIndexEvent<Void> {
     public interface VpnServerSelectedListener {
         void onVpnServerSelected(VpnServerForList selectedServer);
     }
@@ -36,33 +37,51 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<Serve
         vpnSelectedListener = listener;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            return 0;
+        }
+
+        return 1;
+    }
+
     @NonNull
     @Override
-    public ListViewHolder<ServerListButton> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ListViewHolder<View> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == 0) {
+            ServerListOptions view = new ServerListOptions(context);
+            return new ListViewHolder<>(view);
+        }
+
         ServerListButton view = new ServerListButton(context);
         view.setClickWithIndexEventListener(this);
         return new ListViewHolder<>(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListViewHolder<ServerListButton> holder, int position) {
-        ((ServerListButton)holder.itemView).setIndex(position);
-        ((ServerListButton)holder.itemView).changeData(data.get(position), listType);
+    public void onBindViewHolder(@NonNull ListViewHolder<View> holder, int position) {
+        if (position != 0) {
+            position -= 1;
 
-        if (data.size() == 1) {
-            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
-        } else if (position == 0) {
-            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.TOP);
-        } else if (position == getItemCount() - 1) {
-            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
-        } else {
-            ((ServerListButton)holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+            ((ServerListButton) holder.itemView).setIndex(position);
+            ((ServerListButton) holder.itemView).changeData(data.get(position), listType);
+
+            if (data.size() == 1) {
+                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
+            } else if (position == 0) {
+                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+            } else if (position == data.size() - 1) {
+                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+            } else {
+                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return data != null ? data.size() : 0;
+        return data != null ? (data.size() + 1) : 1;
     }
 
     @Override

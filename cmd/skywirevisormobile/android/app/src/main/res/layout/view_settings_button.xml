@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:alpha="0.7">
 
         <TextView
             android:id="@+id/textIcon"
@@ -9,6 +10,6 @@
             android:layout_gravity="center"
             android:fontFamily="@font/material_font"
             android:text="\ue8b8"
-            android:textSize="20dp" />
+            android:textSize="16dp" />
 
 </FrameLayout>

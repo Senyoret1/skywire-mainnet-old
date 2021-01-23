@@ -26,4 +26,12 @@
         <attr name="title" />
         <attr name="description" format="string" />
     </declare-styleable>
+    <declare-styleable name="ServerListOptionButton">
+        <attr name="content" format="string" />
+    </declare-styleable>
+    <declare-styleable name="Tab">
+        <attr name="show_right_border" format="boolean" />
+        <attr name="icon_text" format="string" />
+        <attr name="lower_text" format="string" />
+    </declare-styleable>
 </resources>

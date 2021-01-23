@@ -7,6 +7,7 @@
 
     <color name="bar_background">#1e2f45</color>
     <color name="bar_separator">#314560</color>
+    <color name="bar_selected">#162334</color>
 
     <color name="box_separator">#45a7cbff</color>
     <color name="box_ripple">#415a7d</color>

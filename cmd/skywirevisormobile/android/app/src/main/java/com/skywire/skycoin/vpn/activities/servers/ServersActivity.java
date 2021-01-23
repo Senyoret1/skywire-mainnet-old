@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.controls.Tab;
+import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
@@ -18,15 +21,21 @@ import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 import java.util.ArrayList;
 import java.util.Date;
 
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
-public class ServersActivity extends AppCompatActivity implements VpnServersAdapter.VpnServerSelectedListener {
+public class ServersActivity extends AppCompatActivity implements VpnServersAdapter.VpnServerSelectedListener, ClickEvent {
     public static String ADDRESS_DATA_PARAM = "address";
 
+    private Tab tabPublic;
+    private Tab tabHistory;
+    private Tab tabFavorites;
+    private Tab tabBlocked;
     private RecyclerView recycler;
     private ProgressBar loadingAnimation;
+    private TextView textNoResults;
 
-    private ServerLists listType = ServerLists.History;
+    private ServerLists listType = ServerLists.Public;
     private VpnServersAdapter adapter;
 
     private Disposable serverSubscription;
@@ -36,8 +45,18 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server_list);
 
+        tabPublic = findViewById(R.id.tabPublic);
+        tabHistory = findViewById(R.id.tabHistory);
+        tabFavorites = findViewById(R.id.tabFavorites);
+        tabBlocked = findViewById(R.id.tabBlocked);
         recycler = findViewById(R.id.recycler);
         loadingAnimation = findViewById(R.id.loadingAnimation);
+        textNoResults = findViewById(R.id.textNoResults);
+
+        tabPublic.setClickEventListener(this);
+        tabHistory.setClickEventListener(this);
+        tabFavorites.setClickEventListener(this);
+        tabBlocked.setClickEventListener(this);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recycler.setLayoutManager(layoutManager);
@@ -54,10 +73,45 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         adapter.setVpnSelectedEventListener(this);
         recycler.setAdapter(adapter);
 
-        //requestLocalData();
+        showCorrectList();
+    }
 
-        // Use test data, for now.
-        showTestServers();
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.tabPublic) {
+            listType = ServerLists.Public;
+        } else if (view.getId() == R.id.tabHistory) {
+            listType = ServerLists.History;
+        } else if (view.getId() == R.id.tabFavorites) {
+            listType = ServerLists.Favorites;
+        } else if (view.getId() == R.id.tabBlocked) {
+            listType = ServerLists.Blocked;
+        }
+
+        showCorrectList();
+    }
+
+    private void showCorrectList() {
+        tabPublic.changeState(false);
+        tabHistory.changeState(false);
+        tabFavorites.changeState(false);
+        tabBlocked.changeState(false);
+
+        if (listType == ServerLists.Public) {
+            tabPublic.changeState(true);
+            // Use test data, for now.
+            showTestServers();
+        } else {
+            if (listType == ServerLists.History) {
+                tabHistory.changeState(true);
+            } else if (listType == ServerLists.Favorites) {
+                tabFavorites.changeState(true);
+            } else if (listType == ServerLists.Blocked) {
+                tabBlocked.changeState(true);
+            }
+
+            requestLocalData();
+        }
     }
 
     private void requestData() {
@@ -84,12 +138,20 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
             serverSubscription.dispose();
         }
 
+        textNoResults.setVisibility(View.GONE);
         recycler.setVisibility(View.GONE);
         loadingAnimation.setVisibility(View.VISIBLE);
 
-        serverSubscription = VPNServersPersistentData.getInstance().history().subscribe(response -> {
-            // TODO: check if the response is empty.
+        Observable<ArrayList<LocalServerData>> request;
+        if (listType == ServerLists.History) {
+            request = VPNServersPersistentData.getInstance().history();
+        } else if (listType == ServerLists.Favorites) {
+            request = VPNServersPersistentData.getInstance().favorites();
+        } else {
+            request = VPNServersPersistentData.getInstance().blocked();
+        }
 
+        serverSubscription = request.subscribe(response -> {
             ArrayList<VpnServerForList> list = new ArrayList<>();
 
             for (LocalServerData server : response) {
@@ -114,6 +176,10 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
 
             recycler.setVisibility(View.VISIBLE);
             loadingAnimation.setVisibility(View.GONE);
+
+            if (list.size() == 0) {
+                textNoResults.setVisibility(View.VISIBLE);
+            }
         });
     }
 
@@ -192,5 +258,6 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
 
         recycler.setVisibility(View.VISIBLE);
         loadingAnimation.setVisibility(View.GONE);
+        textNoResults.setVisibility(View.GONE);
     }
 }

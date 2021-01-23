@@ -84,6 +84,11 @@
     <string name="tmp_status_no_server">No server selected!</string>
 
     <string name="tmp_select_server_title">Select VPN server</string>
+    <string name="tmp_select_server_empty_info">There are no servers to display in this list.</string>
+    <string name="tmp_select_server_public">Public</string>
+    <string name="tmp_select_server_history">History</string>
+    <string name="tmp_select_server_favorites">Favorites</string>
+    <string name="tmp_select_server_blocked">Blocked</string>
 
     <string name="tmp_select_apps_title">Select apps</string>
     <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
