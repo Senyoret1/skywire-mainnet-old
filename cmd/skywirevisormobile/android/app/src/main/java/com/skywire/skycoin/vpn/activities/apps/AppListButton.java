@@ -2,6 +2,7 @@ package com.skywire.skycoin.vpn.activities.apps;
 
 import android.content.Context;
 import android.content.pm.ResolveInfo;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
@@ -29,7 +30,7 @@ public class AppListButton extends ListButtonBase<Void> {
     }
 
     @Override
-    protected void Initialize (Context context) {
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_app_list_item, this, true);
 

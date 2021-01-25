@@ -9,24 +9,24 @@ public abstract class ListButtonBase<DataType> extends RelativeLayout implements
     public ListButtonBase(Context context) {
         super(context);
         this.setOnClickListener(this);
-        Initialize(context);
+        Initialize(context, null);
     }
     public ListButtonBase(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.setOnClickListener(this);
-        Initialize(context);
+        Initialize(context, attrs);
     }
     public ListButtonBase(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         this.setOnClickListener(this);
-        Initialize(context);
+        Initialize(context, attrs);
     }
 
     protected DataType dataForEvent;
     private int index;
     private ClickWithIndexEvent<DataType> clickListener;
 
-    abstract protected void Initialize (Context context);
+    abstract protected void Initialize (Context context, AttributeSet attrs);
 
     public void setIndex(int index) {
         this.index = index;

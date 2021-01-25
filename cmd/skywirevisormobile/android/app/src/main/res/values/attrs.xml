@@ -34,4 +34,12 @@
         <attr name="icon_text" format="string" />
         <attr name="lower_text" format="string" />
     </declare-styleable>
+    <declare-styleable name="ModalBase">
+        <attr name="title" />
+        <attr name="remove_internal_padding" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="OptionsItem">
+        <attr name="icon_text" />
+        <attr name="text" format="string" />
+    </declare-styleable>
 </resources>

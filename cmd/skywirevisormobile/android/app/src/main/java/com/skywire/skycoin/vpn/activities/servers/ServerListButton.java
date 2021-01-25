@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.controls.SettingsButton;
+import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
 import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
@@ -45,7 +47,7 @@ public class ServerListButton extends ListButtonBase<Void> {
     }
 
     @Override
-    protected void Initialize (Context context) {
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_server_list_item, this, true);
 
@@ -67,7 +69,7 @@ public class ServerListButton extends ListButtonBase<Void> {
 
         imageFlag.setClipToOutline(true);
 
-        buttonSettings.setClickEventListener(view -> Skywiremob.printString("Settings"));
+        buttonSettings.setClickEventListener(view -> showOptions());
     }
 
     public void changeData(VpnServerForList serverData, ServerLists listType) {
@@ -154,5 +156,24 @@ public class ServerListButton extends ListButtonBase<Void> {
         }
 
         return ContextCompat.getColor(getContext(), colorId);
+    }
+
+    private void showOptions() {
+        OptionsModalWindow.SelectableOption[] options = new OptionsModalWindow.SelectableOption[2];
+
+        OptionsModalWindow.SelectableOption option = new OptionsModalWindow.SelectableOption();
+        option.icon = "\ue83a";
+        option.label = "Option 1";
+        options[0] = option;
+
+        option = new OptionsModalWindow.SelectableOption();
+        option.icon = "\ue83a";
+        option.label = "Option 2";
+        options[1] = option;
+
+        OptionsModalWindow modal = new OptionsModalWindow(getContext(), options, (int index) -> {
+            Skywiremob.printString("//" + index);
+        });
+        modal.show();
     }
 }

@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.activities.apps;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -21,7 +22,7 @@ public class AppListOptionButton extends ListButtonBase<Void> {
     }
 
     @Override
-    protected void Initialize (Context context) {
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_app_list_selection_option, this, true);
 

@@ -8,6 +8,7 @@
 
     <string name="general_seconds_abbreviation">s.</string>
     <string name="general_milliseconds_abbreviation">ms.</string>
+    <string name="general_options">Options</string>
 
     <string name="rating_gold">Gold</string>
     <string name="rating_silver">Silver</string>

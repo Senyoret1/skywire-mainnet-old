@@ -2,6 +2,8 @@
 <resources>
     <color name="normal_text">#ffffff</color>
     <color name="subtle_text">#80ffffff</color>
+    <color name="blue_text">#215f9e</color>
+    <color name="modal_window_text">#555555</color>
 
     <color name="black_background">#88000000</color>
 
@@ -11,8 +13,10 @@
 
     <color name="box_separator">#45a7cbff</color>
     <color name="box_ripple">#415a7d</color>
+    <color name="clear_box_ripple">#bcc4d0</color>
 
     <color name="dark_background_separator">#26ffffff</color>
+    <color name="modal_separator">#33215f9e</color>
 
     <color name="white">#ffffff</color>
     <color name="green">#72c012</color>

@@ -41,6 +41,6 @@ public class SettingsButton extends ButtonBase implements View.OnTouchListener {
             textIcon.setAlpha(1.0f);
         }
 
-        return true;
+        return false;
     }
 }
