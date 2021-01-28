@@ -43,7 +43,7 @@
                 android:maxLines="1"
                 android:text="TextView"
                 android:textAllCaps="true"
-                android:textColor="@color/blue_text"
+                android:textColor="@color/primary"
                 android:textSize="@dimen/title_text_size"
                 android:textStyle="bold" />
 
@@ -67,7 +67,7 @@
                     android:layout_marginLeft="@dimen/modal_window_horizontal_margin"
                     android:layout_marginTop="12dp"
                     android:layout_marginRight="@dimen/modal_window_horizontal_margin"
-                    android:layout_marginBottom="24dp">
+                    android:layout_marginBottom="20dp">
 
                 </FrameLayout>
             </ScrollView>

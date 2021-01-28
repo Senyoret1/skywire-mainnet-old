@@ -91,6 +91,29 @@
     <string name="tmp_select_server_favorites">Favorites</string>
     <string name="tmp_select_server_blocked">Blocked</string>
 
+    <string name="tmp_server_options_make_favorite">Make favorite</string>
+    <string name="tmp_server_options_make_favorite_from_blocked_confirmation">Are you sure you want to mark this server as favorite? It will be removed from the blocked list.</string>
+    <string name="tmp_server_options_make_favorite_done">Added to the favorites list.</string>
+    <string name="tmp_server_options_remove_from_favorites">Remove from favorites</string>
+    <string name="tmp_server_options_remove_from_favorites_done">Removed from the favorites list.</string>
+    <string name="tmp_server_options_block">Block server</string>
+    <string name="tmp_server_options_block_error">ERROR: you cannot block this server because it is currently selected.</string>
+    <string name="tmp_server_options_block_favorite_confirmation">Are you sure you want to block this server? It will be removed from the favorites list.</string>
+    <string name="tmp_server_options_block_done">Added to the blocked list.</string>
+    <string name="tmp_server_options_unblock">Unblock server</string>
+    <string name="tmp_server_options_unblock_done">Removed from the blocked list.</string>
+    <string name="tmp_server_options_remove_from_history">Remove from history</string>
+    <string name="tmp_server_options_remove_from_history_confirmation">Are you sure you want to remove this server from the history?</string>
+    <string name="tmp_server_options_remove_from_history_done">Removed from history.</string>
+
+    <string name="tmp_edit_value_name_title">Custom Name</string>
+    <string name="tmp_edit_value_note_title">Custom Note</string>
+    <string name="tmp_edit_value_name_label">Custom name</string>
+    <string name="tmp_edit_value_note_label">Custom note</string>
+    <string name="tmp_edit_value_apply_button">Apply</string>
+    <string name="tmp_edit_value_cancel_button">Cancel</string>
+    <string name="tmp_edit_value_changes_made_confirmation">The change has been made.</string>
+
     <string name="tmp_select_apps_title">Select apps</string>
     <string name="tmp_select_apps_protect_all_button">Protect all apps</string>
     <string name="tmp_select_apps_protect_all_button_desc">All applications on the device will be protected. Selections made on the list will be ignored.</string>
@@ -112,4 +135,8 @@
     <string name="tmp_options_protect_before_connecting_description">If active, no data will be sent unprotected after you press the connection button, but the internet connection will be unavailable for a moment.</string>
     <string name="tmp_options_start_on_boot_title">Start on boot.</string>
     <string name="tmp_options_start_on_boot_description">The VPN protection will be automatically started shortly after turning on the device.</string>
+
+    <string name="tmp_confirmation_title">Confirmation</string>
+    <string name="tmp_confirmation_yes">Yes</string>
+    <string name="tmp_confirmation_no">No</string>
 </resources>

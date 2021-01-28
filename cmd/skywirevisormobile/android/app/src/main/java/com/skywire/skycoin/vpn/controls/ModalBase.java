@@ -62,6 +62,10 @@ public class ModalBase extends FrameLayout {
         }
     }
 
+    public void setTitle(int resourceId) {
+        textTitle.setText(resourceId);
+    }
+
     @Override
     public void addView(View child) {
         if (contentArea != null) {

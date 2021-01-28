@@ -42,4 +42,8 @@
         <attr name="icon_text" />
         <attr name="text" format="string" />
     </declare-styleable>
+    <declare-styleable name="ModalWindowButton">
+        <attr name="text" />
+        <attr name="use_secondary_color" format="boolean" />
+    </declare-styleable>
 </resources>

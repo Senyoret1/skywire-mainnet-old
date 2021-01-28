@@ -14,6 +14,12 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 
 public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchListener {
+    public static class SelectableOption {
+        public String icon;
+        public String label;
+        public int translatableLabelId = -1;
+    }
+
     private LinearLayout mainContainer;
     private TextView textIcon;
     private TextView text;
@@ -61,17 +67,19 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
         }
     }
 
-    public void setIconText(String newText) {
-        if (newText != null) {
-            textIcon.setText(newText);
+    public void setParams(SelectableOption params) {
+        if (params.icon != null) {
+            textIcon.setText(params.icon);
             textIcon.setVisibility(VISIBLE);
         } else {
             textIcon.setVisibility(GONE);
         }
-    }
 
-    public void setLabel(String newText) {
-        text.setText(newText);
+        if (params.translatableLabelId != -1) {
+            text.setText(params.translatableLabelId);
+        } else if (params.label != null) {
+            text.setText(params.label);
+        }
     }
 
     @Override

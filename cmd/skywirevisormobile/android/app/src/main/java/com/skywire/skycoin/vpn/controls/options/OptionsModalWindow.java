@@ -11,22 +11,19 @@ import android.widget.LinearLayout;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 
-public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Void> {
-    public static class SelectableOption {
-        public String icon;
-        public String label;
-    }
+import java.util.ArrayList;
 
+public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Void> {
     public interface OptionSelected {
         void optionSelected(int selectedIndex);
     }
 
     private LinearLayout container;
 
-    private SelectableOption[] options;
+    private ArrayList<OptionsItem.SelectableOption> options;
     private OptionSelected event;
 
-    public OptionsModalWindow(Context ctx, SelectableOption[] options, OptionSelected event) {
+    public OptionsModalWindow(Context ctx, ArrayList<OptionsItem.SelectableOption> options, OptionSelected event) {
         super(ctx);
 
         this.options = options;
@@ -44,10 +41,9 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         int i = 0;
-        for (SelectableOption option : options) {
+        for (OptionsItem.SelectableOption option : options) {
             OptionsItem view = new OptionsItem(getContext());
-            view.setIconText(option.icon);
-            view.setLabel(option.label);
+            view.setParams(option);
             view.setIndex(i++);
             view.setClickWithIndexEventListener(this);
             container.addView(view);

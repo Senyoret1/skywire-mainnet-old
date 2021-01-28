@@ -167,7 +167,8 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
                 converted.lastUsed = server.lastUsed;
                 converted.inHistory = server.inHistory;
                 converted.flag = server.flag;
-                converted.originalLocalData = server;
+                converted.enteredManually = server.enteredManually;
+                converted.usedWithPassword = server.usedWithPassword;
 
                 list.add(converted);
             }
@@ -254,10 +255,36 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         testServer.hops = 7;
         servers.add(testServer);
 
-        adapter.setData(servers, ServerLists.Public);
+        VPNServersPersistentData.getInstance().updateFromDiscovery(servers);
+
+        if (serverSubscription != null) {
+            serverSubscription.dispose();
+        }
+
+        serverSubscription = Observable.just(servers).flatMap(serversList ->
+            VPNServersPersistentData.getInstance().history()
+        ).subscribe(r -> {
+            addSavedData(servers);
+            adapter.setData(servers, ServerLists.Public);
+        });
 
         recycler.setVisibility(View.VISIBLE);
         loadingAnimation.setVisibility(View.GONE);
         textNoResults.setVisibility(View.GONE);
+    }
+
+    private void addSavedData(ArrayList<VpnServerForList> servers) {
+        for (VpnServerForList server : servers) {
+            LocalServerData savedVersion = VPNServersPersistentData.getInstance().getSavedVersion(server.pk);
+
+            if (savedVersion != null) {
+                server.customName = savedVersion.customName;
+                server.personalNote = savedVersion.personalNote;
+                server.inHistory = savedVersion.inHistory;
+                server.flag = savedVersion.flag;
+                server.enteredManually = savedVersion.enteredManually;
+                server.usedWithPassword = savedVersion.usedWithPassword;
+            }
+        }
     }
 }

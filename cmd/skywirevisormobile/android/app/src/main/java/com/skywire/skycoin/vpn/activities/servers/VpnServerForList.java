@@ -1,9 +1,7 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
-import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
-import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.util.Date;
 
@@ -25,7 +23,4 @@ public class VpnServerForList {
     public ServerFlags flag;
     public boolean usedWithPassword;
     public boolean enteredManually;
-
-    VpnServer originalDiscoveryData;
-    LocalServerData originalLocalData;
 }

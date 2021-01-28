@@ -7,10 +7,10 @@ import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.skywire.skycoin.vpn.App;
+import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.objects.ManualVpnServerData;
 import com.skywire.skycoin.vpn.objects.ServerFlags;
-import com.skywire.skycoin.vpn.objects.VpnServer;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -102,8 +102,8 @@ public class VPNServersPersistentData {
         return this.serversMap.get(pk);
     }
 
-    public void updateFromDiscovery(VpnServer[] serverList) {
-        for (VpnServer server : serverList) {
+    public void updateFromDiscovery(ArrayList<VpnServerForList> serverList) {
+        for (VpnServerForList server : serverList) {
             if (this.serversMap.containsKey(server.pk)) {
                 LocalServerData savedServer = this.serversMap.get(server.pk);
 
@@ -123,7 +123,7 @@ public class VPNServersPersistentData {
         this.saveData();
     }
 
-    public LocalServerData processFromDiscovery(VpnServer newServer) {
+    public LocalServerData processFromList(VpnServerForList newServer) {
         LocalServerData retrievedServer = this.serversMap.get(newServer.pk);
         if (retrievedServer != null) {
             retrievedServer.countryCode = newServer.countryCode;

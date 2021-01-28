@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#215f9e</color>
+    <color name="secondary">#a7a7a7</color>
+
     <color name="normal_text">#ffffff</color>
     <color name="subtle_text">#80ffffff</color>
-    <color name="blue_text">#215f9e</color>
     <color name="modal_window_text">#555555</color>
+    <color name="modal_window_hint">#acc2d9</color>
 
     <color name="black_background">#88000000</color>
 
@@ -14,6 +17,8 @@
     <color name="box_separator">#45a7cbff</color>
     <color name="box_ripple">#415a7d</color>
     <color name="clear_box_ripple">#bcc4d0</color>
+    <color name="primary_button_ripple">#113050</color>
+    <color name="secondary_button_ripple">#727272</color>
 
     <color name="dark_background_separator">#26ffffff</color>
     <color name="modal_separator">#33215f9e</color>
