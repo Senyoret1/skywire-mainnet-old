@@ -14,6 +14,8 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
 import com.skywire.skycoin.vpn.controls.EditServerValueModalWindow;
+import com.skywire.skycoin.vpn.controls.ServerInfoModalWindow;
+import com.skywire.skycoin.vpn.controls.ServerName;
 import com.skywire.skycoin.vpn.controls.SettingsButton;
 import com.skywire.skycoin.vpn.controls.options.OptionsItem;
 import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
@@ -34,8 +36,8 @@ public class ServerListButton extends ListButtonBase<Void> {
 
     private BoxRowLayout mainLayout;
     private ImageView imageFlag;
+    private ServerName serverName;
     private TextView textDate;
-    private TextView textName;
     private TextView textLocation;
     private TextView textLatency;
     private TextView textCongestion;
@@ -43,12 +45,15 @@ public class ServerListButton extends ListButtonBase<Void> {
     private TextView textLatencyRating;
     private TextView textCongestionRating;
     private TextView textNote;
+    private TextView textPersonalNote;
     private LinearLayout statsArea1;
     private LinearLayout statsArea2;
     private LinearLayout noteArea;
+    private LinearLayout personalNoteArea;
     private SettingsButton buttonSettings;
 
     private VpnServerForList server;
+    private ServerLists listType;
 
     public ServerListButton (Context context) {
         super(context);
@@ -61,8 +66,8 @@ public class ServerListButton extends ListButtonBase<Void> {
 
         mainLayout = this.findViewById (R.id.mainLayout);
         imageFlag = this.findViewById (R.id.imageFlag);
+        serverName = this.findViewById (R.id.serverName);
         textDate = this.findViewById (R.id.textDate);
-        textName = this.findViewById (R.id.textName);
         textLocation = this.findViewById (R.id.textLocation);
         textLatency = this.findViewById (R.id.textLatency);
         textCongestion = this.findViewById (R.id.textCongestion);
@@ -70,9 +75,11 @@ public class ServerListButton extends ListButtonBase<Void> {
         textLatencyRating = this.findViewById (R.id.textLatencyRating);
         textCongestionRating = this.findViewById (R.id.textCongestionRating);
         textNote = this.findViewById (R.id.textNote);
+        textPersonalNote = this.findViewById (R.id.textPersonalNote);
         statsArea1 = this.findViewById (R.id.statsArea1);
         statsArea2 = this.findViewById (R.id.statsArea2);
         noteArea = this.findViewById (R.id.noteArea);
+        personalNoteArea = this.findViewById (R.id.personalNoteArea);
         buttonSettings = this.findViewById (R.id.buttonSettings);
 
         imageFlag.setClipToOutline(true);
@@ -81,12 +88,13 @@ public class ServerListButton extends ListButtonBase<Void> {
     }
 
     public void changeData(@NonNull VpnServerForList serverData, ServerLists listType) {
-        this.server = serverData;
+        server = serverData;
+        this.listType = listType;
 
         imageFlag.setImageResource(HelperFunctions.getFlagResourceId(serverData.countryCode));
-        textName.setText(serverData.name);
+        serverName.setServer(serverData, listType);
 
-        if (serverData.location != null && serverData.location.trim() != "") {
+        if (serverData.location != null && !serverData.location.trim().equals("")) {
             String pk = serverData.pk;
             if (pk.length() > 5) {
                 pk = pk.substring(0, 5);
@@ -101,6 +109,12 @@ public class ServerListButton extends ListButtonBase<Void> {
             textNote.setText(serverData.note);
         } else {
             noteArea.setVisibility(GONE);
+        }
+        if (serverData.personalNote != null && serverData.personalNote.trim() != "") {
+            personalNoteArea.setVisibility(VISIBLE);
+            textPersonalNote.setText(serverData.personalNote);
+        } else {
+            personalNoteArea.setVisibility(GONE);
         }
 
         if (listType == ServerLists.Public) {
@@ -173,6 +187,11 @@ public class ServerListButton extends ListButtonBase<Void> {
         ArrayList<Integer> optionCodes = new ArrayList();
 
         OptionsItem.SelectableOption option = new OptionsItem.SelectableOption();
+        option.icon = "\ue88e";
+        option.translatableLabelId = R.string.tmp_server_options_view_info;
+        options.add(option);
+        optionCodes.add(10);
+        option = new OptionsItem.SelectableOption();
         option.icon = "\ue3c9";
         option.translatableLabelId = R.string.tmp_edit_value_name_title;
         options.add(option);
@@ -238,6 +257,9 @@ public class ServerListButton extends ListButtonBase<Void> {
                     server
                 );
                 valueModal.show();
+            } else if (optionCodes.get(selectedOption) == 10) {
+                ServerInfoModalWindow infoModal = new ServerInfoModalWindow(getContext(), server, listType);
+                infoModal.show();
             } else if (optionCodes.get(selectedOption) == 1) {
                 if (server.flag != ServerFlags.Blocked) {
                     VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Favorite);
@@ -260,7 +282,9 @@ public class ServerListButton extends ListButtonBase<Void> {
                 VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.None);
                 HelperFunctions.showToast(getContext().getString(R.string.tmp_server_options_remove_from_favorites_done), true);
             } else if (optionCodes.get(selectedOption) == 2) {
-                if (VPNServersPersistentData.getInstance().getCurrentServer().pk.toLowerCase().equals(server.pk.toLowerCase())) {
+                if (VPNServersPersistentData.getInstance().getCurrentServer() != null &&
+                    VPNServersPersistentData.getInstance().getCurrentServer().pk.toLowerCase().equals(server.pk.toLowerCase())
+                ) {
                     HelperFunctions.showToast(getContext().getString(R.string.tmp_server_options_block_error), true);
                     return;
                 }

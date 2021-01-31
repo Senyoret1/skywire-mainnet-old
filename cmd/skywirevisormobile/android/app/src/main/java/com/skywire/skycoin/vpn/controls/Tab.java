@@ -75,10 +75,12 @@ public class Tab extends ButtonBase implements View.OnTouchListener {
             mainContainer.setBackgroundResource(R.color.bar_selected);
             internalContainer.setBackground(null);
             rippleDrawable = null;
+            this.setClickable(false);
         } else {
             mainContainer.setBackgroundResource(R.color.bar_background);
             internalContainer.setBackgroundResource(R.drawable.box_ripple);
             rippleDrawable = (RippleDrawable) internalContainer.getBackground();
+            this.setClickable(true);
         }
     }
 

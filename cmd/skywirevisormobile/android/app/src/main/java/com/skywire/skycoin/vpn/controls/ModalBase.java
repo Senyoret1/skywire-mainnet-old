@@ -53,9 +53,7 @@ public class ModalBase extends FrameLayout {
 
             boolean removeInternalPadding = attributes.getBoolean(R.styleable.ModalBase_remove_internal_padding, false);
             if (removeInternalPadding) {
-                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)contentArea.getLayoutParams();
-                params.setMargins(0, 0, 0, 0);
-                contentArea.setLayoutParams(params);
+                contentArea.setPadding(0, 0, 0, 0);
             }
 
             attributes.recycle();

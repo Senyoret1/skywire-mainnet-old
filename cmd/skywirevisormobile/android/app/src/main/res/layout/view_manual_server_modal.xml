@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.skywire.skycoin.vpn.controls.ModalBase xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/modalBase"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:title="@string/add_server_title">
 
     <LinearLayout
-        android:id="@+id/container"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/editValue"
+            android:id="@+id/editPk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:backgroundTint="@color/primary"
+            android:hint="@string/add_server_pk_label"
+            android:inputType="text"
+            android:maxLength="66"
+            android:textColor="@color/primary"
+            android:textColorHighlight="@color/modal_window_hint"
+            android:textColorHint="@color/modal_window_hint"/>
+
+        <EditText
+            android:id="@+id/editName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:backgroundTint="@color/primary"
+            android:hint="@string/add_server_name_label"
+            android:inputType="text"
+            android:maxLength="100"
+            android:textColor="@color/primary"
+            android:textColorHighlight="@color/modal_window_hint"
+            android:textColorHint="@color/modal_window_hint" />
+
+        <EditText
+            android:id="@+id/editNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/primary"
-            android:hint="Hint"
-            android:imeOptions="actionDone"
+            android:hint="@string/add_server_note_label"
             android:inputType="text"
             android:maxLength="100"
             android:textColor="@color/primary"
@@ -36,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="4dp"
                 android:layout_weight="1"
-                app:text="@string/tmp_edit_value_cancel_button"
+                app:text="@string/general_cancel"
                 app:use_secondary_color="true" />
 
             <com.skywire.skycoin.vpn.controls.ModalWindowButton
@@ -45,7 +69,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:layout_weight="1"
-                app:text="@string/tmp_edit_value_apply_button" />
+                app:text="@string/add_server_use_server_button" />
+
         </LinearLayout>
 
     </LinearLayout>

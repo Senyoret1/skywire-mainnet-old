@@ -78,4 +78,15 @@ public class ModalWindowButton extends ButtonBase implements View.OnTouchListene
 
         return false;
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
+        if (enabled) {
+            this.setAlpha(1);
+        } else {
+            this.setAlpha(0.35f);
+        }
+    }
 }

@@ -46,7 +46,7 @@ public class CurrentServerButton extends LinearLayout {
     }
 
     public void setData (LocalServerData currentServer) {
-        if (currentServer == null) {
+        if (currentServer == null || currentServer.pk == null) {
             textNoServer.setVisibility(VISIBLE);
             serverContainer.setVisibility(GONE);
 

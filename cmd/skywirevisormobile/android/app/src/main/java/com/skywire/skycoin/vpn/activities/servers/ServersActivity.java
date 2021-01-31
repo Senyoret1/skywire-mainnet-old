@@ -15,10 +15,13 @@ import com.skywire.skycoin.vpn.controls.Tab;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
+import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import io.reactivex.rxjava3.core.Observable;
@@ -173,6 +176,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
                 list.add(converted);
             }
 
+            sortList(list);
             adapter.setData(list, listType);
 
             recycler.setVisibility(View.VISIBLE);
@@ -207,6 +211,18 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
 
         Intent resultIntent = new Intent();
         resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.pk);
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    @Override
+    public void onManualEntered(LocalServerData server) {
+        if (HelperFunctions.closeActivityIfServiceRunning(this)) {
+            return;
+        }
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra(ADDRESS_DATA_PARAM, server.pk);
         setResult(RESULT_OK, resultIntent);
         finish();
     }
@@ -264,8 +280,12 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         serverSubscription = Observable.just(servers).flatMap(serversList ->
             VPNServersPersistentData.getInstance().history()
         ).subscribe(r -> {
-            addSavedData(servers);
-            adapter.setData(servers, ServerLists.Public);
+            ArrayList<VpnServerForList> serversCopy = new ArrayList<>(servers);
+
+            removeSavedData(serversCopy);
+            addSavedData(serversCopy);
+            sortList(serversCopy);
+            adapter.setData(serversCopy, ServerLists.Public);
         });
 
         recycler.setVisibility(View.VISIBLE);
@@ -274,6 +294,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
     }
 
     private void addSavedData(ArrayList<VpnServerForList> servers) {
+        ArrayList<VpnServerForList> remove = new ArrayList();
         for (VpnServerForList server : servers) {
             LocalServerData savedVersion = VPNServersPersistentData.getInstance().getSavedVersion(server.pk);
 
@@ -285,6 +306,54 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
                 server.enteredManually = savedVersion.enteredManually;
                 server.usedWithPassword = savedVersion.usedWithPassword;
             }
+
+            if (server.flag == ServerFlags.Blocked) {
+                remove.add(server);
+            }
         }
+
+        servers.removeAll(remove);
+    }
+
+    private void removeSavedData(ArrayList<VpnServerForList> servers) {
+        for (VpnServerForList server : servers) {
+            server.customName = null;
+            server.personalNote = null;
+            server.inHistory = false;
+            server.flag = ServerFlags.None;
+            server.enteredManually = false;
+            server.usedWithPassword = false;
+        }
+    }
+
+    private void sortList(ArrayList<VpnServerForList> servers) {
+        if (listType != ServerLists.History) {
+            Comparator<VpnServerForList> comparator = (a, b) -> {
+                int response = a.countryCode.compareTo(b.countryCode);
+
+                if (response == 0) {
+                    response = getServerName(a).compareTo(getServerName(b));
+                }
+
+                return response;
+            };
+
+            Collections.sort(servers, comparator);
+        } else {
+            Comparator<VpnServerForList> comparator = (a, b) -> (int)((b.lastUsed.getTime() - a.lastUsed.getTime()) / 1000);
+            Collections.sort(servers, comparator);
+        }
+    }
+
+    private String getServerName(VpnServerForList server) {
+        if ((server.name == null || server.name.trim().equals("")) && (server.customName == null || server.customName.trim().equals(""))) {
+            return "";
+        } else if (server.name != null && !server.name.trim().equals("") && (server.customName == null || server.customName.trim().equals(""))) {
+            return server.name;
+        } else if (server.customName != null && !server.customName.trim().equals("") && (server.name == null || server.name.trim().equals(""))) {
+            return server.customName;
+        }
+
+        return server.customName + " - " + server.name;
     }
 }

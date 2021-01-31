@@ -7,15 +7,18 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.skywire.skycoin.vpn.controls.ManualServerModalWindow;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
 
 import java.util.List;
 
 public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>> implements ClickWithIndexEvent<Void> {
     public interface VpnServerSelectedListener {
         void onVpnServerSelected(VpnServerForList selectedServer);
+        void onManualEntered(LocalServerData server);
     }
 
     private Context context;
@@ -51,6 +54,7 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     public ListViewHolder<View> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == 0) {
             ServerListOptions view = new ServerListOptions(context);
+            view.setClickWithIndexEventListener(this);
             return new ListViewHolder<>(view);
         }
 
@@ -87,7 +91,14 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     @Override
     public void onClickWithIndex(int index, Void data) {
         if (vpnSelectedListener != null) {
-            vpnSelectedListener.onVpnServerSelected(this.data.get(index));
+            if (index >= 0) {
+                vpnSelectedListener.onVpnServerSelected(this.data.get(index));
+            } else {
+                if (index == ServerListOptions.addIndex) {
+                    ManualServerModalWindow modal = new ManualServerModalWindow(context, server -> vpnSelectedListener.onManualEntered(server));
+                    modal.show();
+                }
+            }
         }
     }
 }

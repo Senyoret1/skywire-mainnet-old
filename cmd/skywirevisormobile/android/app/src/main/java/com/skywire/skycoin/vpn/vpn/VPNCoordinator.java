@@ -30,7 +30,7 @@ public class VPNCoordinator implements Handler.Callback {
     /**
      * Value the onActivityResult function will get after asking the user for permission.
      */
-    public static final int VPN_PREPARATION_REQUEST_CODE = 1000100;
+    public static final int VPN_PREPARATION_REQUEST_CODE = 10100;
 
     /**
      * Singleton instance.

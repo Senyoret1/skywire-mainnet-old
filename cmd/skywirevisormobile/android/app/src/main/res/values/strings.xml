@@ -10,6 +10,12 @@
     <string name="general_milliseconds_abbreviation">ms.</string>
     <string name="general_options">Options</string>
 
+    <string name="general_cancel">Cancel</string>
+    <string name="general_close">Close</string>
+    <string name="general_yes">Yes</string>
+    <string name="general_no">No</string>
+    <string name="general_unknown">Unknown</string>
+
     <string name="rating_gold">Gold</string>
     <string name="rating_silver">Silver</string>
     <string name="rating_bronze">Bronze</string>
@@ -90,7 +96,17 @@
     <string name="tmp_select_server_history">History</string>
     <string name="tmp_select_server_favorites">Favorites</string>
     <string name="tmp_select_server_blocked">Blocked</string>
+    <string name="tmp_select_server_unnamed">Unnamed</string>
 
+    <string name="add_server_title">Enter Manually</string>
+    <string name="add_server_pk_label">Server public key</string>
+    <string name="add_server_name_label">Server name (optional)</string>
+    <string name="add_server_note_label">Personal note (optional)</string>
+    <string name="add_server_pk_length_error">The public key must be 66 characters long.</string>
+    <string name="add_server_pk_invalid_error">The public key is not valid.</string>
+    <string name="add_server_use_server_button">Use server</string>
+
+    <string name="tmp_server_options_view_info">View info</string>
     <string name="tmp_server_options_make_favorite">Make favorite</string>
     <string name="tmp_server_options_make_favorite_from_blocked_confirmation">Are you sure you want to mark this server as favorite? It will be removed from the blocked list.</string>
     <string name="tmp_server_options_make_favorite_done">Added to the favorites list.</string>
@@ -105,6 +121,34 @@
     <string name="tmp_server_options_remove_from_history">Remove from history</string>
     <string name="tmp_server_options_remove_from_history_confirmation">Are you sure you want to remove this server from the history?</string>
     <string name="tmp_server_options_remove_from_history_done">Removed from history.</string>
+
+    <string name="server_info_title">Server Info</string>
+    <string name="server_info_without_value">Without value</string>
+    <string name="server_info_basic_info_title">Basic Information</string>
+    <string name="server_info_name">Server name:</string>
+    <string name="server_info_custom_name">Custom server name:</string>
+    <string name="server_info_pk">Skywire visor public key:</string>
+    <string name="server_info_note">Note:</string>
+    <string name="server_info_original_note">Original note:</string>
+    <string name="server_info_personal_note">Personal note:</string>
+    <string name="server_info_last_time_used">Last time used:</string>
+    <string name="server_info_location_title">Location</string>
+    <string name="server_info_country">Country:</string>
+    <string name="server_info_country_code">Country code:</string>
+    <string name="server_info_location">Location:</string>
+    <string name="server_info_connectivity_title">Connectivity</string>
+    <string name="server_info_congestion">Current congestion:</string>
+    <string name="server_info_congestion_rating">Regular congestion rating:</string>
+    <string name="server_info_latency">Current latency:</string>
+    <string name="server_info_latency_rating">Regular latency rating:</string>
+    <string name="server_info_hops">Hops needed for connecting with the server:</string>
+    <string name="server_info_special_conditions_title">Special Conditions</string>
+    <string name="server_info_is_current">Selected as the current server:</string>
+    <string name="server_info_is_favorite">Is favorite:</string>
+    <string name="server_info_is_blocked">Is blocked:</string>
+    <string name="server_info_is_in_history">Is in history:</string>
+    <string name="server_info_entered_manually">Entered manually:</string>
+    <string name="server_info_used_with_password">Used with password:</string>
 
     <string name="tmp_edit_value_name_title">Custom Name</string>
     <string name="tmp_edit_value_note_title">Custom Note</string>

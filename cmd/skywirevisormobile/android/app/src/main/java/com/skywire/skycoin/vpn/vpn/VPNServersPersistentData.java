@@ -65,10 +65,10 @@ public class VPNServersPersistentData {
             serversMap = gson.fromJson(serversList, mapType);
 
             LocalServerData currentServer = this.serversMap.get(currentServerPk);
-            this.currentServerSubject.onNext(currentServer);
+            this.currentServerSubject.onNext(currentServer != null ? currentServer : new LocalServerData());
         } else {
             serversMap = new HashMap<>();
-            this.currentServerSubject.onNext(null);
+            this.currentServerSubject.onNext(new LocalServerData());
         }
 
         this.launchListEvents();
