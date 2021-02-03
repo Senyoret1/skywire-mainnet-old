@@ -1,19 +1,25 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activities.settings.SettingsActivity">
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/top_bar_height">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <com.skywire.skycoin.vpn.activities.settings.SettingsOption
+                android:id="@+id/optionApps"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                app:box_row_type="single"
+                app:description="@string/tmp_options_apps_description"
+                app:title="@string/tmp_options_apps_title" />
 
             <com.skywire.skycoin.vpn.activities.settings.SettingsOption
                 android:id="@+id/optionKillSwitch"
@@ -49,16 +55,4 @@
 
     </ScrollView>
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_shadow_height"
-        android:layout_marginTop="@dimen/top_bar_height"
-        android:scaleType="fitXY"
-        app:srcCompat="@drawable/top_bar_shadow" />
-
-    <com.skywire.skycoin.vpn.controls.TopBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:left_button_icon="back"
-        app:title="@string/tmp_options_title" />
 </FrameLayout>

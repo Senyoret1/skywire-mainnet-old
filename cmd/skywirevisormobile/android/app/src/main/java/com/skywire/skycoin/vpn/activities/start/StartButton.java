@@ -10,22 +10,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.extensible.ButtonBase;
 
-public class StartButton extends LinearLayout implements Animator.AnimatorListener, View.OnTouchListener {
+public class StartButton extends ButtonBase implements Animator.AnimatorListener, View.OnTouchListener {
     public StartButton(Context context) {
         super(context);
-        Initialize(context, null);
     }
     public StartButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Initialize(context, attrs);
     }
     public StartButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Initialize(context, attrs);
     }
 
     private FrameLayout mainLayout;
@@ -34,7 +31,7 @@ public class StartButton extends LinearLayout implements Animator.AnimatorListen
 
     private AnimatorSet animSet;
 
-    private void Initialize (Context context, AttributeSet attrs) {
+    protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_start_button, this, true);
 
@@ -81,6 +78,6 @@ public class StartButton extends LinearLayout implements Animator.AnimatorListen
             imageBackground.setAlpha(0.7f);
         }
 
-        return true;
+        return false;
     }
 }

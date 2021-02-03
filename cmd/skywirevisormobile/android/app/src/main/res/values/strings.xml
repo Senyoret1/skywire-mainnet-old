@@ -87,10 +87,11 @@
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
     <string name="tmp_main_page_last_error">The VPN service failed with the following error:</string>
 
-    <string name="tmp_status_title">START VPN</string>
+    <string name="tmp_status_title">Status</string>
+    <string name="tmp_status_start_title">START VPN</string>
     <string name="tmp_status_no_server">No server selected!</string>
 
-    <string name="tmp_select_server_title">Select VPN server</string>
+    <string name="tmp_select_server_title">Servers</string>
     <string name="tmp_select_server_empty_info">There are no servers to display in this list.</string>
     <string name="tmp_select_server_public">Public</string>
     <string name="tmp_select_server_history">History</string>
@@ -170,7 +171,11 @@
     <string name="tmp_select_apps_installed_apps_title">Installed apps</string>
     <string name="tmp_select_apps_uninstalled_apps_title">Uninstalled apps</string>
 
-    <string name="tmp_options_title">Options</string>
+    <string name="tmp_options_title">Settings</string>
+    <string name="tmp_options_apps_title">Protect specific apps</string>
+    <string name="tmp_options_apps_description">Currently the VPN protection covers all your apps. Use this option if you want to protect only some applications or if you want to ignore them.</string>
+    <string name="tmp_options_apps_include_description">Only %1$s app(s) you have selected will be protected. Press here if you want to change the configuiration.</string>
+    <string name="tmp_options_apps_exclude_description">%1$s app(s) you have selected will NOT be protected. Press here if you want to change the configuiration.</string>
     <string name="tmp_options_kill_switch_title">Kill switch</string>
     <string name="tmp_options_kill_switch_description">This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
     <string name="tmp_options_reset_after_errors_title">Reset after errors.</string>

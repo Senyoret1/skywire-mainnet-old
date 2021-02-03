@@ -1,13 +1,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainContainer"
     android:layout_width="240dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/current_server_rounded_box">
 
     <FrameLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/internalContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/current_server_rounded_box"
+        android:background="@drawable/current_server_ripple"
         android:paddingLeft="16dp"
         android:paddingTop="8dp"
         android:paddingRight="16dp"
@@ -35,13 +38,11 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textTop"
+                <com.skywire.skycoin.vpn.controls.ServerName
+                    android:id="@+id/serverName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:text="United Stated - NY" />
+                    app:default_name="@string/tmp_select_server_unnamed" />
 
                 <TextView
                     android:id="@+id/textBottom"
@@ -77,6 +78,7 @@
             android:id="@+id/textNoServer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="@string/tmp_status_no_server"
             android:textSize="@dimen/normal_text_size" />
 

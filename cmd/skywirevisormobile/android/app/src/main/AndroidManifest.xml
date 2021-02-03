@@ -32,7 +32,7 @@
         </service>
 
         <activity
-            android:name=".activities.main.MainActivity"
+            android:name=".activities.index.IndexActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
@@ -42,33 +42,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-<!--
-        <activity
-            android:name=".activities.start.StartActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask"
-            android:label="@string/general_app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
--->
-        <activity
-            android:name=".activities.start.StartActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:label="@string/general_app_name" >
-        </activity>
-
-        <activity
-            android:name=".activities.servers.ServersActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:label="@string/tmp_select_server_title" >
         </activity>
 
         <activity
@@ -78,12 +51,6 @@
             android:label="@string/tmp_select_apps_title" >
         </activity>
 
-        <activity
-            android:name=".activities.settings.SettingsActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:label="@string/tmp_options_title" >
-        </activity>
     </application>
 
 </manifest>

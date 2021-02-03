@@ -1,0 +1,39 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.index.IndexActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/top_bar_height">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/top_tab_bar_height"
+            app:tabBackground="@color/bar_background"
+            app:tabRippleColor="@color/box_ripple"
+            app:tabIndicatorColor="@color/accent"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/top_bar_with_tabs_height" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_bar_shadow_height"
+        android:layout_marginTop="@dimen/top_bar_with_tabs_height"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/top_bar_shadow" />
+
+    <com.skywire.skycoin.vpn.controls.TopBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</FrameLayout>

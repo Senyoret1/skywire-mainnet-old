@@ -2,6 +2,7 @@
 <resources>
     <color name="primary">#215f9e</color>
     <color name="secondary">#a7a7a7</color>
+    <color name="accent">#5a98f4</color>
 
     <color name="normal_text">#ffffff</color>
     <color name="subtle_text">#80ffffff</color>
@@ -11,6 +12,7 @@
     <color name="modal_window_hint">#acc2d9</color>
 
     <color name="black_background">#88000000</color>
+    <color name="black_background_ripple">#314560</color>
 
     <color name="bar_background">#1e2f45</color>
     <color name="bar_separator">#314560</color>

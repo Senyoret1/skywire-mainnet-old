@@ -22,9 +22,6 @@ import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 public class ServerName extends FrameLayout {
-    private static MaterialFontSpan materialFontSpan = new MaterialFontSpan();
-    private static RelativeSizeSpan relativeSizeSpan = new RelativeSizeSpan(0.75f);
-
     private TextView text;
 
     private String defaultName = "";
@@ -70,14 +67,17 @@ public class ServerName extends FrameLayout {
         }
     }
 
-    public void setServer(VpnServerForList server, ServerLists listType) {
+    public void setServer(VpnServerForList server, ServerLists listType, boolean doNotMarkCurrent) {
+        MaterialFontSpan materialFontSpan = new MaterialFontSpan();
+        RelativeSizeSpan relativeSizeSpan = new RelativeSizeSpan(0.75f);
+
         int initialicons = 0;
         boolean isCurrentServer = VPNServersPersistentData.getInstance().getCurrentServer() != null &&
             server.pk.toLowerCase().equals(VPNServersPersistentData.getInstance().getCurrentServer().pk.toLowerCase());
 
         SpannableStringBuilder finalText = new SpannableStringBuilder("");
 
-        if (isCurrentServer) {
+        if (isCurrentServer && !doNotMarkCurrent) {
             finalText.append("\ue876 ");
             initialicons += 1;
         }

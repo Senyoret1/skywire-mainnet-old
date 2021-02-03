@@ -314,5 +314,6 @@ public class VPNServersPersistentData {
         this.historySubject.onNext(history);
         this.favoritesSubject.onNext(favorites);
         this.blockedSubject.onNext(blocked);
+        this.currentServerSubject.onNext(currentServerSubject.getValue());
     }
 }

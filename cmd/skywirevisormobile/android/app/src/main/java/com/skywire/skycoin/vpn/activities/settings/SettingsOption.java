@@ -14,6 +14,7 @@ import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
 public class SettingsOption extends ButtonBase {
     private BoxRowLayout mainLayout;
+    private TextView textAlertIcon;
     private TextView textName;
     private TextView textDescription;
     private CheckBox checkSelected;
@@ -34,6 +35,7 @@ public class SettingsOption extends ButtonBase {
         inflater.inflate(R.layout.view_settings_list_item, this, true);
 
         mainLayout = this.findViewById (R.id.mainLayout);
+        textAlertIcon = this.findViewById (R.id.textAlertIcon);
         textName = this.findViewById (R.id.textName);
         textDescription = this.findViewById (R.id.textDescription);
         checkSelected = this.findViewById (R.id.checkSelected);
@@ -68,6 +70,8 @@ public class SettingsOption extends ButtonBase {
         } else if (type == 3) {
             mainLayout.setType(BoxRowTypes.SINGLE);
         }
+
+        textAlertIcon.setVisibility(GONE);
     }
 
     public void setChecked(boolean checked) {
@@ -75,5 +79,21 @@ public class SettingsOption extends ButtonBase {
     }
     public boolean isChecked() {
         return checkSelected.isChecked();
+    }
+
+    public void setDescription(int resource, String param) {
+        if (param == null) {
+            textDescription.setText(resource);
+        } else {
+            textDescription.setText(String.format(getResources().getString(resource), param));
+        }
+    }
+
+    public void changeAlertIconVisibility(boolean visible) {
+        if (visible) {
+            textAlertIcon.setVisibility(VISIBLE);
+        } else {
+            textAlertIcon.setVisibility(GONE);
+        }
     }
 }

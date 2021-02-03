@@ -12,8 +12,19 @@ import android.widget.Toast;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.main.MainActivity;
+import com.skywire.skycoin.vpn.activities.servers.ServerLists;
+import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
+import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
+import com.skywire.skycoin.vpn.controls.EditServerValueModalWindow;
+import com.skywire.skycoin.vpn.controls.ServerInfoModalWindow;
+import com.skywire.skycoin.vpn.controls.options.OptionsItem;
+import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
 import com.skywire.skycoin.vpn.network.ApiClient;
+import com.skywire.skycoin.vpn.objects.LocalServerData;
+import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -243,5 +254,180 @@ public class HelperFunctions {
         } else {
             return R.drawable.do_flag;
         }
+    }
+
+    public static boolean prepareAndStartVpn(Activity requestingActivity, LocalServerData server) {
+        long err = Skywiremob.isPKValid(server.pk);
+        if (err != Skywiremob.ErrCodeNoError) {
+            HelperFunctions.showToast(requestingActivity.getString(R.string.vpn_coordinator_invalid_credentials_error) + server.pk, false);
+            return false;
+        } else {
+            Skywiremob.printString("PK is correct");
+        }
+
+        Globals.AppFilteringModes selectedMode = VPNGeneralPersistentData.getAppsSelectionMode();
+        if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
+            HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
+
+            if (selectedApps.size() == 0) {
+                if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
+                    HelperFunctions.showToast(requestingActivity.getString(R.string.vpn_no_apps_to_protect_warning), false);
+                } else {
+                    HelperFunctions.showToast(requestingActivity.getString(R.string.vpn_no_apps_to_ignore_warning), false);
+                }
+            }
+        }
+
+        VPNCoordinator.getInstance().startVPN(
+            requestingActivity,
+            server,
+            ""
+        );
+
+        return true;
+    }
+
+    public static void showServerOptions(Context ctx, VpnServerForList server, ServerLists listType) {
+        ArrayList<OptionsItem.SelectableOption> options = new ArrayList();
+        ArrayList<Integer> optionCodes = new ArrayList();
+
+        OptionsItem.SelectableOption option = new OptionsItem.SelectableOption();
+        option.icon = "\ue88e";
+        option.translatableLabelId = R.string.tmp_server_options_view_info;
+        options.add(option);
+        optionCodes.add(10);
+        option = new OptionsItem.SelectableOption();
+        option.icon = "\ue3c9";
+        option.translatableLabelId = R.string.tmp_edit_value_name_title;
+        options.add(option);
+        optionCodes.add(101);
+        option = new OptionsItem.SelectableOption();
+        option.icon = "\ue8d2";
+        option.translatableLabelId = R.string.tmp_edit_value_note_title;
+        options.add(option);
+        optionCodes.add(102);
+
+        if (server.flag != ServerFlags.Favorite) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue838";
+            option.translatableLabelId = R.string.tmp_server_options_make_favorite;
+            options.add(option);
+            optionCodes.add(1);
+        }
+
+        if (server.flag == ServerFlags.Favorite) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue83a";
+            option.translatableLabelId = R.string.tmp_server_options_remove_from_favorites;
+            options.add(option);
+            optionCodes.add(-1);
+        }
+
+        if (server.flag != ServerFlags.Blocked) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue925";
+            option.translatableLabelId = R.string.tmp_server_options_block;
+            options.add(option);
+            optionCodes.add(2);
+        }
+
+        if (server.flag == ServerFlags.Blocked) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue8dc";
+            option.translatableLabelId = R.string.tmp_server_options_unblock;
+            options.add(option);
+            optionCodes.add(-2);
+        }
+
+        if (server.inHistory) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue872";
+            option.translatableLabelId = R.string.tmp_server_options_remove_from_history;
+            options.add(option);
+            optionCodes.add(-3);
+        }
+
+        OptionsModalWindow modal = new OptionsModalWindow(ctx, options, (int selectedOption) -> {
+            LocalServerData savedVersion_ = VPNServersPersistentData.getInstance().getSavedVersion(server.pk);
+            if (savedVersion_ == null) {
+                savedVersion_ = VPNServersPersistentData.getInstance().processFromList(server);
+            }
+
+            final LocalServerData savedVersion = savedVersion_;
+
+            if (optionCodes.get(selectedOption) > 100) {
+                EditServerValueModalWindow valueModal = new EditServerValueModalWindow(
+                    ctx,
+                    optionCodes.get(selectedOption) == 101,
+                    server
+                );
+                valueModal.show();
+            } else if (optionCodes.get(selectedOption) == 10) {
+                ServerInfoModalWindow infoModal = new ServerInfoModalWindow(ctx, server, listType);
+                infoModal.show();
+            } else if (optionCodes.get(selectedOption) == 1) {
+                if (server.flag != ServerFlags.Blocked) {
+                    VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Favorite);
+                    HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_make_favorite_done), true);
+                    return;
+                }
+
+                ConfirmationModalWindow confirmationModal = new ConfirmationModalWindow(
+                    ctx,
+                    R.string.tmp_server_options_make_favorite_from_blocked_confirmation,
+                    R.string.tmp_confirmation_yes,
+                    R.string.tmp_confirmation_no,
+                    () -> {
+                        VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Favorite);
+                        HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_make_favorite_done), true);
+                    }
+                );
+                confirmationModal.show();
+            } else if (optionCodes.get(selectedOption) == -1) {
+                VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.None);
+                HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_remove_from_favorites_done), true);
+            } else if (optionCodes.get(selectedOption) == 2) {
+                if (VPNServersPersistentData.getInstance().getCurrentServer() != null &&
+                    VPNServersPersistentData.getInstance().getCurrentServer().pk.toLowerCase().equals(server.pk.toLowerCase())
+                ) {
+                    HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_block_error), true);
+                    return;
+                }
+
+                if (server.flag != ServerFlags.Favorite) {
+                    VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Blocked);
+                    HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_block_done), true);
+                    return;
+                }
+
+                ConfirmationModalWindow confirmationModal = new ConfirmationModalWindow(
+                    ctx,
+                    R.string.tmp_server_options_block_favorite_confirmation,
+                    R.string.tmp_confirmation_yes,
+                    R.string.tmp_confirmation_no,
+                    () -> {
+                        VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Blocked);
+                        HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_block_done), true);
+                    }
+                );
+                confirmationModal.show();
+            } else if (optionCodes.get(selectedOption) == -2) {
+                VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.None);
+                HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_unblock_done), true);
+            } else if (optionCodes.get(selectedOption) == -3) {
+                ConfirmationModalWindow confirmationModal = new ConfirmationModalWindow(
+                    ctx,
+                    R.string.tmp_server_options_remove_from_history_confirmation,
+                    R.string.tmp_confirmation_yes,
+                    R.string.tmp_confirmation_no,
+                    () -> {
+                        VPNServersPersistentData.getInstance().removeFromHistory(savedVersion.pk);
+                        HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_remove_from_history_done), true);
+                    }
+                );
+                confirmationModal.show();
+            }
+        });
+        modal.show();
     }
 }

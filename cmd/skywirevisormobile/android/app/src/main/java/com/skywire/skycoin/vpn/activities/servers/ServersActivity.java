@@ -1,16 +1,24 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.activities.index.IndexPageAdapter;
 import com.skywire.skycoin.vpn.controls.Tab;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
@@ -27,8 +35,9 @@ import java.util.Date;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
-public class ServersActivity extends AppCompatActivity implements VpnServersAdapter.VpnServerSelectedListener, ClickEvent {
+public class ServersActivity extends Fragment implements VpnServersAdapter.VpnServerSelectedListener, ClickEvent {
     public static String ADDRESS_DATA_PARAM = "address";
+    private static final String ACTIVE_TAB_KEY = "activeTab";
 
     private Tab tabPublic;
     private Tab tabHistory;
@@ -38,30 +47,39 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
     private ProgressBar loadingAnimation;
     private TextView textNoResults;
 
+    private IndexPageAdapter.RequestTabListener requestTabListener;
     private ServerLists listType = ServerLists.Public;
     private VpnServersAdapter adapter;
+    private SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
     private Disposable serverSubscription;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_server_list);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-        tabPublic = findViewById(R.id.tabPublic);
-        tabHistory = findViewById(R.id.tabHistory);
-        tabFavorites = findViewById(R.id.tabFavorites);
-        tabBlocked = findViewById(R.id.tabBlocked);
-        recycler = findViewById(R.id.recycler);
-        loadingAnimation = findViewById(R.id.loadingAnimation);
-        textNoResults = findViewById(R.id.textNoResults);
+        return inflater.inflate(R.layout.activity_server_list, container, true);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        tabPublic = view.findViewById(R.id.tabPublic);
+        tabHistory = view.findViewById(R.id.tabHistory);
+        tabFavorites = view.findViewById(R.id.tabFavorites);
+        tabBlocked = view.findViewById(R.id.tabBlocked);
+        recycler = view.findViewById(R.id.recycler);
+        loadingAnimation = view.findViewById(R.id.loadingAnimation);
+        textNoResults = view.findViewById(R.id.textNoResults);
 
         tabPublic.setClickEventListener(this);
         tabHistory.setClickEventListener(this);
         tabFavorites.setClickEventListener(this);
         tabBlocked.setClickEventListener(this);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recycler.setLayoutManager(layoutManager);
         // This could be useful in the future.
         // recycler.setHasFixedSize(true);
@@ -71,12 +89,22 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         // requestData()
 
         // Initialize the recycler.
-        adapter = new VpnServersAdapter(this);
+        adapter = new VpnServersAdapter(getContext());
         adapter.setData(new ArrayList<>(), listType);
         adapter.setVpnSelectedEventListener(this);
         recycler.setAdapter(adapter);
 
+        Gson gson = new Gson();
+        String savedlistType = settings.getString(ACTIVE_TAB_KEY, null);
+        if (savedlistType != null) {
+            listType = gson.fromJson(savedlistType, ServerLists.class);
+        }
+
         showCorrectList();
+    }
+
+    public void setRequestTabListener(IndexPageAdapter.RequestTabListener listener) {
+        requestTabListener = listener;
     }
 
     @Override
@@ -90,6 +118,12 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         } else if (view.getId() == R.id.tabBlocked) {
             listType = ServerLists.Blocked;
         }
+
+        Gson gson = new Gson();
+        String listTypeString = gson.toJson(listType);
+        settings.edit()
+            .putString(ACTIVE_TAB_KEY, listTypeString)
+            .apply();
 
         showCorrectList();
     }
@@ -158,22 +192,7 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
             ArrayList<VpnServerForList> list = new ArrayList<>();
 
             for (LocalServerData server : response) {
-                VpnServerForList converted = new VpnServerForList();
-
-                converted.countryCode = server.countryCode;
-                converted.name = server.name;
-                converted.customName = server.customName;
-                converted.location = server.location;
-                converted.pk = server.pk;
-                converted.note = server.note;
-                converted.personalNote = server.personalNote;
-                converted.lastUsed = server.lastUsed;
-                converted.inHistory = server.inHistory;
-                converted.flag = server.flag;
-                converted.enteredManually = server.enteredManually;
-                converted.usedWithPassword = server.usedWithPassword;
-
-                list.add(converted);
+                list.add(convertLocalServerData(server));
             }
 
             sortList(list);
@@ -188,15 +207,34 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        HelperFunctions.closeActivityIfServiceRunning(this);
+    public static VpnServerForList convertLocalServerData(LocalServerData server) {
+        VpnServerForList converted = new VpnServerForList();
+
+        converted.countryCode = server.countryCode;
+        converted.name = server.name;
+        converted.customName = server.customName;
+        converted.location = server.location;
+        converted.pk = server.pk;
+        converted.note = server.note;
+        converted.personalNote = server.personalNote;
+        converted.lastUsed = server.lastUsed;
+        converted.inHistory = server.inHistory;
+        converted.flag = server.flag;
+        converted.enteredManually = server.enteredManually;
+        converted.usedWithPassword = server.usedWithPassword;
+
+        return converted;
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+        //HelperFunctions.closeActivityIfServiceRunning(this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
         if (serverSubscription != null) {
             serverSubscription.dispose();
@@ -205,6 +243,8 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
 
     @Override
     public void onVpnServerSelected(VpnServerForList selectedServer) {
+        start(VPNServersPersistentData.getInstance().processFromList(selectedServer));
+        /*
         if (HelperFunctions.closeActivityIfServiceRunning(this)) {
             return;
         }
@@ -213,10 +253,13 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.pk);
         setResult(RESULT_OK, resultIntent);
         finish();
+        */
     }
 
     @Override
     public void onManualEntered(LocalServerData server) {
+        start(server);
+        /*
         if (HelperFunctions.closeActivityIfServiceRunning(this)) {
             return;
         }
@@ -225,6 +268,17 @@ public class ServersActivity extends AppCompatActivity implements VpnServersAdap
         resultIntent.putExtra(ADDRESS_DATA_PARAM, server.pk);
         setResult(RESULT_OK, resultIntent);
         finish();
+        */
+    }
+
+    private void start(LocalServerData server) {
+        boolean starting = HelperFunctions.prepareAndStartVpn(getActivity(), server);
+
+        if (starting) {
+            if (requestTabListener != null) {
+                requestTabListener.onOpenStatusRequested();
+            }
+        }
     }
 
     private void showTestServers() {
