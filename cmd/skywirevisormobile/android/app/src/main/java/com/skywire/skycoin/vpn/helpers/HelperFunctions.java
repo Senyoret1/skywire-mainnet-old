@@ -257,6 +257,12 @@ public class HelperFunctions {
     }
 
     public static boolean prepareAndStartVpn(Activity requestingActivity, LocalServerData server) {
+        if (server.flag == ServerFlags.Blocked) {
+            HelperFunctions.showToast(requestingActivity.getString(R.string.general_starting_blocked_server_error) + server.pk, false);
+
+            return false;
+        }
+
         long err = Skywiremob.isPKValid(server.pk);
         if (err != Skywiremob.ErrCodeNoError) {
             HelperFunctions.showToast(requestingActivity.getString(R.string.vpn_coordinator_invalid_credentials_error) + server.pk, false);

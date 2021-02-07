@@ -1,9 +1,14 @@
 package com.skywire.skycoin.vpn.activities.start;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,23 +16,32 @@ import androidx.fragment.app.Fragment;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.index.IndexPageAdapter;
-import com.skywire.skycoin.vpn.activities.servers.ServerLists;
-import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
-import com.skywire.skycoin.vpn.extensible.ClickEvent;
-import com.skywire.skycoin.vpn.helpers.HelperFunctions;
-import com.skywire.skycoin.vpn.objects.LocalServerData;
-import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
+import com.skywire.skycoin.vpn.activities.start.connected.StartViewConnected;
+import com.skywire.skycoin.vpn.activities.start.disconnected.StartViewDisconnected;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import io.reactivex.rxjava3.disposables.Disposable;
-import skywiremob.Skywiremob;
 
-public class StartActivity extends Fragment implements ClickEvent {
+public class StartActivity extends Fragment {
+    private enum SimpleVpnStates {
+        Unknown,
+        Running,
+        Stopped,
+    }
+
+    private FrameLayout mainContainer;
     private MapBackground background;
-    private CurrentServerButton viewCurrentServerButton;
-    private StartButton startButton;
+
+    private StartViewDisconnected viewDisconnected;
+    private StartViewConnected viewConnected;
+
+    private SimpleVpnStates vpnState = SimpleVpnStates.Unknown;
+    private ObjectAnimator animation;
+    private ObjectAnimator positionAnimation;
+    private SimpleVpnStates animationDestination = SimpleVpnStates.Unknown;
 
     private IndexPageAdapter.RequestTabListener requestTabListener;
-    private Disposable currentServerSubscription;
+    private Disposable serviceSubscription;
 
     @Nullable
     @Override
@@ -41,25 +55,183 @@ public class StartActivity extends Fragment implements ClickEvent {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mainContainer = view.findViewById(R.id.mainContainer);
         background = view.findViewById(R.id.background);
-        viewCurrentServerButton = view.findViewById(R.id.viewCurrentServerButton);
-        startButton = view.findViewById(R.id.startButton);
-
-        viewCurrentServerButton.setClickEventListener(this);
-        startButton.setClickEventListener(this);
     }
 
     public void setRequestTabListener(IndexPageAdapter.RequestTabListener listener) {
         requestTabListener = listener;
+        if (viewDisconnected != null) {
+            viewDisconnected.setRequestTabListener(listener);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        currentServerSubscription = VPNServersPersistentData.getInstance().getCurrentServerObservable().subscribe(currentServer -> {
-            viewCurrentServerButton.setData(currentServer);
+        serviceSubscription = VPNCoordinator.getInstance().getEventsObservable().subscribe(state -> {
+            if (state.state.val() < 10) {
+                if (vpnState == SimpleVpnStates.Unknown) {
+                    vpnState = SimpleVpnStates.Stopped;
+                    configureViewDisconnected();
+                } else {
+                    vpnState = SimpleVpnStates.Stopped;
+                    startInitialAnimation(SimpleVpnStates.Stopped);
+                }
+            } else {
+                if (vpnState == SimpleVpnStates.Unknown) {
+                    vpnState = SimpleVpnStates.Running;
+                    configureViewConnected();
+                } else {
+                    vpnState = SimpleVpnStates.Running;
+                    startInitialAnimation(SimpleVpnStates.Running);
+                }
+            }
         });
+    }
+
+    private void configureViewDisconnected() {
+        if (viewDisconnected == null) {
+            if (viewConnected != null) {
+                mainContainer.removeView(viewConnected);
+                viewConnected.close();
+                viewConnected = null;
+            }
+
+            viewDisconnected = new StartViewDisconnected(getContext());
+            viewDisconnected.setParentActivity(getActivity());
+            if (requestTabListener != null) {
+                viewDisconnected.setRequestTabListener(requestTabListener);
+            }
+
+            mainContainer.addView(viewDisconnected);
+            viewDisconnected.startAnimation();
+        }
+    }
+
+    private void configureViewConnected() {
+        if (viewConnected == null) {
+            if (viewDisconnected != null) {
+                mainContainer.removeView(viewDisconnected);
+                viewDisconnected.close();
+                viewDisconnected = null;
+            }
+
+            viewConnected = new StartViewConnected(getContext());
+            mainContainer.addView(viewConnected);
+        }
+    }
+
+    private void startInitialAnimation(SimpleVpnStates desiredDestination) {
+        if (animation != null || desiredDestination == SimpleVpnStates.Unknown) {
+            return;
+        }
+        if (desiredDestination == SimpleVpnStates.Running && viewConnected != null) {
+            return;
+        }
+        if (desiredDestination == SimpleVpnStates.Stopped && viewDisconnected != null) {
+            return;
+        }
+
+        animationDestination = desiredDestination;
+
+        View viewToAnimate;
+        if (desiredDestination == SimpleVpnStates.Running) {
+            viewToAnimate = viewDisconnected;
+        } else {
+            viewToAnimate = viewConnected;
+        }
+
+        animate(viewToAnimate, true);
+    }
+
+    private void startFinalAnimation() {
+        View viewToAnimate;
+        if (animationDestination == SimpleVpnStates.Running) {
+            configureViewConnected();
+            viewToAnimate = viewConnected;
+        } else {
+            configureViewDisconnected();
+            viewToAnimate = viewDisconnected;
+        }
+
+        animate(viewToAnimate, false);
+    }
+
+    private void animate(View viewToAnimate, boolean isInitialAnimation) {
+        if (animation != null) {
+            animation.cancel();
+        }
+        if (positionAnimation != null) {
+            positionAnimation.cancel();
+        }
+
+        float initialPosition;
+        float finalPosition;
+        if (animationDestination == SimpleVpnStates.Running) {
+            if (isInitialAnimation) {
+                initialPosition = 0;
+                finalPosition = 20 * getContext().getResources().getDisplayMetrics().density;
+            } else {
+                initialPosition = -20 * getContext().getResources().getDisplayMetrics().density;
+                finalPosition = 0;
+            }
+        } else {
+            if (isInitialAnimation) {
+                initialPosition = 0;
+                finalPosition = -20 * getContext().getResources().getDisplayMetrics().density;
+            } else {
+                initialPosition = 20 * getContext().getResources().getDisplayMetrics().density;
+                finalPosition = 0;
+            }
+        }
+
+        long duration = 200;
+
+        positionAnimation = ObjectAnimator.ofFloat(viewToAnimate, "translationY", initialPosition, finalPosition);
+        positionAnimation.setDuration(duration);
+        positionAnimation.setInterpolator(isInitialAnimation ? new AccelerateInterpolator() : new DecelerateInterpolator());
+        positionAnimation.start();
+
+        animation = ObjectAnimator.ofFloat(viewToAnimate, "alpha", isInitialAnimation ? 1 : 0, isInitialAnimation ? 0 : 1);
+        animation.setDuration(duration);
+        animation.setInterpolator(isInitialAnimation ? new AccelerateInterpolator() : new DecelerateInterpolator());
+
+        animation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (isInitialAnimation) {
+                    startFinalAnimation();
+                } else {
+                    finishAnimations();
+                    animationDestination = SimpleVpnStates.Unknown;
+
+                    if (vpnState == SimpleVpnStates.Running && viewConnected == null) {
+                        startInitialAnimation(SimpleVpnStates.Running);
+                    } else if (vpnState == SimpleVpnStates.Stopped && viewDisconnected == null) {
+                        startInitialAnimation(SimpleVpnStates.Stopped);
+                    }
+                }
+            }
+        });
+
+        animation.start();
+    }
+
+    private void finishAnimations() {
+        animation.cancel();
+        animation = null;
+
+        positionAnimation.cancel();
+        positionAnimation = null;
     }
 
     @Override
@@ -67,7 +239,9 @@ public class StartActivity extends Fragment implements ClickEvent {
         super.onResume();
 
         background.resumeAnimation();
-        startButton.startAnimation();
+        if (viewDisconnected != null) {
+            viewDisconnected.startAnimation();
+        }
     }
 
     @Override
@@ -75,14 +249,15 @@ public class StartActivity extends Fragment implements ClickEvent {
         super.onPause();
 
         background.pauseAnimation();
-        startButton.stopAnimation();
+        if (viewDisconnected != null) {
+            viewDisconnected.stopAnimation();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        currentServerSubscription.dispose();
+        serviceSubscription.dispose();
     }
 
     @Override
@@ -90,21 +265,12 @@ public class StartActivity extends Fragment implements ClickEvent {
         super.onDestroyView();
 
         background.cancelAnimation();
-    }
 
-    @Override
-    public void onClick(View view) {
-        LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
-        if (currentServer != null) {
-            if (view.getId() == R.id.viewCurrentServerButton) {
-                HelperFunctions.showServerOptions(getContext(), ServersActivity.convertLocalServerData(currentServer), ServerLists.History);
-            } else {
-                Skywiremob.printString("Press");
-            }
-        } else {
-            if (requestTabListener != null) {
-                requestTabListener.onOpenServerListRequested();
-            }
+        if (viewDisconnected != null) {
+            viewDisconnected.close();
+        }
+        if (viewConnected != null) {
+            viewConnected.close();
         }
     }
 }

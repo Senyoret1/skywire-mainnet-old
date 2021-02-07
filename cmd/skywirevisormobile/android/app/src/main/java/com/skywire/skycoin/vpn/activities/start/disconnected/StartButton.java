@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn.activities.start;
+package com.skywire.skycoin.vpn.activities.start.disconnected;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -79,5 +79,16 @@ public class StartButton extends ButtonBase implements Animator.AnimatorListener
         }
 
         return false;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
+        if (enabled) {
+            setAlpha(1f);
+        } else {
+            setAlpha(0.5f);
+        }
     }
 }

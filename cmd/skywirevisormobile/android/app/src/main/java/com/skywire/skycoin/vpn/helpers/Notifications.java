@@ -13,8 +13,6 @@ import com.skywire.skycoin.vpn.vpn.VPNStates;
 
 import skywiremob.Skywiremob;
 
-import static com.skywire.skycoin.vpn.vpn.VPNStates.getTextForState;
-
 /**
  * Constant values and helper functions for showing notifications.
  */
@@ -93,7 +91,7 @@ public class Notifications {
         // disconnecting or restoring. For the state numeric values, check the emun documentation.
         int title = R.string.vpn_service_state_preparing;
         if (currentState == VPNStates.CONNECTED) {
-            title = getTextForState(currentState);
+            title = VPNStates.getTitleForState(currentState);
         } else {
             if (currentState.val() >= VPNStates.DISCONNECTING.val()) {
                 title = R.string.vpn_service_state_finishing;
@@ -103,7 +101,7 @@ public class Notifications {
         }
 
         // Main text for the notification.
-        String text = App.getContext().getString(getTextForState(currentState));
+        String text = App.getContext().getString(VPNStates.getDescriptionForState(currentState));
         // If connected, the connection stats are shown as the main text.
         if (currentState == VPNStates.CONNECTED) {
             text = "\u2193" + HelperFunctions.computeSpeedString(Skywiremob.vpnBandwidthReceived());

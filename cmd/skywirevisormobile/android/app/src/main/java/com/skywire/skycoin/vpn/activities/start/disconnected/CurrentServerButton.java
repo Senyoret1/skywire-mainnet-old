@@ -1,4 +1,4 @@
-package com.skywire.skycoin.vpn.activities.start;
+package com.skywire.skycoin.vpn.activities.start.disconnected;
 
 import android.content.Context;
 import android.graphics.drawable.RippleDrawable;

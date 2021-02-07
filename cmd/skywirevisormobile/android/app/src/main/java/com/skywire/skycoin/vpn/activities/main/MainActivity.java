@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (state.state.val() < 10) {
                     displayInitialState();
                 } else if (state.state != VPNStates.ERROR && state.state != VPNStates.BLOCKING_ERROR && state.state != VPNStates.DISCONNECTED) {
-                    int stateText = VPNStates.getTextForState(state.state);
+                    int stateText = VPNStates.getDescriptionForState(state.state);
 
                     displayWorkingState();
 
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     textStatus.setText(R.string.vpn_state_disconnected);
                     displayInitialState();
                 } else {
-                    textStatus.setText(VPNStates.getTextForState(state.state));
+                    textStatus.setText(VPNStates.getDescriptionForState(state.state));
                     displayErrorState(state.stopRequested);
                 }
             }
@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void displayInitialState() {
-        textStatus.setText(R.string.vpn_state_off);
+        textStatus.setText(R.string.vpn_state_details_off);
 
         editTextRemotePK.setEnabled(true);
         editTextPasscode.setEnabled(true);

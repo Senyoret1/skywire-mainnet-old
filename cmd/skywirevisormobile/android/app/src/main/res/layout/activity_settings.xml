@@ -22,10 +22,18 @@
                 app:title="@string/tmp_options_apps_title" />
 
             <com.skywire.skycoin.vpn.activities.settings.SettingsOption
+                android:id="@+id/optionShowIp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:box_row_type="top"
+                app:description="@string/tmp_options_show_ip_description"
+                app:title="@string/tmp_options_show_ip_title" />
+
+            <com.skywire.skycoin.vpn.activities.settings.SettingsOption
                 android:id="@+id/optionKillSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:box_row_type="top"
+                app:box_row_type="middle"
                 app:description="@string/tmp_options_kill_switch_description"
                 app:title="@string/tmp_options_kill_switch_title" />
 

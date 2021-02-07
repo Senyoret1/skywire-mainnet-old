@@ -138,34 +138,34 @@ public enum VPNStates {
     }
 
     /**
-     * Allows to get the resource ID of the string with the message identifying a state of the
+     * Allows to get the resource ID of the string with the title for a state of the
      * VPN service. If no resource is found for the state, -1 is returned.
      */
-    public static int getTextForState(VPNStates state) {
+    public static int getTitleForState(VPNStates state) {
         if (state == OFF) {
-            return R.string.vpn_state_off;
+            return R.string.vpn_state_disconnected;
         } else if (state == STARTING) {
-            return R.string.vpn_state_initializing;
+            return R.string.vpn_state_connecting;
         } else if (state == WAITING_PREVIOUS_INSTANCE_STOP) {
-            return R.string.vpn_state_waiting_previous_instance_stop;
+            return R.string.vpn_state_connecting;
         } else if (state == CHECKING_CONNECTIVITY) {
-            return R.string.vpn_state_checking_connectivity;
+            return R.string.vpn_state_connecting;
         } else if (state == WAITING_FOR_CONNECTIVITY) {
-            return R.string.vpn_state_waiting_connectivity;
+            return R.string.vpn_state_connecting;
         } else if (state == PREPARING_VISOR) {
-            return R.string.vpn_state_starting_visor;
+            return R.string.vpn_state_connecting;
         } else if (state == PREPARING_VPN_CLIENT) {
-            return R.string.vpn_state_starting_vpn_app;
+            return R.string.vpn_state_connecting;
         } else if (state == FINAL_PREPARATIONS_FOR_VISOR) {
-            return R.string.vpn_state_additional_visor_initializations;
+            return R.string.vpn_state_connecting;
         } else if (state == VISOR_READY) {
             return R.string.vpn_state_connecting;
         } else if (state == CONNECTED) {
             return R.string.vpn_state_connected;
         } else if (state == RESTORING_VPN) {
-            return R.string.vpn_state_restoring;
+            return R.string.vpn_state_restarting;
         } else if (state == RESTORING_SERVICE) {
-            return R.string.vpn_state_restoring_service;
+            return R.string.vpn_state_restarting;
         } else if (state == DISCONNECTING) {
             return R.string.vpn_state_disconnecting;
         } else if (state == DISCONNECTED) {
@@ -173,7 +173,71 @@ public enum VPNStates {
         } else if (state == ERROR) {
             return R.string.vpn_state_error;
         } else if (state == BLOCKING_ERROR) {
-            return R.string.vpn_state_blocking_error;
+            return R.string.vpn_state_error;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Allows to get the resource ID of the color for the title of a state of the
+     * VPN service. If no resource is found for the title, red is returned.
+     */
+    public static int getColorForStateTitle(int titleResource) {
+        if (titleResource == R.string.vpn_state_disconnected) {
+            return R.color.red;
+        } else if (titleResource == R.string.vpn_state_connecting) {
+            return R.color.yellow;
+        } else if (titleResource == R.string.vpn_state_connected) {
+            return R.color.green;
+        } else if (titleResource == R.string.vpn_state_restarting) {
+            return R.color.yellow;
+        } else if (titleResource == R.string.vpn_state_disconnecting) {
+            return R.color.yellow;
+        } else if (titleResource == R.string.vpn_state_error) {
+            return R.color.red;
+        }
+
+        return R.color.red;
+    }
+
+    /**
+     * Allows to get the resource ID of the string with the description of a state of the
+     * VPN service. If no resource is found for the state, -1 is returned.
+     */
+    public static int getDescriptionForState(VPNStates state) {
+        if (state == OFF) {
+            return R.string.vpn_state_details_off;
+        } else if (state == STARTING) {
+            return R.string.vpn_state_details_initializing;
+        } else if (state == WAITING_PREVIOUS_INSTANCE_STOP) {
+            return R.string.vpn_state_details_waiting_previous_instance_stop;
+        } else if (state == CHECKING_CONNECTIVITY) {
+            return R.string.vpn_state_details_checking_connectivity;
+        } else if (state == WAITING_FOR_CONNECTIVITY) {
+            return R.string.vpn_state_details_waiting_connectivity;
+        } else if (state == PREPARING_VISOR) {
+            return R.string.vpn_state_details_starting_visor;
+        } else if (state == PREPARING_VPN_CLIENT) {
+            return R.string.vpn_state_details_starting_vpn_app;
+        } else if (state == FINAL_PREPARATIONS_FOR_VISOR) {
+            return R.string.vpn_state_details_additional_visor_initializations;
+        } else if (state == VISOR_READY) {
+            return R.string.vpn_state_details_connecting;
+        } else if (state == CONNECTED) {
+            return R.string.vpn_state_details_connected;
+        } else if (state == RESTORING_VPN) {
+            return R.string.vpn_state_details_restoring;
+        } else if (state == RESTORING_SERVICE) {
+            return R.string.vpn_state_details_restoring_service;
+        } else if (state == DISCONNECTING) {
+            return R.string.vpn_state_details_disconnecting;
+        } else if (state == DISCONNECTED) {
+            return R.string.vpn_state_details_disconnected;
+        } else if (state == ERROR) {
+            return R.string.vpn_state_details_error;
+        } else if (state == BLOCKING_ERROR) {
+            return R.string.vpn_state_details_blocking_error;
         }
 
         return -1;

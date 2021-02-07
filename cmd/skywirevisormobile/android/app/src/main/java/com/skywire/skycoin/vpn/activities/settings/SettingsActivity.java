@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 public class SettingsActivity extends Fragment implements ClickEvent {
     private SettingsOption optionApps;
+    private SettingsOption optionShowIp;
     private SettingsOption optionKillSwitch;
     private SettingsOption optionResetAfterErrors;
     private SettingsOption optionProtectBeforeConnecting;
@@ -39,17 +40,20 @@ public class SettingsActivity extends Fragment implements ClickEvent {
         super.onViewCreated(view, savedInstanceState);
 
         optionApps = view.findViewById(R.id.optionApps);
+        optionShowIp = view.findViewById(R.id.optionShowIp);
         optionKillSwitch = view.findViewById(R.id.optionKillSwitch);
         optionResetAfterErrors = view.findViewById(R.id.optionResetAfterErrors);
         optionProtectBeforeConnecting = view.findViewById(R.id.optionProtectBeforeConnecting);
         optionStartOnBoot = view.findViewById(R.id.optionStartOnBoot);
 
+        optionShowIp.setChecked(VPNGeneralPersistentData.getShowIpActivated());
         optionKillSwitch.setChecked(VPNGeneralPersistentData.getKillSwitchActivated());
         optionResetAfterErrors.setChecked(VPNGeneralPersistentData.getMustRestartVpn());
         optionProtectBeforeConnecting.setChecked(VPNGeneralPersistentData.getProtectBeforeConnected());
         optionStartOnBoot.setChecked(VPNGeneralPersistentData.getStartOnBoot());
 
         optionApps.setClickEventListener(this);
+        optionShowIp.setClickEventListener(this);
         optionKillSwitch.setClickEventListener(this);
         optionResetAfterErrors.setClickEventListener(this);
         optionProtectBeforeConnecting.setClickEventListener(this);
@@ -99,7 +103,9 @@ public class SettingsActivity extends Fragment implements ClickEvent {
 
         ((SettingsOption)view).setChecked(!((SettingsOption)view).isChecked());
 
-        if (view.getId() == R.id.optionKillSwitch) {
+        if (view.getId() == R.id.optionShowIp) {
+            VPNGeneralPersistentData.setShowIpActivated(((SettingsOption)view).isChecked());
+        } else if (view.getId() == R.id.optionKillSwitch) {
             VPNGeneralPersistentData.setKillSwitchActivated(((SettingsOption)view).isChecked());
         } else if (view.getId() == R.id.optionResetAfterErrors) {
             VPNGeneralPersistentData.setMustRestartVpn(((SettingsOption)view).isChecked());

@@ -23,6 +23,7 @@
     <string name="general_autostart_failed_error">Unable to start the VPN protection.</string>
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
     <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
+    <string name="general_starting_blocked_server_error">Unable to connect to the selected server because it has been added to the blocked servers list.</string>
 
     <string name="skywiremob_error_invalid_pk">Invalid public key. Are you connecting to a valid VPN server?</string>
     <string name="skywiremob_error_invalid_visor_config">Unexpected error. The local visor configuration is not valid.</string>
@@ -50,22 +51,29 @@
     <string name="vpn_service_state_restoring">Restoring</string>
     <string name="vpn_service_state_finishing">Finishing</string>
 
-    <string name="vpn_state_off">SkywireVPN disconnected.</string>
-    <string name="vpn_state_initializing">Initializing SkywireVPN.</string>
-    <string name="vpn_state_waiting_previous_instance_stop">Waiting for the visor to be ready.</string>
-    <string name="vpn_state_checking_connectivity">Checking network connectivity.</string>
-    <string name="vpn_state_waiting_connectivity">Waiting for network connectivity.</string>
-    <string name="vpn_state_starting_visor">Starting SkywireVPN visor.</string>
-    <string name="vpn_state_starting_vpn_app">Starting SkywireVPN vpn connector.</string>
-    <string name="vpn_state_additional_visor_initializations">Finishing SkywireVPN visor initialization.</string>
-    <string name="vpn_state_connecting">Establishing VPN connection.</string>
-    <string name="vpn_state_connected">VPN connected.</string>
-    <string name="vpn_state_restoring">Restarting VPN connection.</string>
-    <string name="vpn_state_restoring_service">Restarting VPN service.</string>
-    <string name="vpn_state_disconnecting">Closing VPN connection.</string>
-    <string name="vpn_state_disconnected">VPN connection closed.</string>
-    <string name="vpn_state_error">There has been an error with the SkywireVPN service.</string>
-    <string name="vpn_state_blocking_error">There has been an error with the SkywireVPN service. The network will be blocked until stopping the service.</string>
+    <string name="vpn_state_disconnected">Disconnected</string>
+    <string name="vpn_state_connecting">Connecting</string>
+    <string name="vpn_state_connected">Connected</string>
+    <string name="vpn_state_restarting">Restoring</string>
+    <string name="vpn_state_disconnecting">Disconnecting</string>
+    <string name="vpn_state_error">Error</string>
+
+    <string name="vpn_state_details_off">The SkywireVPN protection disconnected.</string>
+    <string name="vpn_state_details_initializing">Making initial preparations.</string>
+    <string name="vpn_state_details_waiting_previous_instance_stop">Waiting for the visor to be ready.</string>
+    <string name="vpn_state_details_checking_connectivity">Checking network connectivity.</string>
+    <string name="vpn_state_details_waiting_connectivity">Waiting for network connectivity.</string>
+    <string name="vpn_state_details_starting_visor">Starting the SkywireVPN visor.</string>
+    <string name="vpn_state_details_starting_vpn_app">Starting the SkywireVPN network connector.</string>
+    <string name="vpn_state_details_additional_visor_initializations">Finishing the SkywireVPN visor initialization.</string>
+    <string name="vpn_state_details_connecting">Establishing remote connection.</string>
+    <string name="vpn_state_details_connected">VPN protection active.</string>
+    <string name="vpn_state_details_restoring">Restarting the VPN connection.</string>
+    <string name="vpn_state_details_restoring_service">Restarting the VPN service.</string>
+    <string name="vpn_state_details_disconnecting">Closing the VPN connection.</string>
+    <string name="vpn_state_details_disconnected">The VPN connection has been closed.</string>
+    <string name="vpn_state_details_error">There has been an error with the SkywireVPN service.</string>
+    <string name="vpn_state_details_blocking_error">There has been an error with the SkywireVPN service. The network will be blocked until stopping the service.</string>
 
     <string name="vpn_coordinator_invalid_credentials_error">Invalid public key: </string>
 
@@ -87,9 +95,20 @@
     <string name="tmp_main_page_can_not_stop">As the VPN connection was started using the system options, it is not possible to stop it using this page.</string>
     <string name="tmp_main_page_last_error">The VPN service failed with the following error:</string>
 
-    <string name="tmp_status_title">Status</string>
-    <string name="tmp_status_start_title">START VPN</string>
-    <string name="tmp_status_no_server">No server selected!</string>
+    <string name="tmp_status_page_title">Status</string>
+    <string name="tmp_status_page_last_error">Last error:</string>
+
+    <string name="tmp_status_disconnected_title">START VPN</string>
+    <string name="tmp_status_disconnected_no_server">No server selected!</string>
+
+    <string name="tmp_status_connected_title">Your connection is currently:</string>
+    <string name="tmp_status_connected_current_ip_title">Current IP:</string>
+    <string name="tmp_status_connected_current_country_title">Current Country:</string>
+    <string name="tmp_status_connected_waiting">Waiting for VPN...</string>
+    <string name="tmp_status_connected_ip_option_disabled">Option disabled</string>
+    <string name="tmp_status_connected_disconnect">Disconnect</string>
+    <string name="tmp_status_connected_disconnect_confirmation">Are you sure you want to stop the VPN protection?</string>
+    <string name="tmp_status_connected_started_by_the_system">As the VPN connection was started using the system options, it cannot be stopped using this screen. For stopping the VPN, please use the same system options used for stating it.</string>
 
     <string name="tmp_select_server_title">Servers</string>
     <string name="tmp_select_server_empty_info">There are no servers to display in this list.</string>
@@ -176,6 +195,8 @@
     <string name="tmp_options_apps_description">Currently the VPN protection covers all your apps. Use this option if you want to protect only some applications or if you want to ignore them.</string>
     <string name="tmp_options_apps_include_description">Only %1$s app(s) you have selected will be protected. Press here if you want to change the configuiration.</string>
     <string name="tmp_options_apps_exclude_description">%1$s app(s) you have selected will NOT be protected. Press here if you want to change the configuiration.</string>
+    <string name="tmp_options_show_ip_title">Show IP info</string>
+    <string name="tmp_options_show_ip_description">When active, the application will show the public IP address of the device. For this, external services will be used.</string>
     <string name="tmp_options_kill_switch_title">Kill switch</string>
     <string name="tmp_options_kill_switch_description">This option will block all network connections if the VPN protection is stopped unexpectedly.</string>
     <string name="tmp_options_reset_after_errors_title">Reset after errors.</string>

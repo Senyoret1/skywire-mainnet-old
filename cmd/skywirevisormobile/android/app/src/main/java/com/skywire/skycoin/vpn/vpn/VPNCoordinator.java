@@ -75,9 +75,10 @@ public class VPNCoordinator implements Handler.Callback {
         );
 
         // Save the error as the one which made the last execution of the VPN service fail.
-        // Must be dore before sending the event.
-        if (msg.what == VPNStates.ERROR.val() || msg.what == VPNStates.BLOCKING_ERROR.val()) {
-            VPNGeneralPersistentData.setLastError(msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM));
+        // Must be done before sending the event.
+        String errorMsg = msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM);
+        if (errorMsg != null && !errorMsg.equals("") && !errorMsg.equals(VPNGeneralPersistentData.getLastError(null))) {
+            VPNGeneralPersistentData.setLastError(errorMsg);
         }
 
         // Inform the new state.

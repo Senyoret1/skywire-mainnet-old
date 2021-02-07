@@ -1,40 +1,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:id="@+id/mainContainer"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.skywire.skycoin.vpn.activities.start.MapBackground
         android:id="@+id/background"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_gravity="center">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:fontFamily="@font/skycoin_font_bold"
-            android:gravity="center_horizontal"
-            android:text="@string/tmp_status_start_title"
-            android:textSize="20sp" />
-
-        <com.skywire.skycoin.vpn.activities.start.StartButton
-            android:id="@+id/startButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:translationY="-10dp" />
-
-        <com.skywire.skycoin.vpn.activities.start.CurrentServerButton
-            android:id="@+id/viewCurrentServerButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="20dp" />
-
-    </FrameLayout>
 
 </FrameLayout>

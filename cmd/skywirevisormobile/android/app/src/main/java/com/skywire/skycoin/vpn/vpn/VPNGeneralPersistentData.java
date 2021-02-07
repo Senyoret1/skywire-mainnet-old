@@ -18,6 +18,7 @@ public class VPNGeneralPersistentData {
     private static final String LAST_ERROR = "lastError";
     private static final String APPS_SELECTION_MODE = "appsMode";
     private static final String APPS_LIST = "appsList";
+    private static final String SHOW_IP = "showIp";
     private static final String KILL_SWITCH = "killSwitch";
     private static final String RESTART_VPN = "restartVpn";
     private static final String START_ON_BOOT = "startOnBoot";
@@ -49,6 +50,13 @@ public class VPNGeneralPersistentData {
      */
     public static void setAppList(HashSet<String> val) {
         settings.edit().putStringSet(APPS_LIST, val).apply();
+    }
+
+    /**
+     * Sets if the functionality for showing the IP must be active.
+     */
+    public static void setShowIpActivated(boolean val) {
+        settings.edit().putBoolean(SHOW_IP, val).apply();
     }
 
     /**
@@ -116,6 +124,13 @@ public class VPNGeneralPersistentData {
      */
     public static HashSet<String> getAppList(HashSet<String> defaultValue) {
         return new HashSet<>(settings.getStringSet(APPS_LIST, defaultValue));
+    }
+
+    /**
+     * Gets if the functionality for showing the IP must be active.
+     */
+    public static boolean getShowIpActivated() {
+        return settings.getBoolean(SHOW_IP, true);
     }
 
     /**

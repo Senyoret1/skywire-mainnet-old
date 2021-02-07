@@ -79,8 +79,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/tmp_status_no_server"
-            android:textSize="@dimen/normal_text_size" />
+            android:text="@string/tmp_status_disconnected_no_server"
+            android:textSize="@dimen/normal_text_size"
+            android:translationY="-1dp" />
 
     </FrameLayout>
 

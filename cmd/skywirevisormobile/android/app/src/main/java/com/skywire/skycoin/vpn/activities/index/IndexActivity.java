@@ -1,5 +1,6 @@
 package com.skywire.skycoin.vpn.activities.index;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.TopTab;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 public class IndexActivity extends AppCompatActivity implements IndexPageAdapter.RequestTabListener {
     private ViewPager2 pager;
@@ -29,7 +31,7 @@ public class IndexActivity extends AppCompatActivity implements IndexPageAdapter
 
         tabLayoutMediator = new TabLayoutMediator(tabs, pager, (tab, position) -> {
             if (position == 0) {
-                tab.setCustomView(new TopTab(this, R.string.tmp_status_title));
+                tab.setCustomView(new TopTab(this, R.string.tmp_status_page_title));
             } else if (position == 1) {
                 tab.setCustomView(new TopTab(this, R.string.tmp_select_server_title));
             } else {
@@ -71,5 +73,14 @@ public class IndexActivity extends AppCompatActivity implements IndexPageAdapter
     @Override
     public void onOpenServerListRequested() {
         pager.setCurrentItem(1);
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+
+        if (request == VPNCoordinator.VPN_PREPARATION_REQUEST_CODE) {
+            VPNCoordinator.getInstance().onActivityResult(request, result, data);
+        }
     }
 }

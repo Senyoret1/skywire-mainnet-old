@@ -21,8 +21,6 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import skywiremob.Skywiremob;
 
-import static com.skywire.skycoin.vpn.vpn.VPNStates.getTextForState;
-
 /**
  * Service in charge of making the VPN protection work, even if the UI is closed.
  */
@@ -132,12 +130,12 @@ public class SkywireVPNService extends VpnService {
         Bundle dataBundle = new Bundle();
         dataBundle.putBoolean(STARTED_BY_THE_SYSTEM_PARAM, startedByTheSystem);
         dataBundle.putBoolean(STOP_REQUESTED_PARAM, stopRequested);
-        if (newState == VPNStates.ERROR || newState == VPNStates.BLOCKING_ERROR) {
-            // Get the last error from vpnRunnable.getLastErrorMsg(). The lastErrorMsg must be used
-            // to avoid errors because vpnRunnable may be null.
-            lastErrorMsg = vpnRunnable != null ? vpnRunnable.getLastErrorMsg() : lastErrorMsg;
-            dataBundle.putString(ERROR_MSG_PARAM, lastErrorMsg);
-        }
+
+        // Get the last error from vpnRunnable.getLastErrorMsg(). The lastErrorMsg must be used
+        // to avoid errors because vpnRunnable may be null.
+        lastErrorMsg = vpnRunnable != null ? vpnRunnable.getLastErrorMsg() : lastErrorMsg;
+        dataBundle.putString(ERROR_MSG_PARAM, lastErrorMsg);
+
         msg.setData(dataBundle);
 
         // Show toast notifications for certain states if the UI is not being shown.
@@ -149,12 +147,12 @@ public class SkywireVPNService extends VpnService {
                 newState == VPNStates.ERROR ||
                 newState == VPNStates.BLOCKING_ERROR))
             {
-                HelperFunctions.showToast(getString(getTextForState(newState)), false);
+                HelperFunctions.showToast(getString(VPNStates.getDescriptionForState(newState)), false);
             }
 
             // Even if the service has been destroyed.
             if (newState == VPNStates.DISCONNECTED || newState == VPNStates.DISCONNECTING || newState == VPNStates.OFF) {
-                HelperFunctions.showToast(getString(getTextForState(newState)), false);
+                HelperFunctions.showToast(getString(VPNStates.getDescriptionForState(newState)), false);
             }
         }
 

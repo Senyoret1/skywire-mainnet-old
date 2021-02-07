@@ -14,30 +14,17 @@ public class IndexPageAdapter extends FragmentStateAdapter {
         void onOpenServerListRequested();
     }
 
-    private RequestTabListener requestTabListener;
-
-    private RequestTabListener internalEventListener = new RequestTabListener() {
-        @Override
-        public void onOpenStatusRequested() {
-            if (requestTabListener != null) {
-                requestTabListener.onOpenStatusRequested();
-            }
-        }
-
-        @Override
-        public void onOpenServerListRequested() {
-            if (requestTabListener != null) {
-                requestTabListener.onOpenServerListRequested();
-            }
-        }
-    };
+    private StartActivity tab1 = new StartActivity();
+    private ServersActivity tab2 = new ServersActivity();
+    private SettingsActivity tab3 = new SettingsActivity();
 
     public IndexPageAdapter(AppCompatActivity activity) {
         super(activity);
     }
 
     public void setRequestTabListener(RequestTabListener listener) {
-        requestTabListener = listener;
+        tab1.setRequestTabListener(listener);
+        tab2.setRequestTabListener(listener);
     }
 
     @Override
@@ -45,13 +32,11 @@ public class IndexPageAdapter extends FragmentStateAdapter {
         Fragment response;
 
         if (position == 0) {
-            response = new StartActivity();
-            ((StartActivity)response).setRequestTabListener(internalEventListener);
+            response = tab1;
         } else if (position == 1) {
-            response = new ServersActivity();
-            ((ServersActivity)response).setRequestTabListener(internalEventListener);
+            response = tab2;
         } else {
-            response = new SettingsActivity();
+            response = tab3;
         }
 
         return response;
