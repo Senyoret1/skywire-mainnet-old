@@ -28,8 +28,8 @@ public class VisorRunnable {
      * Starts stopping the visor. It returns before the visor has been completely stopped.
      */
     public void startStoppingVisor() {
-        long err = Skywiremob.stopVisor();
-        if (err != Skywiremob.ErrCodeNoError) {
+        skywiremob.Error err = Skywiremob.stopVisor();
+        if (err.getCode() != Skywiremob.ErrCodeNoError) {
             Skywiremob.printString(gerErrorMsg(err));
             HelperFunctions.showToast(gerErrorMsg(err), false);
         }
@@ -63,9 +63,9 @@ public class VisorRunnable {
 
             // Start the visor if the emitter is still valid.
             if (emitter.isDisposed()) { return; }
-            long err = Skywiremob.prepareVisor();
-            if (err != Skywiremob.ErrCodeNoError) {
-                HelperFunctions.logError("Visor startup procedure, code " + err, gerErrorMsg(err));
+            skywiremob.Error err = Skywiremob.prepareVisor();
+            if (err.getCode() != Skywiremob.ErrCodeNoError) {
+                HelperFunctions.logError("Visor startup procedure, code " + err.getCode(), gerErrorMsg(err));
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(gerErrorMsg(err)));
                 return;
@@ -73,8 +73,8 @@ public class VisorRunnable {
 
             // Block the thread while the visor is starting.
             err = Skywiremob.waitVisorReady();
-            if (err != Skywiremob.ErrCodeNoError) {
-                HelperFunctions.logError("Visor startup procedure, code " + err, gerErrorMsg(err));
+            if (err.getCode() != Skywiremob.ErrCodeNoError) {
+                HelperFunctions.logError("Visor startup procedure, code " + err.getCode(), gerErrorMsg(err));
                 if (emitter.isDisposed()) { return; }
                 emitter.onError(new Exception(gerErrorMsg(err)));
                 return;
@@ -103,9 +103,9 @@ public class VisorRunnable {
         if (parentEmitter.isDisposed()) { return; }
         LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
         String savedPk = currentServer != null ? currentServer.pk : "";
-        String savedPassword = VPNServersPersistentData.getInstance().getCurrentServerPassword("");
-        long err = Skywiremob.prepareVPNClient(savedPk, savedPassword);
-        if (err != Skywiremob.ErrCodeNoError) {
+        String savedPassword = currentServer != null && currentServer.password != null ? currentServer.password : "";
+        skywiremob.Error err = Skywiremob.prepareVPNClient(savedPk, savedPassword);
+        if (err.getCode() != Skywiremob.ErrCodeNoError) {
             throw new Exception(gerErrorMsg(err));
         }
         vpnClientStarted = true;
@@ -116,7 +116,7 @@ public class VisorRunnable {
         // Perform the handshake.
         if (parentEmitter.isDisposed()) { return; }
         err = Skywiremob.shakeHands();
-        if (err != Skywiremob.ErrCodeNoError) {
+        if (err.getCode() != Skywiremob.ErrCodeNoError) {
             throw new Exception(gerErrorMsg(err));
         }
 
@@ -124,64 +124,74 @@ public class VisorRunnable {
         if (parentEmitter.isDisposed()) { return; }
         err = Skywiremob.startListeningUDP();
         listeningUdp = true;
-        if (err != Skywiremob.ErrCodeNoError) {
+        if (err.getCode() != Skywiremob.ErrCodeNoError) {
             throw new Exception(gerErrorMsg(err));
         }
 
         // Start serving.
         if (parentEmitter.isDisposed()) { return; }
         err = Skywiremob.serveVPN();
-        if (err != Skywiremob.ErrCodeNoError) {
+        if (err.getCode() != Skywiremob.ErrCodeNoError) {
             throw new Exception(gerErrorMsg(err));
         }
     }
 
     /**
-     * Gets the error string for an specific error code returned by Skywiremob.
+     * Gets the error string for an specific error returned by Skywiremob.
      */
-    private static String gerErrorMsg(long errorCode) {
-        int resource = R.string.skywiremob_error_unknown;
+    private static String gerErrorMsg(skywiremob.Error error) {
+        int resource = -1;
 
-        if (errorCode == Skywiremob.ErrCodeInvalidPK) {
+        if (error.getCode() == Skywiremob.ErrCodeInvalidPK) {
             resource = R.string.skywiremob_error_invalid_pk;
-        } else if (errorCode == Skywiremob.ErrCodeInvalidVisorConfig) {
+        } else if (error.getCode() == Skywiremob.ErrCodeInvalidVisorConfig) {
             resource = R.string.skywiremob_error_invalid_visor_config;
-        } else if (errorCode == Skywiremob.ErrCodeInvalidAddrResolverURL) {
+        } else if (error.getCode() == Skywiremob.ErrCodeInvalidAddrResolverURL) {
             resource = R.string.skywiremob_error_invalid_addr_resolver_url;
-        } else if (errorCode == Skywiremob.ErrCodeSTCPInitFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeSTCPInitFailed) {
             resource = R.string.skywiremob_error_stcp_init_failed;
-        } else if (errorCode == Skywiremob.ErrCodeSTCPRInitFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeSTCPRInitFailed) {
             resource = R.string.skywiremob_error_stcpr_init_failed;
-        } else if (errorCode == Skywiremob.ErrCodeSUDPHInitFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeSUDPHInitFailed) {
             resource = R.string.skywiremob_error_sudph_init_failed;
-        } else if (errorCode == Skywiremob.ErrCodeDmsgListenFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeDmsgListenFailed) {
             resource = R.string.skywiremob_error_dmsg_listen_failed;
-        } else if (errorCode == Skywiremob.ErrCodeTpDiscUnavailable) {
+        } else if (error.getCode() == Skywiremob.ErrCodeTpDiscUnavailable) {
             resource = R.string.skywiremob_error_tp_disc_unavailable;
-        } else if (errorCode == Skywiremob.ErrCodeFailedToStartRouter) {
+        } else if (error.getCode() == Skywiremob.ErrCodeFailedToStartRouter) {
             resource = R.string.skywiremob_error_failed_to_start_router;
-        } else if (errorCode == Skywiremob.ErrCodeFailedToSetupHVGateway) {
+        } else if (error.getCode() == Skywiremob.ErrCodeFailedToSetupHVGateway) {
             resource = R.string.skywiremob_error_failed_to_setup_hv_gateway;
-        } else if (errorCode == Skywiremob.ErrCodeVisorNotRunning) {
+        } else if (error.getCode() == Skywiremob.ErrCodeVisorNotRunning) {
             resource = R.string.skywiremob_error_visor_not_running;
-        } else if (errorCode == Skywiremob.ErrCodeInvalidRemotePK) {
+        } else if (error.getCode() == Skywiremob.ErrCodeInvalidRemotePK) {
             resource = R.string.skywiremob_error_invalid_remote_pk;
-        } else if (errorCode == Skywiremob.ErrCodeFailedToSaveTransport) {
+        } else if (error.getCode() == Skywiremob.ErrCodeFailedToSaveTransport) {
             resource = R.string.skywiremob_error_failed_to_save_transport;
-        } else if (errorCode == Skywiremob.ErrCodeVPNServerUnavailable) {
+        } else if (error.getCode() == Skywiremob.ErrCodeVPNServerUnavailable) {
             resource = R.string.skywiremob_error_vpn_server_unavailable;
-        } else if (errorCode == Skywiremob.ErrCodeVPNClientNotRunning) {
+        } else if (error.getCode() == Skywiremob.ErrCodeVPNClientNotRunning) {
             resource = R.string.skywiremob_error_vpn_client_not_running;
-        } else if (errorCode == Skywiremob.ErrCodeHandshakeFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeHandshakeFailed) {
             resource = R.string.skywiremob_error_handshake_failed;
-        } else if (errorCode == Skywiremob.ErrCodeInvalidAddr) {
+        } else if (error.getCode() == Skywiremob.ErrCodeInvalidAddr) {
             resource = R.string.skywiremob_error_invalid_addr;
-        } else if (errorCode == Skywiremob.ErrCodeAlreadyListeningUDP) {
+        } else if (error.getCode() == Skywiremob.ErrCodeAlreadyListeningUDP) {
             resource = R.string.skywiremob_error_already_listening_udp;
-        } else if (errorCode == Skywiremob.ErrCodeUDPListenFailed) {
+        } else if (error.getCode() == Skywiremob.ErrCodeUDPListenFailed) {
             resource = R.string.skywiremob_error_udp_listen_failed;
         }
 
-        return App.getContext().getString(resource);
+        String response;
+        if (resource != -1) {
+            response = App.getContext().getString(resource);
+        } else {
+            response = error.getError();
+            if (response == null || response.trim().equals("")) {
+                response = App.getContext().getString(R.string.skywiremob_error_unknown);
+            }
+        }
+
+        return response;
     }
 }

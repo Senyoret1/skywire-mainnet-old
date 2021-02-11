@@ -60,17 +60,20 @@ public class TopBar extends LinearLayout implements ClickEvent {
                 textTitle.setText(title);
             }
 
-            int leftButtonIcon = attributes.getInteger(R.styleable.TopBar_left_button_icon, 0);
+            int leftButtonIcon = attributes.getInteger(R.styleable.TopBar_left_button_icon, -1);
             if (leftButtonIcon == 0) {
                 buttonLeft.setIcon(UiMaterialIcons.MENU);
-            } else {
+            } else if (leftButtonIcon == 1) {
                 buttonLeft.setIcon(UiMaterialIcons.BACK);
                 goBack = true;
+            } else {
+                buttonLeft.setVisibility(GONE);
             }
 
             attributes.recycle();
         } else {
             textTitle.setVisibility(GONE);
+            buttonLeft.setVisibility(GONE);
         }
     }
 

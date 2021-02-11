@@ -21,6 +21,6 @@ public class VpnServerForList {
     public Date lastUsed;
     public boolean inHistory;
     public ServerFlags flag;
-    public boolean usedWithPassword;
+    public boolean hasPassword;
     public boolean enteredManually;
 }

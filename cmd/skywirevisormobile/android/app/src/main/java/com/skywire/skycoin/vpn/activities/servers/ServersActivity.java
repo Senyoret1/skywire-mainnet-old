@@ -25,6 +25,7 @@ import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
 import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.objects.ServerRatings;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.util.ArrayList;
@@ -221,7 +222,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
         converted.inHistory = server.inHistory;
         converted.flag = server.flag;
         converted.enteredManually = server.enteredManually;
-        converted.usedWithPassword = server.usedWithPassword;
+        converted.hasPassword = server.password != null && !server.password.equals("");
 
         return converted;
     }
@@ -229,7 +230,6 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     @Override
     public void onResume() {
         super.onResume();
-        //HelperFunctions.closeActivityIfServiceRunning(this);
     }
 
     @Override
@@ -244,34 +244,19 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     @Override
     public void onVpnServerSelected(VpnServerForList selectedServer) {
         start(VPNServersPersistentData.getInstance().processFromList(selectedServer));
-        /*
-        if (HelperFunctions.closeActivityIfServiceRunning(this)) {
-            return;
-        }
-
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra(ADDRESS_DATA_PARAM, selectedServer.pk);
-        setResult(RESULT_OK, resultIntent);
-        finish();
-        */
     }
 
     @Override
     public void onManualEntered(LocalServerData server) {
         start(server);
-        /*
-        if (HelperFunctions.closeActivityIfServiceRunning(this)) {
-            return;
-        }
-
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra(ADDRESS_DATA_PARAM, server.pk);
-        setResult(RESULT_OK, resultIntent);
-        finish();
-        */
     }
 
     private void start(LocalServerData server) {
+        if (VPNCoordinator.getInstance().isServiceRunning()) {
+            HelperFunctions.showToast(getContext().getText(R.string.tmp_select_server_running_error).toString(), true);
+            return;
+        }
+
         boolean starting = HelperFunctions.prepareAndStartVpn(getActivity(), server);
 
         if (starting) {
@@ -358,7 +343,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
                 server.inHistory = savedVersion.inHistory;
                 server.flag = savedVersion.flag;
                 server.enteredManually = savedVersion.enteredManually;
-                server.usedWithPassword = savedVersion.usedWithPassword;
+                server.hasPassword = savedVersion.password != null && !savedVersion.password.equals("");
             }
 
             if (server.flag == ServerFlags.Blocked) {
@@ -376,7 +361,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             server.inHistory = false;
             server.flag = ServerFlags.None;
             server.enteredManually = false;
-            server.usedWithPassword = false;
+            server.hasPassword = false;
         }
     }
 
@@ -386,7 +371,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
                 int response = a.countryCode.compareTo(b.countryCode);
 
                 if (response == 0) {
-                    response = getServerName(a).compareTo(getServerName(b));
+                    response = HelperFunctions.getServerName(a, "").compareTo(HelperFunctions.getServerName(b, ""));
                 }
 
                 return response;
@@ -397,17 +382,5 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             Comparator<VpnServerForList> comparator = (a, b) -> (int)((b.lastUsed.getTime() - a.lastUsed.getTime()) / 1000);
             Collections.sort(servers, comparator);
         }
-    }
-
-    private String getServerName(VpnServerForList server) {
-        if ((server.name == null || server.name.trim().equals("")) && (server.customName == null || server.customName.trim().equals(""))) {
-            return "";
-        } else if (server.name != null && !server.name.trim().equals("") && (server.customName == null || server.customName.trim().equals(""))) {
-            return server.name;
-        } else if (server.customName != null && !server.customName.trim().equals("") && (server.name == null || server.name.trim().equals(""))) {
-            return server.customName;
-        }
-
-        return server.customName + " - " + server.name;
     }
 }

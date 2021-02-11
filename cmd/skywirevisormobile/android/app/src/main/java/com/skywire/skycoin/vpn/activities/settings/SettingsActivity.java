@@ -15,6 +15,7 @@ import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 
 import java.util.HashSet;
@@ -84,16 +85,12 @@ public class SettingsActivity extends Fragment implements ClickEvent {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        /*
-        super.onResume();
-        HelperFunctions.closeActivityIfServiceRunning(this);
-         */
-    }
-
-    @Override
     public void onClick(View view) {
+        if (VPNCoordinator.getInstance().isServiceRunning()) {
+            HelperFunctions.showToast(getContext().getText(R.string.general_server_running_error).toString(), true);
+            return;
+        }
+
         if (view.getId() == R.id.optionApps) {
             Intent intent = new Intent(getContext(), AppsActivity.class);
             startActivity(intent);

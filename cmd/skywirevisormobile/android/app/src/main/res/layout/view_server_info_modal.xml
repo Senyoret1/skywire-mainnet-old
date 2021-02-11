@@ -237,20 +237,20 @@
                 android:textSize="@dimen/normal_text_size" />
 
             <TextView
+                android:id="@+id/textHasPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:text="Has password:"
+                android:textColor="@color/modal_window_text"
+                android:textSize="@dimen/normal_text_size" />
+
+            <TextView
                 android:id="@+id/textEnteredManually"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
                 android:text="Entered manually:"
-                android:textColor="@color/modal_window_text"
-                android:textSize="@dimen/normal_text_size" />
-
-            <TextView
-                android:id="@+id/textUsedWithPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:text="Used with password:"
                 android:textColor="@color/modal_window_text"
                 android:textSize="@dimen/normal_text_size" />
 

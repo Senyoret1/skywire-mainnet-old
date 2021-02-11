@@ -13,6 +13,6 @@ public class LocalServerData {
     public String location;
     public String note;
     public String personalNote;
-    public boolean usedWithPassword;
+    public String password;
     public boolean enteredManually;
 }

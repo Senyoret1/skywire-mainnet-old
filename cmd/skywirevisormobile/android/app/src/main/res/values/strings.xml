@@ -24,6 +24,9 @@
     <string name="general_no_permissions_error">SkywireVPN does not have the necessary permissions for activating the VPN service. Please use the app to start the VPN protection.</string>
     <string name="general_connection_error">There has been an error with the SkywireVPN service. The VPN protection is disabled.</string>
     <string name="general_starting_blocked_server_error">Unable to connect to the selected server because it has been added to the blocked servers list.</string>
+    <string name="general_server_running_error">Please stop the VPN before using this option.</string>
+
+    <string name="general_service_running_notification">The VPN service continues running. See the notification for more information.</string>
 
     <string name="skywiremob_error_invalid_pk">Invalid public key. Are you connecting to a valid VPN server?</string>
     <string name="skywiremob_error_invalid_visor_config">Unexpected error. The local visor configuration is not valid.</string>
@@ -58,7 +61,7 @@
     <string name="vpn_state_disconnecting">Disconnecting</string>
     <string name="vpn_state_error">Error</string>
 
-    <string name="vpn_state_details_off">The SkywireVPN protection disconnected.</string>
+    <string name="vpn_state_details_off">The SkywireVPN protection is disconnected.</string>
     <string name="vpn_state_details_initializing">Making initial preparations.</string>
     <string name="vpn_state_details_waiting_previous_instance_stop">Waiting for the visor to be ready.</string>
     <string name="vpn_state_details_checking_connectivity">Checking network connectivity.</string>
@@ -117,9 +120,11 @@
     <string name="tmp_select_server_favorites">Favorites</string>
     <string name="tmp_select_server_blocked">Blocked</string>
     <string name="tmp_select_server_unnamed">Unnamed</string>
+    <string name="tmp_select_server_running_error">Please stop the VPN before changing the server.</string>
 
     <string name="add_server_title">Enter Manually</string>
     <string name="add_server_pk_label">Server public key</string>
+    <string name="add_server_password_label">Server password (if any)</string>
     <string name="add_server_name_label">Server name (optional)</string>
     <string name="add_server_note_label">Personal note (optional)</string>
     <string name="add_server_pk_length_error">The public key must be 66 characters long.</string>
@@ -127,6 +132,13 @@
     <string name="add_server_use_server_button">Use server</string>
 
     <string name="tmp_server_options_view_info">View info</string>
+    <string name="tmp_server_options_name">Custom name</string>
+    <string name="tmp_server_options_note">Custom note</string>
+    <string name="tmp_server_options_remove_password">Remove password</string>
+    <string name="tmp_server_options_remove_password_confirmation">Are you sure you want remove the password used for connecting to this server?</string>
+    <string name="tmp_server_options_remove_password_done">Password removed.</string>
+    <string name="tmp_server_options_change_password">Change password</string>
+    <string name="tmp_server_options_add_password">Set password</string>
     <string name="tmp_server_options_make_favorite">Make favorite</string>
     <string name="tmp_server_options_make_favorite_from_blocked_confirmation">Are you sure you want to mark this server as favorite? It will be removed from the blocked list.</string>
     <string name="tmp_server_options_make_favorite_done">Added to the favorites list.</string>
@@ -168,7 +180,13 @@
     <string name="server_info_is_blocked">Is blocked:</string>
     <string name="server_info_is_in_history">Is in history:</string>
     <string name="server_info_entered_manually">Entered manually:</string>
-    <string name="server_info_used_with_password">Used with password:</string>
+    <string name="server_info_has_password">Has password:</string>
+
+    <string name="server_password_title">Enter Password</string>
+    <string name="server_password_label">Server password</string>
+    <string name="server_password_apply_button">Apply</string>
+    <string name="server_password_cancel_button">Cancel</string>
+    <string name="server_password_changes_made_confirmation">The change has been made.</string>
 
     <string name="tmp_edit_value_name_title">Custom Name</string>
     <string name="tmp_edit_value_note_title">Custom Note</string>

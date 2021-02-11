@@ -27,6 +27,7 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
     }
 
     private EditText editPk;
+    private EditText editPassword;
     private EditText editName;
     private EditText editNote;
     private ModalWindowButton buttonCancel;
@@ -48,6 +49,7 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         setContentView(R.layout.view_manual_server_modal);
 
         editPk = findViewById(R.id.editPk);
+        editPassword = findViewById(R.id.editPassword);
         editName = findViewById(R.id.editName);
         editNote = findViewById(R.id.editNote);
         buttonCancel = findViewById(R.id.buttonCancel);
@@ -81,7 +83,6 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         buttonConfirm.setClickEventListener(this);
 
         buttonConfirm.setEnabled(false);
-        editPk.setError(getContext().getText(R.string.add_server_pk_length_error));
         hasError = true;
     }
 
@@ -96,7 +97,7 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         if (editPk.getText().length() < 66) {
             editPk.setError(getContext().getText(R.string.add_server_pk_length_error));
             hasError = true;
-        } else if (Skywiremob.isPKValid(editPk.getText().toString()) != Skywiremob.ErrCodeNoError) {
+        } else if (Skywiremob.isPKValid(editPk.getText().toString()).getCode() != Skywiremob.ErrCodeNoError) {
             editPk.setError(getContext().getText(R.string.add_server_pk_invalid_error));
             hasError = true;
         }
@@ -124,6 +125,11 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
 
         ManualVpnServerData serverData = new ManualVpnServerData();
         serverData.pk = editPk.getText().toString().trim();
+
+        String password = editPassword.getText().toString();
+        if (password != null && !password.equals("")) {
+            serverData.password = password;
+        }
         if (editName.getText() != null && !editName.getText().toString().trim().equals("")) {
             serverData.name = editName.getText().toString().trim();
         }

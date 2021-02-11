@@ -139,7 +139,6 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
                         textLastError.setVisibility(GONE);
                     }
                 } else {
-                    VPNGeneralPersistentData.removeLastError();
                     textLastError.setVisibility(GONE);
                 }
 

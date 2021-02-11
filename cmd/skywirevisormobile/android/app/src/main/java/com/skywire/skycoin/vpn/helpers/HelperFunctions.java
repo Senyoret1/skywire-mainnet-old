@@ -17,6 +17,7 @@ import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
 import com.skywire.skycoin.vpn.controls.EditServerValueModalWindow;
 import com.skywire.skycoin.vpn.controls.ServerInfoModalWindow;
+import com.skywire.skycoin.vpn.controls.ServerPasswordModalWindow;
 import com.skywire.skycoin.vpn.controls.options.OptionsItem;
 import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
 import com.skywire.skycoin.vpn.network.ApiClient;
@@ -42,6 +43,9 @@ public class HelperFunctions {
     public static final DecimalFormat twoDecimalsFormatter = new DecimalFormat("#.##");
     public static final DecimalFormat oneDecimalsFormatter = new DecimalFormat("#.#");
     public static final DecimalFormat zeroDecimalsFormatter = new DecimalFormat("#");
+
+    // Last toast notification shown.
+    private static Toast lastToast;
 
     /**
      * Displays debug information about an error in the console. It includes the several details.
@@ -83,9 +87,14 @@ public class HelperFunctions {
         // Run in the UI thread.
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
+            // Close the previous notification.
+            if (lastToast != null) {
+                lastToast.cancel();
+            }
+
             // Show the notification.
-            Toast toast = Toast.makeText(App.getContext(), text, shortDuration ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG);
-            toast.show();
+            lastToast = Toast.makeText(App.getContext(), text, shortDuration ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG);
+            lastToast.show();
         });
     }
 
@@ -263,7 +272,7 @@ public class HelperFunctions {
             return false;
         }
 
-        long err = Skywiremob.isPKValid(server.pk);
+        long err = Skywiremob.isPKValid(server.pk).getCode();
         if (err != Skywiremob.ErrCodeNoError) {
             HelperFunctions.showToast(requestingActivity.getString(R.string.vpn_coordinator_invalid_credentials_error) + server.pk, false);
             return false;
@@ -286,11 +295,22 @@ public class HelperFunctions {
 
         VPNCoordinator.getInstance().startVPN(
             requestingActivity,
-            server,
-            ""
+            server
         );
 
         return true;
+    }
+
+    public static String getServerName(VpnServerForList server, String defaultName) {
+        if ((server.name == null || server.name.trim().equals("")) && (server.customName == null || server.customName.trim().equals(""))) {
+            return defaultName;
+        } else if (server.name != null && !server.name.trim().equals("") && (server.customName == null || server.customName.trim().equals(""))) {
+            return server.name;
+        } else if (server.customName != null && !server.customName.trim().equals("") && (server.name == null || server.name.trim().equals(""))) {
+            return server.customName;
+        }
+
+        return server.customName + " - " + server.name;
     }
 
     public static void showServerOptions(Context ctx, VpnServerForList server, ServerLists listType) {
@@ -304,14 +324,36 @@ public class HelperFunctions {
         optionCodes.add(10);
         option = new OptionsItem.SelectableOption();
         option.icon = "\ue3c9";
-        option.translatableLabelId = R.string.tmp_edit_value_name_title;
+        option.translatableLabelId = R.string.tmp_server_options_name;
         options.add(option);
         optionCodes.add(101);
         option = new OptionsItem.SelectableOption();
         option.icon = "\ue8d2";
-        option.translatableLabelId = R.string.tmp_edit_value_note_title;
+        option.translatableLabelId = R.string.tmp_server_options_note;
         options.add(option);
         optionCodes.add(102);
+
+        if (server.hasPassword) {
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue898";
+            option.translatableLabelId = R.string.tmp_server_options_remove_password;
+            options.add(option);
+            optionCodes.add(201);
+
+            option = new OptionsItem.SelectableOption();
+            option.icon = "\ue899";
+            option.translatableLabelId = R.string.tmp_server_options_change_password;
+            options.add(option);
+            optionCodes.add(202);
+        } else {
+            if (server.enteredManually) {
+                option = new OptionsItem.SelectableOption();
+                option.icon = "\ue899";
+                option.translatableLabelId = R.string.tmp_server_options_add_password;
+                options.add(option);
+                optionCodes.add(202);
+            }
+        }
 
         if (server.flag != ServerFlags.Favorite) {
             option = new OptionsItem.SelectableOption();
@@ -361,7 +403,32 @@ public class HelperFunctions {
 
             final LocalServerData savedVersion = savedVersion_;
 
-            if (optionCodes.get(selectedOption) > 100) {
+            if (optionCodes.get(selectedOption) > 200) {
+                if (VPNCoordinator.getInstance().isServiceRunning() && VPNServersPersistentData.getInstance().getCurrentServer().pk.equals(savedVersion.pk)) {
+                    HelperFunctions.showToast(App.getContext().getText(R.string.general_server_running_error).toString(), true);
+                    return;
+                }
+
+                if (optionCodes.get(selectedOption) == 201) {
+                    ConfirmationModalWindow confirmationModal = new ConfirmationModalWindow(
+                        ctx,
+                        R.string.tmp_server_options_remove_password_confirmation,
+                        R.string.tmp_confirmation_yes,
+                        R.string.tmp_confirmation_no,
+                        () -> {
+                            VPNServersPersistentData.getInstance().removePassword(savedVersion.pk);
+                            HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_remove_password_done), true);
+                        }
+                    );
+                    confirmationModal.show();
+                } else {
+                    ServerPasswordModalWindow passwordModal = new ServerPasswordModalWindow(
+                        ctx,
+                        server
+                    );
+                    passwordModal.show();
+                }
+            } else if (optionCodes.get(selectedOption) > 100) {
                 EditServerValueModalWindow valueModal = new EditServerValueModalWindow(
                     ctx,
                     optionCodes.get(selectedOption) == 101,

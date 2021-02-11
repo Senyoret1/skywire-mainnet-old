@@ -15,11 +15,9 @@ import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.Notifications;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
-import com.skywire.skycoin.vpn.objects.ManualVpnServerData;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
-import skywiremob.Skywiremob;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -81,6 +79,11 @@ public class VPNCoordinator implements Handler.Callback {
             VPNGeneralPersistentData.setLastError(errorMsg);
         }
 
+        // Erase the error which made not possible to connect the last time.
+        if (state.state == VPNStates.CONNECTED) {
+            VPNGeneralPersistentData.removeLastError();
+        }
+
         // Inform the new state.
         eventsSubject.onNext(state);
 
@@ -117,12 +120,11 @@ public class VPNCoordinator implements Handler.Callback {
      * onActivityResult function of this instance with all the params, to be able to process
      * permission requests
      * @param server Data about the remote visor.
-     * @param passcode Password of the remote node.
      */
-    public void startVPN(Activity requestingActivity, LocalServerData server, String passcode) {
+    public void startVPN(Activity requestingActivity, LocalServerData server) {
         if (!isServiceRunning()) {
             // Save the remote visor and password.
-            VPNServersPersistentData.getInstance().modifyCurrentServer(server, passcode);
+            VPNServersPersistentData.getInstance().modifyCurrentServer(server);
             VPNServersPersistentData.getInstance().updateHistory();
 
             // As the service will be started again, erase the error which made it fail the last

@@ -10,6 +10,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.TopTab;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 public class IndexActivity extends AppCompatActivity implements IndexPageAdapter.RequestTabListener {
@@ -63,6 +64,19 @@ public class IndexActivity extends AppCompatActivity implements IndexPageAdapter
         super.onDestroy();
 
         tabLayoutMediator.detach();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (pager.getCurrentItem() != 0) {
+            pager.setCurrentItem(0);
+        } else {
+            super.onBackPressed();
+
+            if (VPNCoordinator.getInstance().isServiceRunning()) {
+                HelperFunctions.showToast(getString(R.string.general_service_running_notification), false);
+            }
+        }
     }
 
     @Override

@@ -17,6 +17,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.servers.ServerLists;
 import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.MaterialFontSpan;
 import com.skywire.skycoin.vpn.objects.ServerFlags;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
@@ -105,22 +106,17 @@ public class ServerName extends FrameLayout {
             finalText.append("\ue889 ");
             initialicons += 1;
         }
+        if (server.hasPassword) {
+            finalText.append("\ue899 ");
+            initialicons += 1;
+        }
 
         if (initialicons != 0) {
             finalText.setSpan(materialFontSpan, 0, initialicons * 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             finalText.setSpan(relativeSizeSpan, 0, initialicons * 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        if ((server.name == null || server.name.trim().equals("")) && (server.customName == null || server.customName.trim().equals(""))) {
-            finalText.append(defaultName);
-        } else if (server.name != null && !server.name.trim().equals("") && (server.customName == null || server.customName.trim().equals(""))) {
-            finalText.append(server.name);
-        } else if (server.customName != null && !server.customName.trim().equals("") && (server.name == null || server.name.trim().equals(""))) {
-            finalText.append(server.customName);
-        } else {
-            finalText.append(server.customName + " - " + server.name);
-        }
-
+        finalText.append(HelperFunctions.getServerName(server, defaultName));
         text.setText(finalText);
     }
 }

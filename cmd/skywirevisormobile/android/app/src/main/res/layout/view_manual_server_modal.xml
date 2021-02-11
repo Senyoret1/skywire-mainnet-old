@@ -21,7 +21,20 @@
             android:maxLength="66"
             android:textColor="@color/primary"
             android:textColorHighlight="@color/modal_window_hint"
-            android:textColorHint="@color/modal_window_hint"/>
+            android:textColorHint="@color/modal_window_hint"
+            android:theme="@style/EditWithTooltipTheme"/>
+
+        <EditText
+            android:id="@+id/editPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:backgroundTint="@color/primary"
+            android:hint="@string/add_server_password_label"
+            android:inputType="textPassword"
+            android:textColor="@color/primary"
+            android:textColorHighlight="@color/modal_window_hint"
+            android:textColorHint="@color/modal_window_hint" />
 
         <EditText
             android:id="@+id/editName"

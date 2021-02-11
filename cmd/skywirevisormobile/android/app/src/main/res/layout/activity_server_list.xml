@@ -77,4 +77,5 @@
         android:gravity="center_horizontal"
         android:text="@string/tmp_select_server_empty_info"
         android:textSize="@dimen/normal_text_size" />
+
 </FrameLayout>

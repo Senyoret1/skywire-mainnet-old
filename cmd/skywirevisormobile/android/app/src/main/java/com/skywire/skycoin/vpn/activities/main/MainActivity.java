@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         LocalServerData currentServer = VPNServersPersistentData.getInstance().getCurrentServer();
         String savedPk = currentServer != null ? currentServer.pk : null;
-        String savedPassword = VPNServersPersistentData.getInstance().getCurrentServerPassword(null);
+        String savedPassword = currentServer != null && currentServer.password != null ? currentServer.password : "";
 
         if (savedPk != null && savedPassword != null) {
             editTextRemotePK.setText(savedPk);
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void start() {
         // Check if the pk is valid.
         String remotePK = editTextRemotePK.getText().toString().trim();
-        long err = Skywiremob.isPKValid(remotePK);
+        long err = Skywiremob.isPKValid(remotePK).getCode();
         if (err != Skywiremob.ErrCodeNoError) {
             HelperFunctions.showToast(getString(R.string.vpn_coordinator_invalid_credentials_error) + remotePK, false);
             return;
@@ -211,12 +211,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ManualVpnServerData intermediaryServerData = new ManualVpnServerData();
         intermediaryServerData.pk = remotePK;
+        intermediaryServerData.password = editTextPasscode.getText().toString();
         LocalServerData server = VPNServersPersistentData.getInstance().processFromManual(intermediaryServerData);
 
         VPNCoordinator.getInstance().startVPN(
             this,
-            server,
-            editTextPasscode.getText().toString()
+            server
         );
     }
 

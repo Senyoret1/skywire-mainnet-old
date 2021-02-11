@@ -40,13 +40,11 @@ public class VPNServersPersistentData {
 
     // Keys for persistent storage.
     private final String CURRENT_SERVER_PK = "serverPK";
-    private final String CURRENT_SERVER_PASSWORD = "serverPass";
     private final String SERVER_LIST = "serverList";
 
     private SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
     private String currentServerPk;
-    private String currentServerPassword;
     private HashMap<String, LocalServerData> serversMap;
 
     private ReplaySubject<LocalServerData> currentServerSubject = ReplaySubject.createWithSize(1);
@@ -56,7 +54,6 @@ public class VPNServersPersistentData {
 
     private VPNServersPersistentData() {
         currentServerPk = settings.getString(CURRENT_SERVER_PK, "");
-        currentServerPassword = settings.getString(CURRENT_SERVER_PASSWORD, "");
 
         String serversList = settings.getString(SERVER_LIST, null);
         if (serversList != null) {
@@ -76,10 +73,6 @@ public class VPNServersPersistentData {
 
     public LocalServerData getCurrentServer() {
         return serversMap.get(this.currentServerPk);
-    }
-
-    public String getCurrentServerPassword(String defaultValue) {
-        return currentServerPassword != null && !currentServerPassword.equals("") ? currentServerPassword : defaultValue;
     }
 
     public Observable<LocalServerData> getCurrentServerObservable() {
@@ -148,7 +141,7 @@ public class VPNServersPersistentData {
         response.personalNote = null;
         response.note = newServer.note;
         response.enteredManually = false;
-        response.usedWithPassword = false;
+        response.password = null;
 
         return response;
     }
@@ -156,6 +149,7 @@ public class VPNServersPersistentData {
     public LocalServerData processFromManual(ManualVpnServerData newServer) {
         LocalServerData retrievedServer = this.serversMap.get(newServer.pk);
         if (retrievedServer != null) {
+            retrievedServer.password = newServer.password;
             retrievedServer.customName = newServer.name;
             retrievedServer.personalNote = newServer.note;
             retrievedServer.enteredManually = true;
@@ -177,7 +171,7 @@ public class VPNServersPersistentData {
         response.personalNote = newServer.note;
         response.note = null;
         response.enteredManually = true;
-        response.usedWithPassword = false;
+        response.password = newServer.password;
 
         return response;
     }
@@ -201,6 +195,17 @@ public class VPNServersPersistentData {
         this.saveData();
     }
 
+    public void removePassword(String pk) {
+        LocalServerData retrievedServer = this.serversMap.get(pk);
+        if (retrievedServer == null || retrievedServer.password == null || retrievedServer.password.equals("")) {
+            return;
+        }
+
+        retrievedServer.password = null;
+        this.cleanServers();
+        this.saveData();
+    }
+
     public void removeFromHistory(String pk) {
         LocalServerData retrievedServer = this.serversMap.get(pk);
         if (retrievedServer == null || !retrievedServer.inHistory) {
@@ -212,13 +217,12 @@ public class VPNServersPersistentData {
         this.saveData();
     }
 
-    public void modifyCurrentServer(LocalServerData newServer, String password) {
+    public void modifyCurrentServer(LocalServerData newServer) {
         if (!this.serversMap.containsKey(newServer.pk)) {
             this.serversMap.put(newServer.pk, newServer);
         }
 
         this.currentServerPk = newServer.pk;
-        this.currentServerPassword = password;
 
         LocalServerData currentServer = this.serversMap.get(currentServerPk);
         this.currentServerSubject.onNext(currentServer);
@@ -288,7 +292,6 @@ public class VPNServersPersistentData {
             .edit()
             .putString(SERVER_LIST, servers)
             .putString(CURRENT_SERVER_PK, currentServerPk)
-            .putString(CURRENT_SERVER_PASSWORD, currentServerPassword)
             .apply();
 
         this.launchListEvents();

@@ -1,7 +1,7 @@
 package com.skywire.skycoin.vpn.activities.start;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,7 +10,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.skywire.skycoin.vpn.R;
 
@@ -29,9 +30,10 @@ public class MapBackground extends View {
     }
 
     private BitmapDrawable bitmapDrawable;
-
     private float proportion = 1;
     private Rect drawableArea = new Rect(0, 0,1, 1);
+    private int widthSize;
+    private boolean finished = false;
     private ObjectAnimator animation;
 
     private void Initialize (Context context, AttributeSet attrs) {
@@ -40,30 +42,32 @@ public class MapBackground extends View {
         bitmapDrawable.setAlpha(40);
 
         proportion = (float)bitmap.getWidth() / (float)bitmap.getHeight();
-
-        startAnimation(0);
     }
 
     public void pauseAnimation() {
-        animation.pause();
+        if (animation != null) {
+            animation.pause();
+        }
     }
 
     public void resumeAnimation() {
-        animation.resume();
+        if (animation != null) {
+            animation.resume();
+        }
     }
 
     public void cancelAnimation() {
-        animation.cancel();
-        animation = null;
+        finished = true;
+        stopAnimation();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int widthtSize = MeasureSpec.getSize(widthMeasureSpec);
+        widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (widthtSize != drawableArea.width() || heightSize != drawableArea.height()) {
-            setValues(widthtSize, heightSize);
+        if (widthSize != drawableArea.width() || heightSize != drawableArea.height()) {
+            setValues(widthSize, heightSize);
         }
 
         setMeasuredDimension(drawableArea.width(), drawableArea.height());
@@ -76,28 +80,60 @@ public class MapBackground extends View {
     }
 
     private void setValues(int width, int height) {
-        drawableArea = new Rect(0, 0, (int) (height * proportion), height);
-        bitmapDrawable.setBounds(drawableArea);
-
-        if (animation == null) {
+        if (finished) {
             return;
         }
 
-        boolean pause = animation.isPaused();
-        animation.cancel();
+        drawableArea = new Rect(0, 0, (int) (height * proportion), height);
+        bitmapDrawable.setBounds(drawableArea);
 
-        startAnimation(-(drawableArea.width() - width));
-        if (pause) {
-            animation.pause();
-        }
+        stopAnimation();
+        selectPosition();
+        startAnimation(true);
     }
 
-    private void startAnimation(int finalValue) {
-        animation = ObjectAnimator.ofFloat(this, "translationX", 0, finalValue);
-        animation.setDuration(45000);
-        animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setRepeatCount(ValueAnimator.INFINITE);
-        animation.setRepeatMode(ValueAnimator.REVERSE);
+    private void selectPosition() {
+        int max = drawableArea.width() - widthSize;
+        this.setTranslationX(-(int)Math.round(Math.random() * max));
+        invalidate();
+    }
+
+    private void startAnimation(boolean appear) {
+        animation = ObjectAnimator.ofFloat(this, "alpha", appear ? 0 : 1, appear ? 1 : 0);
+        animation.setDuration(800);
+        animation.setInterpolator(appear ? new DecelerateInterpolator() : new AccelerateInterpolator());
+        if (!appear) {
+            animation.setStartDelay(15000);
+        }
+
+        animation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                stopAnimation();
+                if (appear) {
+                    startAnimation(false);
+                } else {
+                    selectPosition();
+                    startAnimation(true);
+                }
+            }
+        });
+
         animation.start();
+    }
+
+    private void stopAnimation() {
+        if (animation != null) {
+            animation.removeAllListeners();
+            animation.cancel();
+            animation = null;
+        }
     }
 }

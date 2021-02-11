@@ -7,11 +7,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.ManualServerModalWindow;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
+import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import java.util.List;
 
@@ -95,6 +98,11 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
                 vpnSelectedListener.onVpnServerSelected(this.data.get(index));
             } else {
                 if (index == ServerListOptions.addIndex) {
+                    if (VPNCoordinator.getInstance().isServiceRunning()) {
+                        HelperFunctions.showToast(context.getText(R.string.tmp_select_server_running_error).toString(), true);
+                        return;
+                    }
+
                     ManualServerModalWindow modal = new ManualServerModalWindow(context, server -> vpnSelectedListener.onManualEntered(server));
                     modal.show();
                 }

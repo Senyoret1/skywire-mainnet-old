@@ -61,7 +61,7 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
     private TextView textBlocked;
     private TextView textInHistory;
     private TextView textEnteredManually;
-    private TextView textUsedWithPassword;
+    private TextView textHasPassword;
 
     private ModalWindowButton buttonClose;
 
@@ -105,7 +105,7 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
         textBlocked = findViewById(R.id.textBlocked);
         textInHistory = findViewById(R.id.textInHistory);
         textEnteredManually = findViewById(R.id.textEnteredManually);
-        textUsedWithPassword = findViewById(R.id.textUsedWithPassword);
+        textHasPassword = findViewById(R.id.textHasPassword);
 
         buttonClose = findViewById(R.id.buttonClose);
 
@@ -191,11 +191,11 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
         } else {
             textEnteredManually.setVisibility(View.GONE);
         }
-        if (server.enteredManually && server.usedWithPassword) {
-            putValue(textUsedWithPassword, R.string.server_info_used_with_password, getBooleanString(true), null, null);
+        if (server.enteredManually && server.hasPassword) {
+            putValue(textHasPassword, R.string.server_info_has_password, getBooleanString(true), null, "\ue899");
             hasSpecialCondition = true;
         } else {
-            textUsedWithPassword.setVisibility(View.GONE);
+            textHasPassword.setVisibility(View.GONE);
         }
         if (!hasSpecialCondition) {
             specialContainer.setVisibility(View.GONE);
