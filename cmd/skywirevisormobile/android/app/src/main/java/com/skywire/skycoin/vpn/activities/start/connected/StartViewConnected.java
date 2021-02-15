@@ -11,14 +11,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.activities.servers.ServerLists;
+import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
+import com.skywire.skycoin.vpn.controls.ServerName;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -42,6 +49,7 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
 
     private final int retryDelay = 20000;
 
+    private TextView textTime;
     private TextView textState;
     private TextView textStateDescription;
     private TextView textLastError;
@@ -49,10 +57,20 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private TextView textWaitingCountry;
     private TextView textIp;
     private TextView textCountry;
+    private TextView textUploadSpeed;
+    private TextView textTotalUploaded;
+    private TextView textDownloadSpeed;
+    private TextView textTotalDownloaded;
+    private TextView textLatency;
     private TextView textStartedByTheSystem;
+    private ServerName serverName;
     private ImageView imageStateLine;
+    private Chart downloadChart;
+    private Chart uploadChart;
+    private Chart latencyChart;
     private LinearLayout ipContainer;
     private LinearLayout countryContainer;
+    private LinearLayout serverContainer;
     private ProgressBar progressIp;
     private ProgressBar progressCountry;
     private StopButton buttonStop;
@@ -62,12 +80,15 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private String previousCountry;
 
     private Disposable serviceSubscription;
+    private Disposable serverSubscription;
     private Disposable ipSubscription;
+    private Disposable statsSubscription;
 
     protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_start_connected, this, true);
 
+        textTime = findViewById(R.id.textTime);
         textState = findViewById(R.id.textState);
         textStateDescription = findViewById(R.id.textStateDescription);
         textLastError = findViewById(R.id.textLastError);
@@ -75,10 +96,21 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         textWaitingCountry = findViewById(R.id.textWaitingCountry);
         textIp = findViewById(R.id.textIp);
         textCountry = findViewById(R.id.textCountry);
+        textUploadSpeed = findViewById(R.id.textUploadSpeed);
+        textTotalUploaded = findViewById(R.id.textTotalUploaded);
+        textDownloadSpeed = findViewById(R.id.textDownloadSpeed);
+        textTotalDownloaded = findViewById(R.id.textTotalDownloaded);
+        textLatency = findViewById(R.id.textLatency);
         textStartedByTheSystem = findViewById(R.id.textStartedByTheSystem);
+        serverName = this.findViewById (R.id.serverName);
         imageStateLine = findViewById(R.id.imageStateLine);
+        imageStateLine = findViewById(R.id.imageStateLine);
+        downloadChart = findViewById(R.id.downloadChart);
+        uploadChart = findViewById(R.id.uploadChart);
+        latencyChart = findViewById(R.id.latencyChart);
         ipContainer = findViewById(R.id.ipContainer);
         countryContainer = findViewById(R.id.countryContainer);
+        serverContainer = findViewById(R.id.serverContainer);
         progressIp = findViewById(R.id.progressIp);
         progressCountry = findViewById(R.id.progressCountry);
         buttonStop = findViewById(R.id.buttonStop);
@@ -92,6 +124,20 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
             textWaitingIp.setText(R.string.tmp_status_connected_ip_option_disabled);
             textWaitingCountry.setText(R.string.tmp_status_connected_ip_option_disabled);
         }
+
+        ArrayList<Long> emptyValues = new ArrayList<>();
+        emptyValues.add(0L);
+        downloadChart.setData(emptyValues, false);
+        uploadChart.setData(emptyValues, false);
+        latencyChart.setData(emptyValues, true);
+
+        serverSubscription = VPNServersPersistentData.getInstance().getCurrentServerObservable().subscribe(server -> {
+            serverName.setServer(ServersActivity.convertLocalServerData(server), ServerLists.History, true);
+        });
+
+        serverContainer.setOnClickListener((View v) -> {
+            HelperFunctions.showServerOptions(getContext(), ServersActivity.convertLocalServerData(VPNServersPersistentData.getInstance().getCurrentServer()), ServerLists.History);
+        });
 
         buttonStop.setClickEventListener(this);
 
@@ -168,6 +214,44 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
                 }
             }
         );
+
+        statsSubscription = VPNCoordinator.getInstance().getConnectionStats().subscribe(stats -> {
+            updateTime(stats.lastConnectionDate);
+
+            downloadChart.setData(stats.downloadSpeedHistory, false);
+            uploadChart.setData(stats.uploadSpeedHistory, false);
+            latencyChart.setData(stats.latencyHistory, true);
+
+            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentDownloadSpeed, true));
+            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentUploadSpeed, true));
+            textLatency.setText(HelperFunctions.getLatencyValue(stats.currentLatency));
+
+            textTotalDownloaded.setText(String.format(
+                getContext().getText(R.string.tmp_status_connected_total_data).toString(),
+                HelperFunctions.computeDataAmountString(stats.totalDownloadedData, false)
+            ));
+
+            textTotalUploaded.setText(String.format(
+                getContext().getText(R.string.tmp_status_connected_total_data).toString(),
+                HelperFunctions.computeDataAmountString(stats.totalUploadedData, false)
+            ));
+        });
+
+        updateTime(null);
+    }
+
+    private void updateTime(Date lastConnectionDate) {
+        if (lastConnectionDate == null) {
+            textTime.setText(R.string.tmp_status_connected_waiting);
+        } else {
+            long connectionMs = (new Date()).getTime() - lastConnectionDate.getTime();
+
+            String time = String.format("%02d", connectionMs / 3600000) + ":";
+            time += String.format("%02d", (connectionMs / 60000) % 60) + ":";
+            time += String.format("%02d", (connectionMs / 1000) % 60);
+
+            textTime.setText(time);
+        }
     }
 
     private void getIp(int delayMs) {
@@ -240,7 +324,9 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
 
     @Override
     public void close() {
+        serverSubscription.dispose();
         serviceSubscription.dispose();
+        statsSubscription.dispose();
         cancelIpCheck();
     }
 

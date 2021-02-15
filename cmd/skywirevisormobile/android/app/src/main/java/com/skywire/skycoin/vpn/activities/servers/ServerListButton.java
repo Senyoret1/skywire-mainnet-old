@@ -112,7 +112,7 @@ public class ServerListButton extends ListButtonBase<Void> {
             statsArea1.setVisibility(VISIBLE);
             statsArea2.setVisibility(VISIBLE);
 
-            textLatency.setText(HelperFunctions.getLatencyValue(serverData.latency, getContext()));
+            textLatency.setText(HelperFunctions.getLatencyValue(serverData.latency));
             textCongestion.setText(HelperFunctions.zeroDecimalsFormatter.format(serverData.congestion) + "%");
             textHops.setText(serverData.hops + "");
 

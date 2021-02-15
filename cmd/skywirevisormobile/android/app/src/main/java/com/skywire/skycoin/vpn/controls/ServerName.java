@@ -8,6 +8,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -52,6 +53,11 @@ public class ServerName extends FrameLayout {
                 R.styleable.ServerName,
                 0, 0
             );
+
+            boolean centerText = attributes.getBoolean(R.styleable.ServerName_center_text, false);
+            if (centerText) {
+                text.setGravity(Gravity.CENTER_HORIZONTAL);
+            }
 
             String defaultName = attributes.getString(R.styleable.ServerName_default_name);
             if (defaultName != null) {

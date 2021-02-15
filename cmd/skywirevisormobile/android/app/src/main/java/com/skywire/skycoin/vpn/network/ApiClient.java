@@ -6,6 +6,7 @@ import com.skywire.skycoin.vpn.network.models.VpnServerModel;
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
@@ -38,13 +39,13 @@ public class ApiClient {
     private static final Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJava3CallAdapterFactory.createSynchronous())
+        .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
         .build();
 
     private static final Retrofit rawTextRetrofit = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addCallAdapterFactory(RxJava3CallAdapterFactory.createSynchronous())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build();
 
     private static final ApiInterface apiService = retrofit.create(ApiInterface.class);

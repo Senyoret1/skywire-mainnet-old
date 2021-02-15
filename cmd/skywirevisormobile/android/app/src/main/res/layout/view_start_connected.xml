@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
@@ -39,7 +40,7 @@
                     android:id="@+id/textTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="01:05:30"
+                    android:text="00:00:00"
                     android:textColor="@color/subtle_text"
                     android:textSize="@dimen/small_text_size"
                     android:translationY="-1dp" />
@@ -113,9 +114,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/status_page_horizontal_margin"
+                android:paddingLeft="@dimen/status_page_horizontal_margin"
+                android:paddingRight="@dimen/status_page_horizontal_margin"
+                android:layout_marginLeft="-5dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginRight="@dimen/status_page_horizontal_margin"
+                android:layout_marginRight="-5dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -164,10 +167,10 @@
                             android:layout_width="15dp"
                             android:layout_height="15dp"
                             android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="5dp"
                             android:indeterminate="true"
-                            android:indeterminateTintMode="src_in"
                             android:indeterminateTint="@color/normal_text"
-                            android:layout_marginLeft="5dp" />
+                            android:indeterminateTintMode="src_in" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -219,14 +222,187 @@
                             android:layout_width="15dp"
                             android:layout_height="15dp"
                             android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="5dp"
                             android:indeterminate="true"
-                            android:indeterminateTintMode="src_in"
                             android:indeterminateTint="@color/normal_text"
-                            android:layout_marginLeft="5dp" />
+                            android:indeterminateTintMode="src_in" />
                     </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="5dp"
+                android:orientation="horizontal">
+
+                <com.skywire.skycoin.vpn.activities.start.connected.Chart
+                    android:id="@+id/uploadChart"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_marginRight="-5dp"
+                    android:layout_weight="1" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:translationY="-7dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:layout_gravity="center_horizontal"
+                            android:fontFamily="@font/material_font"
+                            android:rotation="90"
+                            android:text="\ue317"
+                            android:textSize="20dp" />
+
+                        <TextView
+                            android:id="@+id/textUploadSpeed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="0B/s"
+                            android:textSize="@dimen/small_text_size"/>
+
+                        <TextView
+                            android:id="@+id/textTotalUploaded"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="0B Total"
+                            android:textColor="@color/subtle_text"
+                            android:textSize="@dimen/mini_text_size" />
+
+                    </LinearLayout>
+
+                </com.skywire.skycoin.vpn.activities.start.connected.Chart>
+
+                <com.skywire.skycoin.vpn.activities.start.connected.Chart
+                    android:id="@+id/downloadChart"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_marginLeft="-5dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:translationY="-7dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:layout_gravity="center_horizontal"
+                            android:fontFamily="@font/material_font"
+                            android:rotation="-90"
+                            android:text="\ue317"
+                            android:textSize="20dp" />
+
+                        <TextView
+                            android:id="@+id/textDownloadSpeed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="0B/s"
+                            android:textSize="@dimen/small_text_size"/>
+
+                        <TextView
+                            android:id="@+id/textTotalDownloaded"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="0B Total"
+                            android:textColor="@color/subtle_text"
+                            android:textSize="@dimen/mini_text_size" />
+
+                    </LinearLayout>
+
+                </com.skywire.skycoin.vpn.activities.start.connected.Chart>
+
+            </LinearLayout>
+
+            <com.skywire.skycoin.vpn.activities.start.connected.Chart
+                android:id="@+id/latencyChart"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="-10dp"
+                android:layout_marginRight="5dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:translationY="-3dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_gravity="center_horizontal"
+                        android:fontFamily="@font/material_font"
+                        android:text="\ue8d4"
+                        android:textSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/textLatency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="5 ms."
+                        android:textSize="@dimen/small_text_size"/>
+
+                </LinearLayout>
+
+            </com.skywire.skycoin.vpn.activities.start.connected.Chart>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/black_background">
+
+                <LinearLayout
+                    android:id="@+id/serverContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/current_server_ripple"
+                    android:clickable="true"
+                    android:orientation="vertical"
+                    android:paddingLeft="@dimen/status_page_horizontal_margin"
+                    android:paddingTop="10dp"
+                    android:paddingRight="@dimen/status_page_horizontal_margin"
+                    android:paddingBottom="15dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/tmp_status_connected_server_title"
+                        android:textColor="@color/subtle_text"
+                        android:textSize="@dimen/mini_text_size" />
+
+                    <com.skywire.skycoin.vpn.controls.ServerName
+                        android:id="@+id/serverName"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:center_text="true"
+                        app:default_name="@string/tmp_select_server_unnamed"
+                        app:text_size="@dimen/small_text_size" />
+
+                </LinearLayout>
+
+            </FrameLayout>
 
             <com.skywire.skycoin.vpn.activities.start.connected.StopButton
                 android:id="@+id/buttonStop"

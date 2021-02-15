@@ -104,9 +104,9 @@ public class Notifications {
         String text = App.getContext().getString(VPNStates.getDescriptionForState(currentState));
         // If connected, the connection stats are shown as the main text.
         if (currentState == VPNStates.CONNECTED) {
-            text = "\u2193" + HelperFunctions.computeSpeedString(Skywiremob.vpnBandwidthReceived());
-            text += "  \u2191" + HelperFunctions.computeSpeedString(Skywiremob.vpnBandwidthSent());
-            text += "  \u2194" + Skywiremob.vpnLatency() + App.getContext().getString(R.string.general_milliseconds_abbreviation);
+            text = "\u2193" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthReceived(), true);
+            text += "  \u2191" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthSent(), true);
+            text += "  \u2194" + HelperFunctions.getLatencyValue(Skywiremob.vpnLatency());
         }
 
         // The lines icon indicates that the service is disconnected and the network protection is

@@ -49,5 +49,6 @@
     <declare-styleable name="ServerName">
         <attr name="default_name" format="string" />
         <attr name="text_size" format="dimension" />
+        <attr name="center_text" format="boolean" />
     </declare-styleable>
 </resources>

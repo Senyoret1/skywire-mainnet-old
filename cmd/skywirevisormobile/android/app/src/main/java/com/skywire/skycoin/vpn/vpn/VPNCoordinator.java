@@ -16,8 +16,16 @@ import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.Notifications;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import skywiremob.Skywiremob;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -25,6 +33,26 @@ import static android.app.Activity.RESULT_OK;
  * Class for communication between the app UI and the VPN service. It is accessed via a singleton.
  */
 public class VPNCoordinator implements Handler.Callback {
+    public static class ConnectionStats {
+        public Date lastConnectionDate = null;
+        public long currentDownloadSpeed = 0;
+        public long currentUploadSpeed = 0;
+        public long currentLatency = 0;
+        public long totalDownloadedData = 0;
+        public long totalUploadedData = 0;
+        public ArrayList<Long> downloadSpeedHistory = new ArrayList<>();
+        public ArrayList<Long> uploadSpeedHistory  = new ArrayList<>();
+        public ArrayList<Long> latencyHistory = new ArrayList<>();
+
+        public ConnectionStats() {
+            for (int i = 0; i < 10; i++) {
+                downloadSpeedHistory.add(0L);
+                uploadSpeedHistory.add(0L);
+                latencyHistory.add(0L);
+            }
+        }
+    }
+
     /**
      * Value the onActivityResult function will get after asking the user for permission.
      */
@@ -38,6 +66,10 @@ public class VPNCoordinator implements Handler.Callback {
      * Gets the singleton for using the class.
      */
     public static VPNCoordinator getInstance() { return instance; }
+
+    private Disposable updateStatsSubscription;
+
+    private ConnectionStats connectionStats = new ConnectionStats();
 
     /**
      * App context.
@@ -53,6 +85,8 @@ public class VPNCoordinator implements Handler.Callback {
      */
     private final BehaviorSubject<VPNStates.StateInfo> eventsSubject = BehaviorSubject.create();
 
+    private final BehaviorSubject<ConnectionStats> connectionStatsSubject = BehaviorSubject.create();
+
     private VPNCoordinator() {
         serviceCommunicationHandler = new Handler(this);
 
@@ -60,18 +94,15 @@ public class VPNCoordinator implements Handler.Callback {
         eventsSubject.onNext(new VPNStates.StateInfo(VPNStates.OFF, false, false));
     }
 
+    public Observable<ConnectionStats> getConnectionStats() {
+        return connectionStatsSubject.hide();
+    }
+
     /**
      * Handles the messages received from the VPN service.
      */
     @Override
     public boolean handleMessage(Message msg) {
-        // Create the state object with the params returned by the VPN service.
-        VPNStates.StateInfo state = new VPNStates.StateInfo(
-            VPNStates.valueOf(msg.what),
-            msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM),
-            msg.getData().getBoolean(SkywireVPNService.STOP_REQUESTED_PARAM)
-        );
-
         // Save the error as the one which made the last execution of the VPN service fail.
         // Must be done before sending the event.
         String errorMsg = msg.getData().getString(SkywireVPNService.ERROR_MSG_PARAM);
@@ -79,15 +110,73 @@ public class VPNCoordinator implements Handler.Callback {
             VPNGeneralPersistentData.setLastError(errorMsg);
         }
 
-        // Erase the error which made not possible to connect the last time.
-        if (state.state == VPNStates.CONNECTED) {
-            VPNGeneralPersistentData.removeLastError();
+        if (updateStatsSubscription == null) {
+            continuallyUpdateStats();
         }
+
+        if (VPNStates.valueOf(msg.what) == VPNStates.CONNECTED) {
+            // Erase the error which made not possible to connect the last time.
+            VPNGeneralPersistentData.removeLastError();
+
+            if (connectionStats.lastConnectionDate == null) {
+                connectionStats.lastConnectionDate = new Date();
+            }
+        } else {
+            if (VPNStates.valueOf(msg.what) == VPNStates.DISCONNECTED || VPNStates.valueOf(msg.what) == VPNStates.OFF) {
+                if (updateStatsSubscription != null) {
+                    updateStatsSubscription.dispose();
+                    updateStatsSubscription = null;
+                }
+
+                connectionStats = new ConnectionStats();
+                connectionStatsSubject.onNext(connectionStats);
+            } else {
+                connectionStats.lastConnectionDate = null;
+            }
+        }
+
+        // Create the state object with the params returned by the VPN service.
+        VPNStates.StateInfo state = new VPNStates.StateInfo(
+            VPNStates.valueOf(msg.what),
+            msg.getData().getBoolean(SkywireVPNService.STARTED_BY_THE_SYSTEM_PARAM),
+            msg.getData().getBoolean(SkywireVPNService.STOP_REQUESTED_PARAM)
+        );
 
         // Inform the new state.
         eventsSubject.onNext(state);
 
         return true;
+    }
+
+    private void continuallyUpdateStats() {
+        if (updateStatsSubscription != null) {
+            updateStatsSubscription.dispose();
+        }
+
+        sendStats();
+
+        updateStatsSubscription = Observable.interval(1000L, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(val -> {
+                sendStats();
+            });
+    }
+
+    private void sendStats() {
+        connectionStats.currentDownloadSpeed = Skywiremob.vpnBandwidthReceived();
+        connectionStats.downloadSpeedHistory.remove(0);
+        connectionStats.downloadSpeedHistory.add(connectionStats.currentDownloadSpeed);
+
+        connectionStats.currentUploadSpeed = Skywiremob.vpnBandwidthSent();
+        connectionStats.uploadSpeedHistory.remove(0);
+        connectionStats.uploadSpeedHistory.add(connectionStats.currentUploadSpeed);
+
+        connectionStats.currentLatency = Skywiremob.vpnLatency();
+        connectionStats.latencyHistory.remove(0);
+        connectionStats.latencyHistory.add(connectionStats.currentLatency);
+
+        connectionStatsSubject.onNext(connectionStats);
     }
 
     /**

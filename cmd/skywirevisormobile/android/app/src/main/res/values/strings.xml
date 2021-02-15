@@ -109,6 +109,8 @@
     <string name="tmp_status_connected_current_country_title">Current Country:</string>
     <string name="tmp_status_connected_waiting">Waiting for VPN...</string>
     <string name="tmp_status_connected_ip_option_disabled">Option disabled</string>
+    <string name="tmp_status_connected_total_data">%1$s total</string>
+    <string name="tmp_status_connected_server_title">Server:</string>
     <string name="tmp_status_connected_disconnect">Disconnect</string>
     <string name="tmp_status_connected_disconnect_confirmation">Are you sure you want to stop the VPN protection?</string>
     <string name="tmp_status_connected_started_by_the_system">As the VPN connection was started using the system options, it cannot be stopped using this screen. For stopping the VPN, please use the same system options used for stating it.</string>

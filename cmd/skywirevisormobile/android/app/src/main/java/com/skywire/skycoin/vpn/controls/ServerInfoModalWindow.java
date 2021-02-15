@@ -143,7 +143,7 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
                 getContext().getText(ServerRatings.getTextForRating(server.congestionRating)).toString(), getRatingColor(server.congestionRating), null
             );
             putValue(textLatency, R.string.server_info_latency,
-                HelperFunctions.getLatencyValue(server.latency, getContext()), null, null
+                HelperFunctions.getLatencyValue(server.latency), null, null
             );
             putValue(textLatencyRating, R.string.server_info_latency_rating,
                 getContext().getText(ServerRatings.getTextForRating(server.latencyRating)).toString(), getRatingColor(server.latencyRating), null

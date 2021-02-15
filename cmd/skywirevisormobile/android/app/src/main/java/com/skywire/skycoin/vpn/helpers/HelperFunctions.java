@@ -205,13 +205,16 @@ public class HelperFunctions {
     }
 
     /**
-     * Process a bytes per second speed and returns the string for displaying it in the UI. The
-     * returned speed in in bits and not bytes.
-     * @param bytesPerSecondSpeed Speed to process.
+     * Allows to convert a bytes value to KB, MB, GB, etc. It considers 1024, and not 1000, a K.
+     * @param bytes Amount of data to process, in bytes.
+     * @param calculatePerSecond If true, the result will have "/s" added at the end.
      */
-    public static String computeSpeedString(long bytesPerSecondSpeed) {
-        double current = bytesPerSecondSpeed * 8;
-        String[] scales = new String[]{"b/s", "Kb/s", "Mb/s", "Gb/s", "Tb/s"};
+    public static String computeDataAmountString(long bytes, boolean calculatePerSecond) {
+        double current = (double)bytes;
+        String[] accumulatedMeasurements = new String[]{" B", " KB", " MB", " GB", " TB"};
+        String[] measurementsPerSec = new String[]{" B/s", " KB/s", " MB/s", " GB/s", " TB/s"};
+
+        String[] scales = calculatePerSecond ? measurementsPerSec : accumulatedMeasurements;
 
         // Divide the speed by 1024 until getting an appropriate scale to return.
         for (int i = 0; i < scales.length - 1; i++) {
@@ -232,16 +235,16 @@ public class HelperFunctions {
         return current + scales[scales.length - 1];
     }
 
-    public static String getLatencyValue(double latency, Context ctx) {
+    public static String getLatencyValue(double latency) {
         String initialPart;
         String lastPart;
 
         if (latency >= 1000) {
             initialPart = oneDecimalsFormatter.format(latency / 1000);
-            lastPart = ctx.getString(R.string.general_seconds_abbreviation);
+            lastPart = App.getContext().getString(R.string.general_seconds_abbreviation);
         } else {
             initialPart = zeroDecimalsFormatter.format(latency);
-            lastPart = ctx.getString(R.string.general_milliseconds_abbreviation);
+            lastPart = App.getContext().getString(R.string.general_milliseconds_abbreviation);
         }
 
         return initialPart + lastPart;

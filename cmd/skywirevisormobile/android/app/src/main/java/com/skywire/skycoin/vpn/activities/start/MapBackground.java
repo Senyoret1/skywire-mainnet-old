@@ -39,7 +39,7 @@ public class MapBackground extends View {
     private void Initialize (Context context, AttributeSet attrs) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map);
         bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-        bitmapDrawable.setAlpha(40);
+        bitmapDrawable.setAlpha(25);
 
         proportion = (float)bitmap.getWidth() / (float)bitmap.getHeight();
     }
