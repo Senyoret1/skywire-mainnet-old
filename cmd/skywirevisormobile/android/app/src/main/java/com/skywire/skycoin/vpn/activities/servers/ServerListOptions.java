@@ -16,6 +16,7 @@ import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 public class ServerListOptions extends FrameLayout implements ClickEvent {
     public static final int filterIndex = -1;
     public static final int addIndex = -2;
+    public static final int sortIndex = -3;
 
     public ServerListOptions(Context context) {
         super(context);
@@ -30,6 +31,7 @@ public class ServerListOptions extends FrameLayout implements ClickEvent {
         Initialize(context, attrs);
     }
 
+    private ServerListOptionButton buttonSort;
     private ServerListOptionButton buttonFilter;
     private ServerListOptionButton buttonAdd;
 
@@ -39,9 +41,11 @@ public class ServerListOptions extends FrameLayout implements ClickEvent {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.view_server_list_options, this, true);
 
+        buttonSort = this.findViewById (R.id.buttonSort);
         buttonFilter = this.findViewById (R.id.buttonFilter);
         buttonAdd = this.findViewById (R.id.buttonAdd);
 
+        buttonSort.setClickEventListener(this);
         buttonFilter.setClickEventListener(this);
         buttonAdd.setClickEventListener(this);
 
@@ -56,8 +60,12 @@ public class ServerListOptions extends FrameLayout implements ClickEvent {
     @Override
     public void onClick(View view) {
         if (clickListener != null) {
-            if (view.getId() == R.id.buttonAdd) {
+            if (view.getId() == R.id.buttonSort) {
+                clickListener.onClickWithIndex(sortIndex, null);
+            } else if (view.getId() == R.id.buttonAdd) {
                 clickListener.onClickWithIndex(addIndex, null);
+            } else if (view.getId() == R.id.buttonFilter) {
+                clickListener.onClickWithIndex(filterIndex, null);
             }
         }
     }

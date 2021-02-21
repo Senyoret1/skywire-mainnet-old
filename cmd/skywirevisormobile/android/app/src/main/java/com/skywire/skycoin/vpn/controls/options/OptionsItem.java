@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,11 +17,13 @@ import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchListener {
     public static class SelectableOption {
         public String icon;
+        public Integer drawableId;
         public String label;
         public int translatableLabelId = -1;
     }
 
     private LinearLayout mainContainer;
+    private ImageView imageBitmap;
     private TextView textIcon;
     private TextView text;
 
@@ -42,6 +45,7 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
         inflater.inflate(R.layout.view_options_item, this, true);
 
         mainContainer = this.findViewById (R.id.mainContainer);
+        imageBitmap = this.findViewById (R.id.imageBitmap);
         textIcon = this.findViewById (R.id.textIcon);
         text = this.findViewById (R.id.text);
 
@@ -71,8 +75,16 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
         if (params.icon != null) {
             textIcon.setText(params.icon);
             textIcon.setVisibility(VISIBLE);
+            imageBitmap.setVisibility(GONE);
         } else {
             textIcon.setVisibility(GONE);
+
+            if (params.drawableId != null) {
+                imageBitmap.setImageResource(params.drawableId);
+                imageBitmap.setVisibility(VISIBLE);
+            } else {
+                textIcon.setVisibility(GONE);
+            }
         }
 
         if (params.translatableLabelId != -1) {

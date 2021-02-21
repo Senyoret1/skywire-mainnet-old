@@ -12,9 +12,16 @@
         android:orientation="horizontal">
 
         <com.skywire.skycoin.vpn.activities.servers.ServerListOptionButton
+            android:id="@+id/buttonSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:content="\ue164" />
+
+        <com.skywire.skycoin.vpn.activities.servers.ServerListOptionButton
             android:id="@+id/buttonFilter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="-10dp"
             app:content="\ue8b6" />
 
         <com.skywire.skycoin.vpn.activities.servers.ServerListOptionButton

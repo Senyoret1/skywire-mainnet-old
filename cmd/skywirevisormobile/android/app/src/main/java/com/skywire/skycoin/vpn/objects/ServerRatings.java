@@ -22,4 +22,16 @@ public enum ServerRatings {
 
         return -1;
     }
+
+    public static int getNumberForRating(ServerRatings rating) {
+        if (rating == Gold) {
+            return 2;
+        } else if (rating == Silver) {
+            return 1;
+        } else if (rating == Bronze) {
+            return 0;
+        }
+
+        return -1;
+    }
 }

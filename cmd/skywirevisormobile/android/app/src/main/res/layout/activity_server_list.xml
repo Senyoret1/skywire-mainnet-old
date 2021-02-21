@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar
-        android:id="@+id/loadingAnimation"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
@@ -67,15 +60,46 @@
         android:scaleType="fitXY"
         app:srcCompat="@drawable/top_bar_shadow" />
 
-    <TextView
-        android:id="@+id/textNoResults"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:gravity="center_horizontal"
-        android:text="@string/tmp_select_server_empty_info"
-        android:textSize="@dimen/normal_text_size" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/tab_bar_height">
+
+        <ProgressBar
+            android:id="@+id/loadingAnimation"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <LinearLayout
+            android:id="@+id/noResultsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.5"
+                android:fontFamily="@font/material_font"
+                android:gravity="center_horizontal"
+                android:text="\ue88f"
+                android:textSize="50dp" />
+
+            <TextView
+                android:id="@+id/textNoResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Empty"
+                android:textSize="@dimen/normal_text_size" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </FrameLayout>

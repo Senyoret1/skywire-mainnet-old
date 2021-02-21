@@ -398,7 +398,7 @@ public class HelperFunctions {
             optionCodes.add(-3);
         }
 
-        OptionsModalWindow modal = new OptionsModalWindow(ctx, options, (int selectedOption) -> {
+        OptionsModalWindow modal = new OptionsModalWindow(ctx, null, options, (int selectedOption) -> {
             LocalServerData savedVersion_ = VPNServersPersistentData.getInstance().getSavedVersion(server.pk);
             if (savedVersion_ == null) {
                 savedVersion_ = VPNServersPersistentData.getInstance().processFromList(server);

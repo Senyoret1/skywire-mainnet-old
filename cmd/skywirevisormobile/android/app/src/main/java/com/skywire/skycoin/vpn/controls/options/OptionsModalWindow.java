@@ -9,6 +9,7 @@ import android.view.Window;
 import android.widget.LinearLayout;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.controls.ModalBase;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
 
 import java.util.ArrayList;
@@ -18,14 +19,17 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
         void optionSelected(int selectedIndex);
     }
 
+    private String title;
+    private ModalBase modalBase;
     private LinearLayout container;
 
     private ArrayList<OptionsItem.SelectableOption> options;
     private OptionSelected event;
 
-    public OptionsModalWindow(Context ctx, ArrayList<OptionsItem.SelectableOption> options, OptionSelected event) {
+    public OptionsModalWindow(Context ctx, String title, ArrayList<OptionsItem.SelectableOption> options, OptionSelected event) {
         super(ctx);
 
+        this.title = title;
         this.options = options;
         this.event = event;
     }
@@ -36,7 +40,12 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.view_options);
 
+        modalBase = findViewById(R.id.modalBase);
         container = findViewById(R.id.container);
+
+        if (title != null) {
+            modalBase.setTitleString(title);
+        }
 
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 

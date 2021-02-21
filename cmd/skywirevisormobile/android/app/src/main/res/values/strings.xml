@@ -116,13 +116,45 @@
     <string name="tmp_status_connected_started_by_the_system">As the VPN connection was started using the system options, it cannot be stopped using this screen. For stopping the VPN, please use the same system options used for stating it.</string>
 
     <string name="tmp_select_server_title">Servers</string>
-    <string name="tmp_select_server_empty_info">There are no servers to display in this list.</string>
+    <string name="tmp_select_server_empty_discovery">Currently there are no VPN servers to show. Please try again later.</string>
+    <string name="tmp_select_server_empty_history">There is no history to show.</string>
+    <string name="tmp_select_server_empty_favorites">There are no favorite servers to show.</string>
+    <string name="tmp_select_server_empty_blocked">There are no blocked servers to show.</string>
+    <string name="tmp_select_server_empty_with_filter">No VPN server matches the selected filtering criteria.</string>
+    <string name="tmp_select_server_sorted_by_prefix">Sorted by</string>
+    <string name="tmp_select_server_press_to_remove_conditions">(Press to remove)</string>
+    <string name="tmp_select_server_remove_filters_button">Remove filters</string>
+    <string name="tmp_select_server_remove_custom_sorting_button">Remove custom sorting</string>
+    <string name="tmp_select_server_remove_both_button">Remove both</string>
+    <string name="tmp_select_server_sort_title">Sort by</string>
+    <string name="tmp_select_server_automatic_label">Automatic</string>
+    <string name="tmp_select_server_date_label">Last usage date</string>
+    <string name="tmp_select_server_country_label">Country</string>
+    <string name="tmp_select_server_name_label">Name</string>
+    <string name="tmp_select_server_location_label">Location</string>
+    <string name="tmp_select_server_public_key_label">Public key</string>
+    <string name="tmp_select_server_congestion_label">Congestion</string>
+    <string name="tmp_select_server_congestion_rating_label">Congestion rating</string>
+    <string name="tmp_select_server_latency_label">Latency</string>
+    <string name="tmp_select_server_latency_rating_label">Latency rating</string>
+    <string name="tmp_select_server_hops_label">Hops</string>
+    <string name="tmp_select_server_note_label">Note</string>
+    <string name="tmp_select_server_reversed_suffix">(reversed)</string>
     <string name="tmp_select_server_public">Public</string>
     <string name="tmp_select_server_history">History</string>
     <string name="tmp_select_server_favorites">Favorites</string>
     <string name="tmp_select_server_blocked">Blocked</string>
     <string name="tmp_select_server_unnamed">Unnamed</string>
     <string name="tmp_select_server_running_error">Please stop the VPN before changing the server.</string>
+
+    <string name="filter_server_title">Filter List</string>
+    <string name="filter_server_any_country_option">Any country</string>
+    <string name="filter_server_country_label">The country must be</string>
+    <string name="filter_server_name_label">The name must contain</string>
+    <string name="filter_server_location_label">The location must contain</string>
+    <string name="filter_server_public_key_label">The public key must contain</string>
+    <string name="filter_server_note_label">The note must contain</string>
+    <string name="filter_server_filter_button">Filter</string>
 
     <string name="add_server_title">Enter Manually</string>
     <string name="add_server_pk_label">Server public key</string>

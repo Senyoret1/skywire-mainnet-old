@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -36,7 +37,7 @@ import java.util.Date;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
-public class ServersActivity extends Fragment implements VpnServersAdapter.VpnServerSelectedListener, ClickEvent {
+public class ServersActivity extends Fragment implements VpnServersAdapter.VpnServerListEventListener, ClickEvent {
     public static String ADDRESS_DATA_PARAM = "address";
     private static final String ACTIVE_TAB_KEY = "activeTab";
 
@@ -47,6 +48,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     private RecyclerView recycler;
     private ProgressBar loadingAnimation;
     private TextView textNoResults;
+    private LinearLayout noResultsContainer;
 
     private IndexPageAdapter.RequestTabListener requestTabListener;
     private ServerLists listType = ServerLists.Public;
@@ -74,6 +76,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
         recycler = view.findViewById(R.id.recycler);
         loadingAnimation = view.findViewById(R.id.loadingAnimation);
         textNoResults = view.findViewById(R.id.textNoResults);
+        noResultsContainer = view.findViewById(R.id.noResultsContainer);
 
         tabPublic.setClickEventListener(this);
         tabHistory.setClickEventListener(this);
@@ -91,8 +94,8 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
 
         // Initialize the recycler.
         adapter = new VpnServersAdapter(getContext());
+        adapter.setVpnServerListEventListener(this);
         adapter.setData(new ArrayList<>(), listType);
-        adapter.setVpnSelectedEventListener(this);
         recycler.setAdapter(adapter);
 
         Gson gson = new Gson();
@@ -176,7 +179,6 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             serverSubscription.dispose();
         }
 
-        textNoResults.setVisibility(View.GONE);
         recycler.setVisibility(View.GONE);
         loadingAnimation.setVisibility(View.VISIBLE);
 
@@ -196,15 +198,10 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
                 list.add(convertLocalServerData(server));
             }
 
-            sortList(list);
             adapter.setData(list, listType);
 
             recycler.setVisibility(View.VISIBLE);
             loadingAnimation.setVisibility(View.GONE);
-
-            if (list.size() == 0) {
-                textNoResults.setVisibility(View.VISIBLE);
-            }
         });
     }
 
@@ -249,6 +246,29 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     @Override
     public void onManualEntered(LocalServerData server) {
         start(server);
+    }
+
+    @Override
+    public void listHasElements(boolean hasElements, boolean emptyBecauseFilters) {
+        if (hasElements) {
+            noResultsContainer.setVisibility(View.GONE);
+        } else {
+            noResultsContainer.setVisibility(View.VISIBLE);
+
+            if (emptyBecauseFilters) {
+                textNoResults.setText(R.string.tmp_select_server_empty_with_filter);
+            } else {
+                if (listType == ServerLists.History) {
+                    textNoResults.setText(R.string.tmp_select_server_empty_history);
+                } else if (listType == ServerLists.Favorites) {
+                    textNoResults.setText(R.string.tmp_select_server_empty_favorites);
+                } else if (listType == ServerLists.Blocked) {
+                    textNoResults.setText(R.string.tmp_select_server_empty_blocked);
+                } else {
+                    textNoResults.setText(R.string.tmp_select_server_empty_discovery);
+                }
+            }
+        }
     }
 
     private void start(LocalServerData server) {
@@ -323,13 +343,11 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
 
             removeSavedData(serversCopy);
             addSavedData(serversCopy);
-            sortList(serversCopy);
             adapter.setData(serversCopy, ServerLists.Public);
         });
 
         recycler.setVisibility(View.VISIBLE);
         loadingAnimation.setVisibility(View.GONE);
-        textNoResults.setVisibility(View.GONE);
     }
 
     private void addSavedData(ArrayList<VpnServerForList> servers) {
@@ -362,25 +380,6 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             server.flag = ServerFlags.None;
             server.enteredManually = false;
             server.hasPassword = false;
-        }
-    }
-
-    private void sortList(ArrayList<VpnServerForList> servers) {
-        if (listType != ServerLists.History) {
-            Comparator<VpnServerForList> comparator = (a, b) -> {
-                int response = a.countryCode.compareTo(b.countryCode);
-
-                if (response == 0) {
-                    response = HelperFunctions.getServerName(a, "").compareTo(HelperFunctions.getServerName(b, ""));
-                }
-
-                return response;
-            };
-
-            Collections.sort(servers, comparator);
-        } else {
-            Comparator<VpnServerForList> comparator = (a, b) -> (int)((b.lastUsed.getTime() - a.lastUsed.getTime()) / 1000);
-            Collections.sort(servers, comparator);
         }
     }
 }
