@@ -32,6 +32,7 @@ public class Chart extends FrameLayout {
 
     private LineChart chart;
     private FrameLayout chartContainer;
+    private TextView textMin;
     private TextView textMid;
     private TextView textMax;
 
@@ -41,6 +42,7 @@ public class Chart extends FrameLayout {
 
         chart = findViewById(R.id.chart);
         chartContainer = findViewById(R.id.chartContainer);
+        textMin = findViewById(R.id.textMin);
         textMid = findViewById(R.id.textMid);
         textMax = findViewById(R.id.textMax);
 
@@ -65,10 +67,10 @@ public class Chart extends FrameLayout {
     public void setData(ArrayList<Long> data, boolean showingMs) {
         ArrayList<Entry> values = new ArrayList<>();
 
-        float max = 0;
+        double max = 0;
         for (int i = 0; i < data.size(); i++) {
-            float val = (float)data.get(i);
-            values.add(new Entry(i, val));
+            double val = (float)data.get(i);
+            values.add(new Entry(i, (float)val));
 
             if (val > max) {
                 max = val;
@@ -79,17 +81,19 @@ public class Chart extends FrameLayout {
             max = 1;
         }
 
-        float mid = max / 2;
+        double mid = max / 2;
 
         if (chart.getAxisLeft().getAxisMaximum() != max) {
-            chart.getAxisLeft().setAxisMaximum(max);
+            chart.getAxisLeft().setAxisMaximum((float)max);
 
             if (showingMs) {
-                textMax.setText(HelperFunctions.getLatencyValue((long) max));
-                textMid.setText(HelperFunctions.getLatencyValue((long) mid));
+                textMax.setText(HelperFunctions.getLatencyValue(max));
+                textMid.setText(HelperFunctions.getLatencyValue(mid));
+                textMin.setText(HelperFunctions.getLatencyValue(0));
             } else {
-                textMax.setText(HelperFunctions.computeDataAmountString((long) max, true));
-                textMid.setText(HelperFunctions.computeDataAmountString((long) mid, true));
+                textMax.setText(HelperFunctions.computeDataAmountString(max, true));
+                textMid.setText(HelperFunctions.computeDataAmountString(mid, true));
+                textMin.setText(HelperFunctions.computeDataAmountString(0, true));
             }
         }
 

@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
@@ -20,6 +21,7 @@ import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 public class EditServerValueModalWindow extends Dialog implements ClickEvent {
     private ModalBase modalBase;
+    private TextInputLayout editContainer;
     private EditText editValue;
     private ModalWindowButton buttonCancel;
     private ModalWindowButton buttonConfirm;
@@ -41,6 +43,7 @@ public class EditServerValueModalWindow extends Dialog implements ClickEvent {
         setContentView(R.layout.view_edit_server_value_modal);
 
         modalBase = findViewById(R.id.modalBase);
+        editContainer = findViewById(R.id.editContainer);
         editValue = findViewById(R.id.editValue);
         buttonCancel = findViewById(R.id.buttonCancel);
         buttonConfirm = findViewById(R.id.buttonConfirm);
@@ -48,7 +51,7 @@ public class EditServerValueModalWindow extends Dialog implements ClickEvent {
         LocalServerData localServerData = VPNServersPersistentData.getInstance().processFromList(server);
         if (editingName) {
             modalBase.setTitle(R.string.tmp_edit_value_name_title);
-            editValue.setHint(R.string.tmp_edit_value_name_label);
+            editContainer.setHint(getContext().getText(R.string.tmp_edit_value_name_label));
 
             if (localServerData.customName != null) {
                 editValue.setText(localServerData.customName);
@@ -57,7 +60,7 @@ public class EditServerValueModalWindow extends Dialog implements ClickEvent {
             }
         } else {
             modalBase.setTitle(R.string.tmp_edit_value_note_title);
-            editValue.setHint(R.string.tmp_edit_value_note_label);
+            editContainer.setHint(getContext().getText(R.string.tmp_edit_value_note_label));
 
             if (localServerData.personalNote != null) {
                 editValue.setText(localServerData.personalNote);

@@ -132,7 +132,11 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
         }
 
         putValue(textCountry, R.string.server_info_country, CountriesList.getCountryName(server.countryCode), null, null);
-        putValue(textCountryCode, R.string.server_info_country_code, server.countryCode.toUpperCase(), null, null);
+        if (!server.countryCode.toUpperCase().equals("ZZ")) {
+            putValue(textCountryCode, R.string.server_info_country_code, server.countryCode.toUpperCase(), null, null);
+        } else {
+            textCountryCode.setVisibility(View.GONE);
+        }
         putValue(textLocation, R.string.server_info_location, server.location, null, null);
 
         if (listType == ServerLists.Public) {

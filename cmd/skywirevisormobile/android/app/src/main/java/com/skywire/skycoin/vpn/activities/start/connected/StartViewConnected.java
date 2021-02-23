@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.activities.start.connected;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServerLists;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
 import com.skywire.skycoin.vpn.controls.ServerName;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.network.ApiClient;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
@@ -26,6 +29,7 @@ import com.skywire.skycoin.vpn.vpn.VPNStates;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -62,6 +66,8 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private TextView textDownloadSpeed;
     private TextView textTotalDownloaded;
     private TextView textLatency;
+    private TextView textAppsProtectionMode;
+    private TextView textServerNote;
     private TextView textStartedByTheSystem;
     private ServerName serverName;
     private ImageView imageStateLine;
@@ -70,6 +76,8 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private Chart latencyChart;
     private LinearLayout ipContainer;
     private LinearLayout countryContainer;
+    private FrameLayout appsContainer;
+    private LinearLayout appsInternalContainer;
     private LinearLayout serverContainer;
     private ProgressBar progressIp;
     private ProgressBar progressCountry;
@@ -78,6 +86,8 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private String previousIp;
     private String currentIp;
     private String previousCountry;
+    private VPNCoordinator.ConnectionStats lastStats;
+    private boolean updateStats = true;
 
     private Disposable serviceSubscription;
     private Disposable serverSubscription;
@@ -101,6 +111,8 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         textDownloadSpeed = findViewById(R.id.textDownloadSpeed);
         textTotalDownloaded = findViewById(R.id.textTotalDownloaded);
         textLatency = findViewById(R.id.textLatency);
+        textAppsProtectionMode = findViewById(R.id.textAppsProtectionMode);
+        textServerNote = findViewById(R.id.textServerNote);
         textStartedByTheSystem = findViewById(R.id.textStartedByTheSystem);
         serverName = this.findViewById (R.id.serverName);
         imageStateLine = findViewById(R.id.imageStateLine);
@@ -110,6 +122,8 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         latencyChart = findViewById(R.id.latencyChart);
         ipContainer = findViewById(R.id.ipContainer);
         countryContainer = findViewById(R.id.countryContainer);
+        appsContainer = findViewById(R.id.appsContainer);
+        appsInternalContainer = findViewById(R.id.appsInternalContainer);
         serverContainer = findViewById(R.id.serverContainer);
         progressIp = findViewById(R.id.progressIp);
         progressCountry = findViewById(R.id.progressCountry);
@@ -119,6 +133,29 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         textStartedByTheSystem.setVisibility(GONE);
         ipContainer.setVisibility(GONE);
         countryContainer.setVisibility(GONE);
+
+        Globals.AppFilteringModes selectedMode = VPNGeneralPersistentData.getAppsSelectionMode();
+        if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
+            HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
+
+            if (selectedApps.size() > 0) {
+                if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
+                    textAppsProtectionMode.setText(R.string.tmp_status_connected_protecting_selected_apps);
+                } else {
+                    textAppsProtectionMode.setText(R.string.tmp_status_connected_ignoring_selected_apps);
+                }
+
+                appsInternalContainer.setOnClickListener((View v) -> {
+                    Intent intent = new Intent(getContext(), AppsActivity.class);
+                    intent.putExtra(AppsActivity.READ_ONLY_EXTRA, true);
+                    getContext().startActivity(intent);
+                });
+            } else {
+                appsContainer.setVisibility(GONE);
+            }
+        } else {
+            appsContainer.setVisibility(GONE);
+        }
 
         if (!VPNGeneralPersistentData.getShowIpActivated()) {
             textWaitingIp.setText(R.string.tmp_status_connected_ip_option_disabled);
@@ -133,6 +170,13 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
 
         serverSubscription = VPNServersPersistentData.getInstance().getCurrentServerObservable().subscribe(server -> {
             serverName.setServer(ServersActivity.convertLocalServerData(server), ServerLists.History, true);
+
+            String note = HelperFunctions.getServerNote(server);
+            if (note != null) {
+                textServerNote.setText(note);
+            } else {
+                textServerNote.setText(server.pk);
+            }
         });
 
         serverContainer.setOnClickListener((View v) -> {
@@ -216,28 +260,46 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         );
 
         statsSubscription = VPNCoordinator.getInstance().getConnectionStats().subscribe(stats -> {
-            updateTime(stats.lastConnectionDate);
+            lastStats = stats;
+            if (updateStats) {
+                updateDisplayedStats();
+            }
+        });
 
-            downloadChart.setData(stats.downloadSpeedHistory, false);
-            uploadChart.setData(stats.uploadSpeedHistory, false);
-            latencyChart.setData(stats.latencyHistory, true);
+        updateTime(null);
+    }
 
-            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentDownloadSpeed, true));
-            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentUploadSpeed, true));
-            textLatency.setText(HelperFunctions.getLatencyValue(stats.currentLatency));
+    private void updateDisplayedStats() {
+        if (lastStats != null) {
+            updateTime(lastStats.lastConnectionDate);
+
+            downloadChart.setData(lastStats.downloadSpeedHistory, false);
+            uploadChart.setData(lastStats.uploadSpeedHistory, false);
+            latencyChart.setData(lastStats.latencyHistory, true);
+
+            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(lastStats.currentDownloadSpeed, true));
+            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(lastStats.currentUploadSpeed, true));
+            textLatency.setText(HelperFunctions.getLatencyValue(lastStats.currentLatency));
 
             textTotalDownloaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(stats.totalDownloadedData, false)
+                HelperFunctions.computeDataAmountString(lastStats.totalDownloadedData, false)
             ));
 
             textTotalUploaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(stats.totalUploadedData, false)
+                HelperFunctions.computeDataAmountString(lastStats.totalUploadedData, false)
             ));
-        });
+        }
+    }
 
-        updateTime(null);
+    public void pauseUpdatingStats() {
+        updateStats = false;
+    }
+
+    public void continueUpdatingStats() {
+        updateStats = true;
+        updateDisplayedStats();
     }
 
     private void updateTime(Date lastConnectionDate) {

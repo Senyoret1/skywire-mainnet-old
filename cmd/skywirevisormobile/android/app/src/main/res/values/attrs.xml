@@ -51,4 +51,7 @@
         <attr name="text_size" format="dimension" />
         <attr name="center_text" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="Select">
+        <attr name="hint" format="string" />
+    </declare-styleable>
 </resources>

@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.controls;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.FrameLayout;
 
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.options.OptionsItem;
 import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
@@ -24,6 +26,7 @@ public class Select extends FrameLayout implements View.OnTouchListener, View.On
         public Integer iconId;
     }
 
+    private TextInputLayout container;
     private EditText edit;
     private FrameLayout clickArea;
 
@@ -47,8 +50,24 @@ public class Select extends FrameLayout implements View.OnTouchListener, View.On
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_select, this, true);
 
+        container = this.findViewById (R.id.container);
         edit = this.findViewById (R.id.edit);
         clickArea = this.findViewById (R.id.clickArea);
+
+        if (attrs != null) {
+            TypedArray attributes = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.Select,
+                0, 0
+            );
+
+            String hint = attributes.getString(R.styleable.Select_hint);
+            if (hint != null) {
+                this.container.setHint(hint);
+            }
+
+            attributes.recycle();
+        }
 
         clickArea.setOnTouchListener(this);
         clickArea.setOnClickListener(this);
@@ -72,7 +91,11 @@ public class Select extends FrameLayout implements View.OnTouchListener, View.On
         Drawable[] drawables = edit.getCompoundDrawables();
         edit.setCompoundDrawables(leftDrawable, drawables[1], drawables[2], drawables[3]);
 
-        edit.setText(currentOption.text);
+        if (currentOption.iconId != null) {
+            edit.setText("        " + currentOption.text);
+        } else {
+            edit.setText(currentOption.text);
+        }
     }
 
     public String getSelectedValue() {

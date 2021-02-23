@@ -368,6 +368,45 @@
             </com.skywire.skycoin.vpn.activities.start.connected.Chart>
 
             <FrameLayout
+                android:id="@+id/appsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:background="@color/black_background">
+
+                <LinearLayout
+                    android:id="@+id/appsInternalContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/current_server_ripple"
+                    android:clickable="true"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/status_page_horizontal_margin"
+                    android:paddingTop="12dp"
+                    android:paddingRight="@dimen/status_page_horizontal_margin"
+                    android:paddingBottom="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:translationY="1dp"
+                        android:text="\ue001"
+                        android:fontFamily="@font/material_font"/>
+
+                    <TextView
+                        android:id="@+id/textAppsProtectionMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tmp_status_connected_protecting_selected_apps"
+                        android:textSize="@dimen/small_text_size" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/black_background">
@@ -399,6 +438,14 @@
                         app:center_text="true"
                         app:default_name="@string/tmp_select_server_unnamed"
                         app:text_size="@dimen/small_text_size" />
+
+                    <TextView
+                        android:id="@+id/textServerNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Note"
+                        android:textSize="@dimen/mini_text_size" />
 
                 </LinearLayout>
 

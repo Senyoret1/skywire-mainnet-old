@@ -39,8 +39,11 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     private ArrayList<AppListOptionButton> optionButtons = new ArrayList<>();
     private ArrayList<AppListButton> appButtons = new ArrayList<>();
 
-    public AppsAdapter(Context context) {
+    private boolean readOnly;
+
+    public AppsAdapter(Context context, boolean readOnly) {
         this.context = context;
+        this.readOnly = readOnly;
 
         selectedApps = VPNGeneralPersistentData.getAppList(new HashSet<>());
         changeSelectedOption(VPNGeneralPersistentData.getAppsSelectionMode());
@@ -92,12 +95,20 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
             view.setClickWithIndexEventListener(this);
             optionButtons.add(view);
 
+            if (readOnly) {
+                view.setEnabled(false);
+            }
+
             return new ListViewHolder<>(view);
         } else if (viewType == 1) {
             AppListButton view = new AppListButton(context);
             view.setClickWithIndexEventListener(this);
             view.setEnabled(selectedOption != Globals.AppFilteringModes.PROTECT_ALL);
             appButtons.add(view);
+
+            if (readOnly) {
+                view.setEnabled(false);
+            }
 
             return new ListViewHolder<>(view);
         }

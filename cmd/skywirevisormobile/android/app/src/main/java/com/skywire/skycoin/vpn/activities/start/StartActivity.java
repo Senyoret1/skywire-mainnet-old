@@ -242,6 +242,9 @@ public class StartActivity extends Fragment {
         if (viewDisconnected != null) {
             viewDisconnected.startAnimation();
         }
+        if (viewConnected != null) {
+            viewConnected.continueUpdatingStats();
+        }
     }
 
     @Override
@@ -251,6 +254,9 @@ public class StartActivity extends Fragment {
         background.pauseAnimation();
         if (viewDisconnected != null) {
             viewDisconnected.stopAnimation();
+        }
+        if (viewConnected != null) {
+            viewConnected.pauseUpdatingStats();
         }
     }
 

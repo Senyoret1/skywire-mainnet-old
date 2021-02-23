@@ -123,6 +123,8 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
             return;
         }
 
+        LocalServerData savedVersion = VPNServersPersistentData.getInstance().getSavedVersion(editPk.getText().toString().trim());
+
         ManualVpnServerData serverData = new ManualVpnServerData();
         serverData.pk = editPk.getText().toString().trim();
 
@@ -130,11 +132,17 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         if (password != null && !password.equals("")) {
             serverData.password = password;
         }
+
         if (editName.getText() != null && !editName.getText().toString().trim().equals("")) {
             serverData.name = editName.getText().toString().trim();
+        } else if (savedVersion != null && savedVersion.customName != null && !savedVersion.customName.equals("")) {
+            serverData.name = savedVersion.customName;
         }
+
         if (editNote.getText() != null && !editNote.getText().toString().trim().equals("")) {
             serverData.note = editNote.getText().toString().trim();
+        } else if (savedVersion != null && savedVersion.personalNote != null && !savedVersion.personalNote.equals("")) {
+            serverData.note = savedVersion.personalNote;
         }
 
         LocalServerData localServerData = VPNServersPersistentData.getInstance().processFromManual(serverData);

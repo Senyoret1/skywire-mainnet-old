@@ -23,6 +23,17 @@ public class VisorRunnable {
      * If Skywiremob.startListeningUDP() has already been called without errors.
      */
     private boolean listeningUdp = false;
+    /**
+     * If true, the initialization failed because the server refused the password.
+     */
+    private boolean passwordFailed = false;
+
+    /**
+     * Allows to know if the initialization failed because the server refused the password.
+     */
+    public boolean getIfPasswordFailed() {
+        return passwordFailed;
+    }
 
     /**
      * Starts stopping the visor. It returns before the visor has been completely stopped.
@@ -95,6 +106,8 @@ public class VisorRunnable {
      *                      able to emit the state changes.
      */
     public void runVpnClient(ObservableEmitter<VPNStates> parentEmitter) throws Exception {
+        passwordFailed = false;
+
         // Update the state.
         if (parentEmitter.isDisposed()) { return; }
         parentEmitter.onNext(VPNStates.PREPARING_VPN_CLIENT);
@@ -117,6 +130,10 @@ public class VisorRunnable {
         if (parentEmitter.isDisposed()) { return; }
         err = Skywiremob.shakeHands();
         if (err.getCode() != Skywiremob.ErrCodeNoError) {
+            // Check if the server refused the password.
+            if (err.getCode() == Skywiremob.ErrCodeHandshakeFailed && err.getError().toUpperCase().contains("4 (Forbidden)".toUpperCase())) {
+                passwordFailed = true;
+            }
             throw new Exception(gerErrorMsg(err));
         }
 
@@ -173,7 +190,11 @@ public class VisorRunnable {
         } else if (error.getCode() == Skywiremob.ErrCodeVPNClientNotRunning) {
             resource = R.string.skywiremob_error_vpn_client_not_running;
         } else if (error.getCode() == Skywiremob.ErrCodeHandshakeFailed) {
-            resource = R.string.skywiremob_error_handshake_failed;
+            if (error.getError().toUpperCase().contains("4 (Forbidden)".toUpperCase())) {
+                resource = R.string.skywiremob_error_wrong_password;
+            } else {
+                resource = R.string.skywiremob_error_handshake_failed;
+            }
         } else if (error.getCode() == Skywiremob.ErrCodeInvalidAddr) {
             resource = R.string.skywiremob_error_invalid_addr;
         } else if (error.getCode() == Skywiremob.ErrCodeAlreadyListeningUDP) {

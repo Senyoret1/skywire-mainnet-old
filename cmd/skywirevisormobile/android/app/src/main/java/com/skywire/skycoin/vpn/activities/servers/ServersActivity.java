@@ -168,6 +168,9 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
                 VpnServersAdapter adapter = new VpnServersAdapter(this, response.body());
                 adapter.setVpnSelectedEventListener(this);
                 recycler.setAdapter(adapter);
+
+                // TODO: addSavedData will remove all blocked servers, so it will have to be called
+                // every time the blocked servers list changes.
             }, err -> {
                 this.requestData();
             });

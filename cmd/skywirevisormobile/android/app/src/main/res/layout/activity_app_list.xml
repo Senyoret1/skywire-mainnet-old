@@ -24,4 +24,5 @@
         android:layout_height="wrap_content"
         app:left_button_icon="back"
         app:title="@string/tmp_select_apps_title" />
+
 </FrameLayout>

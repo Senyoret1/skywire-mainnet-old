@@ -38,6 +38,7 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
 
     private CurrentServerButton viewCurrentServerButton;
     private StartButton startButton;
+    private TextView textServerNote;
     private TextView textLastError;
 
     private Activity parentActivity;
@@ -50,6 +51,7 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
 
         viewCurrentServerButton = findViewById(R.id.viewCurrentServerButton);
         startButton = findViewById(R.id.startButton);
+        textServerNote = findViewById(R.id.textServerNote);
         textLastError = findViewById(R.id.textLastError);
 
         viewCurrentServerButton.setClickEventListener(this);
@@ -57,6 +59,7 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
 
         currentServerSubscription = VPNServersPersistentData.getInstance().getCurrentServerObservable().subscribe(currentServer -> {
             viewCurrentServerButton.setData(currentServer);
+            updateNote(currentServer);
         });
 
         setErrorMsg(VPNGeneralPersistentData.getLastError(null));
@@ -85,6 +88,23 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
             textLastError.setVisibility(VISIBLE);
         } else {
             textLastError.setVisibility(GONE);
+        }
+    }
+
+    private void updateNote(LocalServerData currentServer) {
+        if (currentServer == null) {
+            textServerNote.setVisibility(GONE);
+
+            return;
+        }
+
+        String note = HelperFunctions.getServerNote(currentServer);
+
+        if (note != null) {
+            textServerNote.setText(note);
+            textServerNote.setVisibility(VISIBLE);
+        } else {
+            textServerNote.setVisibility(GONE);
         }
     }
 

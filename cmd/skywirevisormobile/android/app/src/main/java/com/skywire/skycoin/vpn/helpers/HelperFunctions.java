@@ -2,6 +2,8 @@ package com.skywire.skycoin.vpn.helpers;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -209,7 +211,7 @@ public class HelperFunctions {
      * @param bytes Amount of data to process, in bytes.
      * @param calculatePerSecond If true, the result will have "/s" added at the end.
      */
-    public static String computeDataAmountString(long bytes, boolean calculatePerSecond) {
+    public static String computeDataAmountString(double bytes, boolean calculatePerSecond) {
         double current = (double)bytes;
         String[] accumulatedMeasurements = new String[]{" B", " KB", " MB", " GB", " TB"};
         String[] measurementsPerSec = new String[]{" B/s", " KB/s", " MB/s", " GB/s", " TB/s"};
@@ -243,7 +245,7 @@ public class HelperFunctions {
             initialPart = oneDecimalsFormatter.format(latency / 1000);
             lastPart = App.getContext().getString(R.string.general_seconds_abbreviation);
         } else {
-            initialPart = zeroDecimalsFormatter.format(latency);
+            initialPart = oneDecimalsFormatter.format(latency);
             lastPart = App.getContext().getString(R.string.general_milliseconds_abbreviation);
         }
 
@@ -316,6 +318,21 @@ public class HelperFunctions {
         return server.customName + " - " + server.name;
     }
 
+    public static String getServerNote(LocalServerData server) {
+        String note = "";
+        if (server.note != null && !server.note.trim().equals("")) {
+            note = server.note;
+        }
+        if (server.personalNote != null && !server.personalNote.trim().equals("")) {
+            if (note.length() > 0) {
+                note += " - ";
+            }
+            note += server.personalNote;
+        }
+
+        return note.length() > 0 ? note : null;
+    }
+
     public static void showServerOptions(Context ctx, VpnServerForList server, ServerLists listType) {
         ArrayList<OptionsItem.SelectableOption> options = new ArrayList();
         ArrayList<Integer> optionCodes = new ArrayList();
@@ -325,6 +342,11 @@ public class HelperFunctions {
         option.translatableLabelId = R.string.tmp_server_options_view_info;
         options.add(option);
         optionCodes.add(10);
+        option = new OptionsItem.SelectableOption();
+        option.icon = "\ue14d";
+        option.translatableLabelId = R.string.tmp_server_options_copy_pk;
+        options.add(option);
+        optionCodes.add(11);
         option = new OptionsItem.SelectableOption();
         option.icon = "\ue3c9";
         option.translatableLabelId = R.string.tmp_server_options_name;
@@ -441,6 +463,11 @@ public class HelperFunctions {
             } else if (optionCodes.get(selectedOption) == 10) {
                 ServerInfoModalWindow infoModal = new ServerInfoModalWindow(ctx, server, listType);
                 infoModal.show();
+            } else if (optionCodes.get(selectedOption) == 11) {
+                ClipboardManager clipboard = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("", server.pk);
+                clipboard.setPrimaryClip(clip);
+                HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_copy_pk_done), true);
             } else if (optionCodes.get(selectedOption) == 1) {
                 if (server.flag != ServerFlags.Blocked) {
                     VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Favorite);

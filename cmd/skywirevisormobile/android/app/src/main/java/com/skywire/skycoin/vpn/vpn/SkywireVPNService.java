@@ -12,6 +12,7 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.Notifications;
+import com.skywire.skycoin.vpn.objects.ServerFlags;
 
 import java.util.concurrent.TimeUnit;
 
@@ -94,6 +95,11 @@ public class SkywireVPNService extends VpnService {
      * itself (false).
      */
     private boolean startedByTheSystem = false;
+    /**
+     * If true, a condition that makes it not possible to start the service was detected, so
+     * the option for retrying the connection must be ignored.
+     */
+    private boolean impossibleToStart = false;
     /**
      * If there was a request for completely stopping the service.
      */
@@ -196,8 +202,14 @@ public class SkywireVPNService extends VpnService {
             processedState = currentState;
         }
 
+        boolean failedBecausePassword = false;
         // If the state indicates that vpnRunnable finished, remove the instance.
         if (processedState.val() >= 300 && processedState.val() < 400) {
+            // Check if the process finished due to an error cause by a wrong password. This data is
+            // used if the protection has to be restarted.
+            if (vpnRunnable != null && vpnRunnable.getIfPasswordFailed()) {
+                failedBecausePassword = true;
+            }
             vpnRunnable = null;
             if (vpnRunnableSubscription != null) {
                 vpnRunnableSubscription.dispose();
@@ -208,7 +220,7 @@ public class SkywireVPNService extends VpnService {
         if (!stopRequested && !serviceDestroyed) {
             // If the new state is for informing about an error.
             if (processedState.val() >= 400 && processedState.val() < 500) {
-                if (VPNGeneralPersistentData.getMustRestartVpn()) {
+                if (VPNGeneralPersistentData.getMustRestartVpn() && !impossibleToStart) {
                     // If the option for restarting the protection automatically is active, update
                     // the state.
                     processedState = VPNStates.RESTORING_SERVICE;
@@ -224,9 +236,11 @@ public class SkywireVPNService extends VpnService {
             // closed and restored.
             if (currentState == VPNStates.RESTORING_SERVICE) {
                 // Restart the whole VPN connection after a small delay when receiving the state
-                // indicating that vpnRunnable finished.
+                // indicating that vpnRunnable finished. If the error was because the password was
+                // wrong, the delay is much longer.
                 if (processedState.val() >= 300 && processedState.val() < 400) {
-                    restartingSubscription = Observable.just(0).delay(1, TimeUnit.MILLISECONDS)
+                    int delay = failedBecausePassword ? 60000 : 1;
+                    restartingSubscription = Observable.just(0).delay(delay, TimeUnit.MILLISECONDS)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(val -> runVpn());
@@ -331,8 +345,28 @@ public class SkywireVPNService extends VpnService {
             }
             updateState(currentState);
 
-            // Start the VPN protection.
-            runVpn();
+            // Check if no server has been selected and if the selected server has been blocked.
+            String errorMsg = null;
+            if (
+                VPNServersPersistentData.getInstance().getCurrentServer() == null ||
+                VPNServersPersistentData.getInstance().getCurrentServer().pk == null ||
+                VPNServersPersistentData.getInstance().getCurrentServer().pk.trim().equals("")
+            ) {
+                errorMsg = App.getContext().getText(R.string.skywiremob_error_no_server).toString();
+            } else if (VPNServersPersistentData.getInstance().getCurrentServer().flag == ServerFlags.Blocked) {
+                errorMsg = App.getContext().getText(R.string.skywiremob_error_server_blocked).toString();
+            }
+
+            // If any of the previous conditions was found, put the service in error state.
+            if (errorMsg != null) {
+                HelperFunctions.logError("Starting VPN service", errorMsg);
+                lastErrorMsg = errorMsg;
+                impossibleToStart = true;
+                updateState(VPNStates.ERROR);
+            } else {
+                // Start the VPN protection.
+                runVpn();
+            }
         }
 
         return START_NOT_STICKY;

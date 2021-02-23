@@ -46,4 +46,15 @@ public class AppListOptionButton extends ListButtonBase<Void> {
     public void setChecked(boolean checked) {
         radioSelected.setChecked(checked);
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
+        if (enabled) {
+            setAlpha(1f);
+        } else {
+            setAlpha(0.5f);
+        }
+    }
 }

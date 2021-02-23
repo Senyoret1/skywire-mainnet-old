@@ -20,6 +20,7 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
         public Integer drawableId;
         public String label;
         public int translatableLabelId = -1;
+        public boolean disabled = false;
     }
 
     private LinearLayout mainContainer;
@@ -83,7 +84,7 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
                 imageBitmap.setImageResource(params.drawableId);
                 imageBitmap.setVisibility(VISIBLE);
             } else {
-                textIcon.setVisibility(GONE);
+                imageBitmap.setVisibility(GONE);
             }
         }
 
@@ -91,6 +92,14 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
             text.setText(params.translatableLabelId);
         } else if (params.label != null) {
             text.setText(params.label);
+        }
+
+        if (params.disabled) {
+            this.setAlpha(0.5f);
+            this.setClickable(false);
+        } else {
+            this.setAlpha(1f);
+            this.setClickable(true);
         }
     }
 

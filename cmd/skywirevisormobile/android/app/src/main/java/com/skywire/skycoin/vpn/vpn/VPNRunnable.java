@@ -103,6 +103,13 @@ public class VPNRunnable {
     }
 
     /**
+     * Allows to know if the initialization failed because the server refused the password.
+     */
+    public boolean getIfPasswordFailed() {
+        return visor != null ? visor.getIfPasswordFailed() : false;
+    }
+
+    /**
      * Waits for the visor to be totally stopped. After that, goes to the next step for
      * starting the VPN protection. If this step was already finished, the function does nothing.
      */

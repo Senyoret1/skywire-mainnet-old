@@ -17,6 +17,7 @@ import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
+import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.util.HashSet;
 
@@ -88,12 +89,19 @@ public class SettingsActivity extends Fragment implements ClickEvent {
     public void onClick(View view) {
         if (VPNCoordinator.getInstance().isServiceRunning()) {
             HelperFunctions.showToast(getContext().getText(R.string.general_server_running_error).toString(), true);
+
             return;
         }
 
         if (view.getId() == R.id.optionApps) {
             Intent intent = new Intent(getContext(), AppsActivity.class);
             startActivity(intent);
+
+            return;
+        }
+
+        if (view.getId() == R.id.optionStartOnBoot && VPNServersPersistentData.getInstance().getCurrentServer() == null) {
+            HelperFunctions.showToast(getContext().getText(R.string.tmp_options_start_on_boot_without_server_error).toString(), true);
 
             return;
         }
