@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
@@ -86,6 +87,7 @@ public class EditServerValueModalWindow extends Dialog implements ClickEvent {
         editValue.setSelection(editValue.getText().length());
 
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         buttonCancel.setClickEventListener(this);
         buttonConfirm.setClickEventListener(this);

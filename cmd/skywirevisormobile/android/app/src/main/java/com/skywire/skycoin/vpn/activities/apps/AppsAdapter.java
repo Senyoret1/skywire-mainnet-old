@@ -2,6 +2,7 @@ package com.skywire.skycoin.vpn.activities.apps;
 
 import android.content.Context;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,7 +18,6 @@ import com.skywire.skycoin.vpn.extensible.ListViewHolder;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -38,6 +38,9 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
     private int[] optionDescriptions = new int[3];
     private ArrayList<AppListOptionButton> optionButtons = new ArrayList<>();
     private ArrayList<AppListButton> appButtons = new ArrayList<>();
+
+    private ArrayList<AppListButton> premadeButtons = new ArrayList<>();
+    private int lastUsedPremadeButtonIdex = 0;
 
     private boolean readOnly;
 
@@ -68,6 +71,13 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
         optionDescriptions[0] =  R.string.tmp_select_apps_protect_all_button_desc;
         optionDescriptions[1] =  R.string.tmp_select_apps_protect_selected_button_desc;
         optionDescriptions[2] =  R.string.tmp_select_apps_unprotect_selected_button_desc;
+
+        int screenHeightInDP = (int)(Resources.getSystem().getDisplayMetrics().heightPixels / context.getResources().getDisplayMetrics().density);
+        int aproxButtonsToFillScreen = (int)Math.ceil((screenHeightInDP / AppListButton.APROX_HEIGHT_DP) * 1.3);
+
+        for (int i = 0; i < aproxButtonsToFillScreen; i++) {
+            premadeButtons.add(createNewAppButton());
+        }
     }
 
     public void setAppListChangedEventListener(AppListChangedListener listener) {
@@ -101,13 +111,13 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
 
             return new ListViewHolder<>(view);
         } else if (viewType == 1) {
-            AppListButton view = new AppListButton(context);
-            view.setClickWithIndexEventListener(this);
-            view.setEnabled(selectedOption != Globals.AppFilteringModes.PROTECT_ALL);
-            appButtons.add(view);
+            AppListButton view;
 
-            if (readOnly) {
-                view.setEnabled(false);
+            if (lastUsedPremadeButtonIdex < premadeButtons.size()) {
+                view = premadeButtons.get(lastUsedPremadeButtonIdex);
+                lastUsedPremadeButtonIdex += 1;
+            } else {
+                view = createNewAppButton();
             }
 
             return new ListViewHolder<>(view);
@@ -116,6 +126,19 @@ public class AppsAdapter extends RecyclerView.Adapter<ListViewHolder<View>> impl
         AppListSeparator view = new AppListSeparator(context);
 
         return new ListViewHolder<>(view);
+    }
+
+    private AppListButton createNewAppButton() {
+        AppListButton view = new AppListButton(context);
+        view.setClickWithIndexEventListener(this);
+        view.setEnabled(selectedOption != Globals.AppFilteringModes.PROTECT_ALL);
+        appButtons.add(view);
+
+        if (readOnly) {
+            view.setEnabled(false);
+        }
+
+        return view;
     }
 
     @Override

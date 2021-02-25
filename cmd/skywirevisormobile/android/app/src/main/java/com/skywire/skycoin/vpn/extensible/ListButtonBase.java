@@ -5,6 +5,15 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.skywire.skycoin.vpn.helpers.ClickTimeManagement;
+import com.skywire.skycoin.vpn.helpers.Globals;
+
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public abstract class ListButtonBase<DataType> extends RelativeLayout implements View.OnClickListener {
     public ListButtonBase(Context context) {
         super(context);
@@ -25,6 +34,7 @@ public abstract class ListButtonBase<DataType> extends RelativeLayout implements
     protected DataType dataForEvent;
     private int index;
     private ClickWithIndexEvent<DataType> clickListener;
+    private ClickTimeManagement buttonTimeManager = new ClickTimeManagement();
 
     abstract protected void Initialize (Context context, AttributeSet attrs);
 
@@ -42,8 +52,12 @@ public abstract class ListButtonBase<DataType> extends RelativeLayout implements
 
     @Override
     public void onClick(View view) {
-        if (clickListener != null) {
-            clickListener.onClickWithIndex(index, dataForEvent);
+        if (clickListener != null && buttonTimeManager.canClick()) {
+            buttonTimeManager.informClickMade();
+            Observable.just(1).delay(Globals.CLICK_DELAY_MS, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(v -> clickListener.onClickWithIndex(index, dataForEvent));
         }
     }
 }

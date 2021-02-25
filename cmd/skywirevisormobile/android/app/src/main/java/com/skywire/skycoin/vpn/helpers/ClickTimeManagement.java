@@ -1,0 +1,33 @@
+package com.skywire.skycoin.vpn.helpers;
+
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
+public class ClickTimeManagement {
+    private Disposable timeSubscription;
+
+    public void informClickMade() {
+        removeDelay();
+
+        timeSubscription = Observable.just(1).delay(700, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(v -> timeSubscription = null);
+    }
+
+    public boolean canClick() {
+        return timeSubscription == null;
+    }
+
+    public void removeDelay() {
+        if (timeSubscription != null) {
+            timeSubscription.dispose();
+        }
+
+        timeSubscription = null;
+    }
+}

@@ -20,7 +20,12 @@ import com.skywire.skycoin.vpn.activities.start.connected.StartViewConnected;
 import com.skywire.skycoin.vpn.activities.start.disconnected.StartViewDisconnected;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class StartActivity extends Fragment {
     private enum SimpleVpnStates {
@@ -209,7 +214,10 @@ public class StartActivity extends Fragment {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (isInitialAnimation) {
-                    startFinalAnimation();
+                    Observable.just(1).delay(50, TimeUnit.MILLISECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(v -> startFinalAnimation());
                 } else {
                     finishAnimations();
                     animationDestination = SimpleVpnStates.Unknown;

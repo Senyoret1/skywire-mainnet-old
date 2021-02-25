@@ -16,6 +16,8 @@ import com.skywire.skycoin.vpn.extensible.ListButtonBase;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
 public class AppListButton extends ListButtonBase<Void> {
+    public static final float APROX_HEIGHT_DP = 55;
+
     private BoxRowLayout mainLayout;
     private LinearLayout internalLayout;
     private ImageView imageIcon;

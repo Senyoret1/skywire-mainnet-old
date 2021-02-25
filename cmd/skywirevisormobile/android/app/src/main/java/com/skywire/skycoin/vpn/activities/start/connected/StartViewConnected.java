@@ -18,6 +18,7 @@ import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
 import com.skywire.skycoin.vpn.controls.ServerName;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
+import com.skywire.skycoin.vpn.helpers.ClickTimeManagement;
 import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.network.ApiClient;
@@ -89,6 +90,9 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private VPNCoordinator.ConnectionStats lastStats;
     private boolean updateStats = true;
 
+    private ClickTimeManagement appsButtonTimeManager = new ClickTimeManagement();
+    private ClickTimeManagement serverButtonTimeManager = new ClickTimeManagement();
+
     private Disposable serviceSubscription;
     private Disposable serverSubscription;
     private Disposable ipSubscription;
@@ -146,9 +150,12 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
                 }
 
                 appsInternalContainer.setOnClickListener((View v) -> {
-                    Intent intent = new Intent(getContext(), AppsActivity.class);
-                    intent.putExtra(AppsActivity.READ_ONLY_EXTRA, true);
-                    getContext().startActivity(intent);
+                    if (appsButtonTimeManager.canClick()) {
+                        appsButtonTimeManager.informClickMade();
+                        Intent intent = new Intent(getContext(), AppsActivity.class);
+                        intent.putExtra(AppsActivity.READ_ONLY_EXTRA, true);
+                        getContext().startActivity(intent);
+                    }
                 });
             } else {
                 appsContainer.setVisibility(GONE);
@@ -164,6 +171,18 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
 
         ArrayList<Long> emptyValues = new ArrayList<>();
         emptyValues.add(0L);
+
+        VPNCoordinator.ConnectionStats emptyStats = new VPNCoordinator.ConnectionStats();
+        emptyStats.downloadSpeedHistory = emptyValues;
+        emptyStats.uploadSpeedHistory = emptyValues;
+        emptyStats.latencyHistory = emptyValues;
+        emptyStats.currentDownloadSpeed = 0;
+        emptyStats.currentUploadSpeed = 0;
+        emptyStats.currentLatency = 0;
+        emptyStats.totalDownloadedData = 0;
+        emptyStats.totalUploadedData = 0;
+        updateDisplayedStats(emptyStats);
+
         downloadChart.setData(emptyValues, false);
         uploadChart.setData(emptyValues, false);
         latencyChart.setData(emptyValues, true);
@@ -180,7 +199,19 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         });
 
         serverContainer.setOnClickListener((View v) -> {
-            HelperFunctions.showServerOptions(getContext(), ServersActivity.convertLocalServerData(VPNServersPersistentData.getInstance().getCurrentServer()), ServerLists.History);
+            if (serverButtonTimeManager.canClick()) {
+                serverButtonTimeManager.informClickMade();
+                Observable.just(1).delay(Globals.CLICK_DELAY_MS, TimeUnit.MILLISECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(val -> {
+                        HelperFunctions.showServerOptions(
+                            getContext(),
+                            ServersActivity.convertLocalServerData(VPNServersPersistentData.getInstance().getCurrentServer()),
+                            ServerLists.History
+                        );
+                    });
+            }
         });
 
         buttonStop.setClickEventListener(this);
@@ -262,33 +293,33 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         statsSubscription = VPNCoordinator.getInstance().getConnectionStats().subscribe(stats -> {
             lastStats = stats;
             if (updateStats) {
-                updateDisplayedStats();
+                updateDisplayedStats(lastStats);
             }
         });
 
         updateTime(null);
     }
 
-    private void updateDisplayedStats() {
-        if (lastStats != null) {
-            updateTime(lastStats.lastConnectionDate);
+    private void updateDisplayedStats(VPNCoordinator.ConnectionStats stats) {
+        if (stats != null) {
+            updateTime(stats.lastConnectionDate);
 
-            downloadChart.setData(lastStats.downloadSpeedHistory, false);
-            uploadChart.setData(lastStats.uploadSpeedHistory, false);
-            latencyChart.setData(lastStats.latencyHistory, true);
+            downloadChart.setData(stats.downloadSpeedHistory, false);
+            uploadChart.setData(stats.uploadSpeedHistory, false);
+            latencyChart.setData(stats.latencyHistory, true);
 
-            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(lastStats.currentDownloadSpeed, true));
-            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(lastStats.currentUploadSpeed, true));
-            textLatency.setText(HelperFunctions.getLatencyValue(lastStats.currentLatency));
+            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentDownloadSpeed, true));
+            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentUploadSpeed, true));
+            textLatency.setText(HelperFunctions.getLatencyValue(stats.currentLatency));
 
             textTotalDownloaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(lastStats.totalDownloadedData, false)
+                HelperFunctions.computeDataAmountString(stats.totalDownloadedData, false)
             ));
 
             textTotalUploaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(lastStats.totalUploadedData, false)
+                HelperFunctions.computeDataAmountString(stats.totalUploadedData, false)
             ));
         }
     }
@@ -299,7 +330,7 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
 
     public void continueUpdatingStats() {
         updateStats = true;
-        updateDisplayedStats();
+        updateDisplayedStats(lastStats);
     }
 
     private void updateTime(Date lastConnectionDate) {

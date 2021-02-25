@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.options.OptionsItem;
 import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
+import com.skywire.skycoin.vpn.helpers.ClickTimeManagement;
 
 import java.util.ArrayList;
 
@@ -32,6 +33,7 @@ public class Select extends FrameLayout implements View.OnTouchListener, View.On
 
     private ArrayList<SelectOption> options;
     private int selectedIndex = 0;
+    private ClickTimeManagement buttonTimeManager = new ClickTimeManagement();
 
     public Select(Context context) {
         super(context);
@@ -115,6 +117,12 @@ public class Select extends FrameLayout implements View.OnTouchListener, View.On
 
     @Override
     public void onClick(View view) {
+        if (!buttonTimeManager.canClick()) {
+            return;
+        }
+
+        buttonTimeManager.informClickMade();
+
         ArrayList<OptionsItem.SelectableOption> optionsToShow = new ArrayList();
 
         for (SelectOption option : options) {

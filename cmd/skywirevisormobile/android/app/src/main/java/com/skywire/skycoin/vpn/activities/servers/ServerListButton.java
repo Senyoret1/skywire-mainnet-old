@@ -23,6 +23,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class ServerListButton extends ListButtonBase<Void> {
+    public static final float APROX_HEIGHT_DP = 55;
+
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
 
     private BoxRowLayout mainLayout;

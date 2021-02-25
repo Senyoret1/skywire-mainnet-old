@@ -7,6 +7,11 @@ import androidx.annotation.NonNull;
  */
 public class Globals {
     /**
+     * Time to wait before sending a click event after the user clicks a button. This is for
+     * allowing the UI to show the click effect.
+     */
+    public static final int CLICK_DELAY_MS = 150;
+    /**
      * Address of the local Skywire node.
      */
     public static final String LOCAL_VISOR_ADDRESS = "localhost";

@@ -10,6 +10,7 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
@@ -61,6 +62,8 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         editName.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         editNote.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
+        editPk.setSelection(editName.getText().length());
+
         editNote.setOnEditorActionListener((v, actionId, event) -> {
             if (
                 actionId == EditorInfo.IME_ACTION_DONE ||
@@ -78,6 +81,7 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         });
 
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         buttonCancel.setClickEventListener(this);
         buttonConfirm.setClickEventListener(this);

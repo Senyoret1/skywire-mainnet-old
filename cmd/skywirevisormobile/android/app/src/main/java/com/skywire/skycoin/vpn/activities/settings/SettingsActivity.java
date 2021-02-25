@@ -63,8 +63,8 @@ public class SettingsActivity extends Fragment implements ClickEvent {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
 
         Globals.AppFilteringModes appsMode = VPNGeneralPersistentData.getAppsSelectionMode();
         if (appsMode == Globals.AppFilteringModes.PROTECT_ALL) {

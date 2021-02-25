@@ -46,8 +46,6 @@ public class TopBarButton extends ButtonBase {
         } else {
             textIcon.setText("\ue5d2");
         }
-
-        this.setOnClickListener(this);
     }
 
     public void setIcon(UiMaterialIcons icon) {

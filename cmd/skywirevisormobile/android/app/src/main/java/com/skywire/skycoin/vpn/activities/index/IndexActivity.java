@@ -57,6 +57,8 @@ public class IndexActivity extends AppCompatActivity implements IndexPageAdapter
             @Override
             public void onTabReselected(TabLayout.Tab tab) { }
         });
+
+        pager.setOffscreenPageLimit(3);
     }
 
     @Override

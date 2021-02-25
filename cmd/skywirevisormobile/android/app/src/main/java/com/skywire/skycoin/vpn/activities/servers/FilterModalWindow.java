@@ -100,9 +100,9 @@ public class FilterModalWindow extends Dialog implements ClickEvent {
             editLocation.setText(currentFilters.location);
             editPk.setText(currentFilters.pk);
             editNote.setText(currentFilters.note);
-
-            editName.setSelection(editName.getText().length());
         }
+
+        editName.setSelection(editName.getText().length());
 
         if (currentFilters != null && currentFilters.countryCode != null) {
             int selectedIndex = countryIndexMap.containsKey(currentFilters.countryCode) ? countryIndexMap.get(currentFilters.countryCode) : 0;

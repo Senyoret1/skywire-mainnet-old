@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.activities.servers;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -83,8 +84,18 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     private ArrayList<SortableColumns> sortBy;
     private ArrayList<Boolean> sortInverse;
 
+    private ArrayList<ServerListButton> premadeButtons = new ArrayList<>();
+    private int lastUsedPremadeButtonIdex = 0;
+
     public VpnServersAdapter(Context context) {
         this.context = context;
+
+        int screenHeightInDP = (int)(Resources.getSystem().getDisplayMetrics().heightPixels / context.getResources().getDisplayMetrics().density);
+        int aproxButtonsToFillScreen = (int)Math.ceil((screenHeightInDP / ServerListButton.APROX_HEIGHT_DP) * 1.3);
+
+        for (int i = 0; i < aproxButtonsToFillScreen; i++) {
+            premadeButtons.add(createNewServerButton());
+        }
     }
 
     public void setData(List<VpnServerForList> data, ServerLists listType) {
@@ -323,9 +334,21 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
             return new ListViewHolder<>(conditionsView);
         }
 
+        ServerListButton view;
+        if (lastUsedPremadeButtonIdex < premadeButtons.size()) {
+            view = premadeButtons.get(lastUsedPremadeButtonIdex);
+            lastUsedPremadeButtonIdex += 1;
+        } else {
+            view = createNewServerButton();
+        }
+
+        return new ListViewHolder<>(view);
+    }
+
+    private ServerListButton createNewServerButton() {
         ServerListButton view = new ServerListButton(context);
         view.setClickWithIndexEventListener(this);
-        return new ListViewHolder<>(view);
+        return view;
     }
 
     @Override
