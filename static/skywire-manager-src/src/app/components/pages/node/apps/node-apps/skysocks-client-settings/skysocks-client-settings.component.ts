@@ -157,6 +157,39 @@ export class SkysocksClientSettingsComponent implements OnInit, OnDestroy {
       this.loadingFromDiscovery = false;
     });
 
+    this.proxiesFromDiscovery = [];
+
+    let tmp:ProxyDiscoveryEntry = new ProxyDiscoveryEntry();
+    tmp.pk = "123";
+    tmp.address = "address"
+    tmp.port = "1";
+    tmp.country = "ar";
+    this.proxiesFromDiscovery.push(tmp);
+
+    tmp = new ProxyDiscoveryEntry();
+    tmp.pk = "1234";
+    tmp.address = "address 2"
+    tmp.port = "1";
+    tmp.country = "pe";
+    this.proxiesFromDiscovery.push(tmp);
+
+    tmp = new ProxyDiscoveryEntry();
+    tmp.pk = "12345";
+    tmp.address = "address 3"
+    tmp.port = "1";
+    tmp.country = "do";
+    this.proxiesFromDiscovery.push(tmp);
+
+    // Save all countries.
+    this.proxiesFromDiscovery.forEach(entry => {
+      if (entry.country) {
+        this.countriesFromDiscovery.add(entry.country.toUpperCase());
+      }
+    });
+
+    this.filterProxies();
+    this.loadingFromDiscovery = false;
+
     // Get the history.
     const retrievedHistory = localStorage.getItem(this.configuringVpn ? this.vpnHistoryStorageKey : this.socksHistoryStorageKey);
     if (retrievedHistory) {
