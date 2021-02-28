@@ -2,6 +2,8 @@ package com.skywire.skycoin.vpn.activities.index;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -14,6 +16,7 @@ import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 public class IndexActivity extends AppCompatActivity implements IndexPageAdapter.RequestTabListener {
+    private ImageView imageBackground;
     private ViewPager2 pager;
     private TabLayout tabs;
     private TabLayoutMediator tabLayoutMediator;
@@ -23,8 +26,13 @@ public class IndexActivity extends AppCompatActivity implements IndexPageAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_index);
 
+        imageBackground = findViewById(R.id.imageBackground);
         pager = findViewById(R.id.pager);
         tabs = findViewById(R.id.tabs);
+
+        if (HelperFunctions.showBackgroundForVerticalScreen()) {
+            imageBackground.setVisibility(View.GONE);
+        }
 
         IndexPageAdapter adapter = new IndexPageAdapter(this);
         adapter.setRequestTabListener(this);

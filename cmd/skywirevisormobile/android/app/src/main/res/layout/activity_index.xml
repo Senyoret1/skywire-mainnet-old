@@ -14,11 +14,21 @@
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="@dimen/top_tab_bar_height"
+            android:background="@color/bar_background"
             app:tabBackground="@color/bar_background"
             app:tabRippleColor="@color/box_ripple"
             app:tabIndicatorColor="@color/accent"/>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <ImageView
+        android:id="@+id/imageBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/top_bar_with_tabs_height"
+        android:alpha="0.1"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/map" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"

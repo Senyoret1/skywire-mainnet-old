@@ -7,8 +7,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.skywire.skycoin.vpn.App;
@@ -268,6 +270,35 @@ public class HelperFunctions {
         } else {
             return R.drawable.do_flag;
         }
+    }
+
+    public static boolean showBackgroundForVerticalScreen() {
+        double proportion = (double)Resources.getSystem().getDisplayMetrics().widthPixels / (double)Resources.getSystem().getDisplayMetrics().heightPixels;
+        if (proportion > 1.1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static int getTabletExtraHorizontalPadding(Context ctx) {
+        int screenWidthInDP = (int)(Resources.getSystem().getDisplayMetrics().widthPixels / ctx.getResources().getDisplayMetrics().density);
+
+        if (screenWidthInDP >= 1100) {
+            return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                100,
+                ctx.getResources().getDisplayMetrics()
+            );
+        } else if (screenWidthInDP >= 800) {
+            return (int)TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                40,
+                ctx.getResources().getDisplayMetrics()
+            );
+        }
+
+        return 0;
     }
 
     public static boolean prepareAndStartVpn(Activity requestingActivity, LocalServerData server) {

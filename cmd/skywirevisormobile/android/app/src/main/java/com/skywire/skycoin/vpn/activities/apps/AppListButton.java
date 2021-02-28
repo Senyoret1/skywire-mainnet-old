@@ -2,8 +2,11 @@ package com.skywire.skycoin.vpn.activities.apps;
 
 import android.content.Context;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -11,24 +14,31 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
-import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.extensible.ListButtonBase;
-import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
-public class AppListButton extends ListButtonBase<Void> {
+public class AppListButton extends ListButtonBase<Void> implements View.OnTouchListener {
     public static final float APROX_HEIGHT_DP = 55;
 
-    private BoxRowLayout mainLayout;
+    private FrameLayout mainLayout;
     private LinearLayout internalLayout;
     private ImageView imageIcon;
     private FrameLayout layoutSeparator;
     private TextView textAppName;
     private CheckBox checkSelected;
+    private View separator;
+
+    private RippleDrawable rippleDrawable;
 
     private String appPackageName;
 
     public AppListButton(Context context) {
         super(context);
+    }
+    public AppListButton(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+    public AppListButton(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
     }
 
     @Override
@@ -42,25 +52,43 @@ public class AppListButton extends ListButtonBase<Void> {
         layoutSeparator = this.findViewById (R.id.layoutSeparator);
         textAppName = this.findViewById (R.id.textAppName);
         checkSelected = this.findViewById (R.id.checkSelected);
+        separator = this.findViewById (R.id.separator);
+
+        rippleDrawable = (RippleDrawable) mainLayout.getBackground();
+        setOnTouchListener(this);
+    }
+
+    public void setSeparatorVisibility(boolean visible) {
+        if (visible) {
+            separator.setVisibility(VISIBLE);
+        } else {
+            separator.setVisibility(GONE);
+        }
     }
 
     public void changeData(ResolveInfo appData) {
-        appPackageName = appData.activityInfo.packageName;
-        imageIcon.setImageDrawable(appData.activityInfo.loadIcon(this.getContext().getPackageManager()));
-        textAppName.setText(appData.activityInfo.loadLabel(this.getContext().getPackageManager()));
-        imageIcon.setVisibility(VISIBLE);
-        layoutSeparator.setVisibility(VISIBLE);
+        if (appData != null) {
+            appPackageName = appData.activityInfo.packageName;
+            imageIcon.setImageDrawable(appData.activityInfo.loadIcon(this.getContext().getPackageManager()));
+            textAppName.setText(appData.activityInfo.loadLabel(this.getContext().getPackageManager()));
+            imageIcon.setVisibility(VISIBLE);
+            layoutSeparator.setVisibility(VISIBLE);
+            setVisibility(VISIBLE);
+        } else {
+            setVisibility(INVISIBLE);
+        }
     }
 
     public void changeData(String appPackageName) {
-        this.appPackageName = appPackageName;
-        textAppName.setText(appPackageName);
         imageIcon.setVisibility(GONE);
         layoutSeparator.setVisibility(GONE);
-    }
-
-    public void setBoxRowType(BoxRowTypes type) {
-        mainLayout.setType(type);
+        if (appPackageName != null) {
+            this.appPackageName = appPackageName;
+            textAppName.setText(appPackageName);
+            setVisibility(VISIBLE);
+        } else {
+            setVisibility(INVISIBLE);
+        }
     }
 
     public String getAppPackageName() {
@@ -80,5 +108,14 @@ public class AppListButton extends ListButtonBase<Void> {
         } else {
             internalLayout.setAlpha(0.5f);
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (rippleDrawable != null) {
+            rippleDrawable.setHotspot(event.getX(), event.getY());
+        }
+
+        return false;
     }
 }

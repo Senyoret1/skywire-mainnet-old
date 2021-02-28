@@ -34,7 +34,6 @@
         <activity
             android:name=".activities.index.IndexActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:label="@string/general_app_name" >
             <intent-filter>
@@ -47,7 +46,6 @@
         <activity
             android:name=".activities.apps.AppsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
             android:label="@string/tmp_select_apps_title" >
         </activity>
 

@@ -18,6 +18,7 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.index.IndexPageAdapter;
 import com.skywire.skycoin.vpn.activities.start.connected.StartViewConnected;
 import com.skywire.skycoin.vpn.activities.start.disconnected.StartViewDisconnected;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 
 import java.util.concurrent.TimeUnit;
@@ -62,6 +63,10 @@ public class StartActivity extends Fragment {
 
         mainContainer = view.findViewById(R.id.mainContainer);
         background = view.findViewById(R.id.background);
+
+        if (!HelperFunctions.showBackgroundForVerticalScreen()) {
+            background.setVisibility(View.GONE);
+        }
     }
 
     public void setRequestTabListener(IndexPageAdapter.RequestTabListener listener) {
