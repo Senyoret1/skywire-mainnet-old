@@ -134,10 +134,12 @@
     <string name="tmp_select_server_sort_title">Sort by</string>
     <string name="tmp_select_server_automatic_label">Automatic</string>
     <string name="tmp_select_server_date_label">Last usage date</string>
+    <string name="tmp_select_server_date_small_label">Date</string>
     <string name="tmp_select_server_country_label">Country</string>
     <string name="tmp_select_server_name_label">Name</string>
     <string name="tmp_select_server_location_label">Location</string>
     <string name="tmp_select_server_public_key_label">Public key</string>
+    <string name="tmp_select_server_public_key_small_label">PK</string>
     <string name="tmp_select_server_congestion_label">Congestion</string>
     <string name="tmp_select_server_congestion_rating_label">Congestion rating</string>
     <string name="tmp_select_server_latency_label">Latency</string>
@@ -196,6 +198,7 @@
     <string name="tmp_server_options_remove_from_history_done">Removed from history.</string>
 
     <string name="server_info_title">Server Info</string>
+    <string name="server_info_note_title">Server Note</string>
     <string name="server_info_without_value">Without value</string>
     <string name="server_info_basic_info_title">Basic Information</string>
     <string name="server_info_name">Server name:</string>

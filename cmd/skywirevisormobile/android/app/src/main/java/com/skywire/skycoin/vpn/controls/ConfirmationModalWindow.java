@@ -2,8 +2,6 @@ package com.skywire.skycoin.vpn.controls;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -11,6 +9,7 @@ import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 public class ConfirmationModalWindow extends Dialog implements ClickEvent {
     public interface Confirmed {
@@ -49,10 +48,10 @@ public class ConfirmationModalWindow extends Dialog implements ClickEvent {
         buttonCancel.setText(cancelBtnResource);
         buttonConfirm.setText(confirmBtnResource);
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
         buttonCancel.setClickEventListener(this);
         buttonConfirm.setClickEventListener(this);
+
+        HelperFunctions.configureModalWindow(getContext(), getWindow());
     }
 
     @Override

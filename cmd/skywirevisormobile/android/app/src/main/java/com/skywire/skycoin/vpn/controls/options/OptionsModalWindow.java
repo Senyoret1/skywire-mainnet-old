@@ -2,8 +2,6 @@ package com.skywire.skycoin.vpn.controls.options;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.LinearLayout;
@@ -11,6 +9,7 @@ import android.widget.LinearLayout;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.controls.ModalBase;
 import com.skywire.skycoin.vpn.extensible.ClickWithIndexEvent;
+import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
 import java.util.ArrayList;
 
@@ -47,8 +46,6 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
             modalBase.setTitleString(title);
         }
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
         int i = 0;
         for (OptionsItem.SelectableOption option : options) {
             OptionsItem view = new OptionsItem(getContext());
@@ -57,6 +54,8 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
             view.setClickWithIndexEventListener(this);
             container.addView(view);
         }
+
+        HelperFunctions.configureModalWindow(getContext(), getWindow());
     }
 
     @Override

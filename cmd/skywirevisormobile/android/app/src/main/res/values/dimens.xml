@@ -17,8 +17,8 @@
     <dimen name="box_row_layout_vertical_padding">10dp</dimen>
     <dimen name="box_row_layout_horizontal_padding">14dp</dimen>
     <dimen name="box_row_layout_separator_height">1dp</dimen>
-    <dimen name="box_row_layout_separator_horizontal_margin">5dp</dimen>
-    <dimen name="box_row_layout_separator_combined_horizontal_margin">19dp</dimen>
+    <dimen name="box_row_layout_separator_horizontal_margin">-5dp</dimen>
+    <dimen name="box_row_layout_separator_combined_horizontal_margin">9dp</dimen>
 
     <dimen name="check_box_separation">10dp</dimen>
 

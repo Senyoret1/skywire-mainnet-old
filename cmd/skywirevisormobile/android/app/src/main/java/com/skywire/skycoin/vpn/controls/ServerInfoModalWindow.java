@@ -2,8 +2,6 @@ package com.skywire.skycoin.vpn.controls;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -205,9 +203,9 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
             specialContainer.setVisibility(View.GONE);
         }
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
         buttonClose.setClickEventListener(this);
+
+        HelperFunctions.configureModalWindow(getContext(), getWindow());
     }
 
     @Override

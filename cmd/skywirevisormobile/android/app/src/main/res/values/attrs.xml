@@ -30,6 +30,14 @@
         <attr name="title" />
         <attr name="description" format="string" />
     </declare-styleable>
+    <declare-styleable name="ServerListTopTab">
+        <attr name="text" format="string" />
+        <attr name="position" format="enum">
+            <enum name="middle" value="0"/>
+            <enum name="left" value="1"/>
+            <enum name="right" value="2"/>
+        </attr>
+    </declare-styleable>
     <declare-styleable name="ServerListOptionButton">
         <attr name="content" format="string" />
     </declare-styleable>
@@ -44,7 +52,7 @@
     </declare-styleable>
     <declare-styleable name="OptionsItem">
         <attr name="icon_text" />
-        <attr name="text" format="string" />
+        <attr name="text" />
     </declare-styleable>
     <declare-styleable name="ModalWindowButton">
         <attr name="text" />
@@ -57,5 +65,8 @@
     </declare-styleable>
     <declare-styleable name="Select">
         <attr name="hint" format="string" />
+    </declare-styleable>
+    <declare-styleable name="SettingsButton">
+        <attr name="use_note_icon" format="boolean" />
     </declare-styleable>
 </resources>

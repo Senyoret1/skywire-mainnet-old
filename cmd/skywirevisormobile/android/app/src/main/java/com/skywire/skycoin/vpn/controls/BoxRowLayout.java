@@ -183,7 +183,12 @@ public class BoxRowLayout extends FrameLayout {
         }
 
         float separatorHeight = getContext().getResources().getDimension(R.dimen.box_row_layout_separator_height);
-        float separatorHorizontalMargin = getContext().getResources().getDimension(R.dimen.box_row_layout_separator_horizontal_margin);
+        float separatorHorizontalMargin;
+        if (ignoreMargins) {
+            separatorHorizontalMargin = getContext().getResources().getDimension(R.dimen.box_row_layout_separator_combined_horizontal_margin);
+        } else {
+            separatorHorizontalMargin = getContext().getResources().getDimension(R.dimen.box_row_layout_separator_horizontal_margin);
+        }
 
         FrameLayout.LayoutParams separatorLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int)Math.round(separatorHeight));
         separatorLayoutParams.gravity = Gravity.BOTTOM;

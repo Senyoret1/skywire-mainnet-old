@@ -2,13 +2,10 @@ package com.skywire.skycoin.vpn.activities.servers;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
@@ -130,11 +127,10 @@ public class FilterModalWindow extends Dialog implements ClickEvent {
             return false;
         });
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
         buttonCancel.setClickEventListener(this);
         buttonConfirm.setClickEventListener(this);
+
+        HelperFunctions.configureModalWindow(getContext(), getWindow());
     }
 
     @Override

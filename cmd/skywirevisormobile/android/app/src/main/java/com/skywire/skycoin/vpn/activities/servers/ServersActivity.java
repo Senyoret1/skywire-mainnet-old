@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,12 +32,13 @@ import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class ServersActivity extends Fragment implements VpnServersAdapter.VpnServerListEventListener, ClickEvent {
     public static String ADDRESS_DATA_PARAM = "address";
@@ -49,6 +52,9 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     private ProgressBar loadingAnimation;
     private TextView textNoResults;
     private LinearLayout noResultsContainer;
+    private LinearLayout bottomTabsContainer;
+    private FrameLayout internalContainer;
+    private ImageView ImageBottomTabsShadow;
 
     private IndexPageAdapter.RequestTabListener requestTabListener;
     private ServerLists listType = ServerLists.Public;
@@ -77,6 +83,9 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
         loadingAnimation = view.findViewById(R.id.loadingAnimation);
         textNoResults = view.findViewById(R.id.textNoResults);
         noResultsContainer = view.findViewById(R.id.noResultsContainer);
+        bottomTabsContainer = view.findViewById(R.id.bottomTabsContainer);
+        internalContainer = view.findViewById(R.id.internalContainer);
+        ImageBottomTabsShadow = view.findViewById(R.id.ImageBottomTabsShadow);
 
         tabPublic.setClickEventListener(this);
         tabHistory.setClickEventListener(this);
@@ -85,12 +94,13 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recycler.setLayoutManager(layoutManager);
-        // This could be useful in the future.
-        // recycler.setHasFixedSize(true);
 
         // This code retrieves the data from the server and populates the list with the recovered
         // data, but is not used right now as the server is returning empty arrays.
         // requestData()
+
+        noResultsContainer.setVisibility(View.GONE);
+        loadingAnimation.setVisibility(View.VISIBLE);
 
         // Initialize the recycler.
         adapter = new VpnServersAdapter(getContext());
@@ -105,10 +115,28 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
         }
 
         showCorrectList();
+
+        if (HelperFunctions.getWidthType(getContext()) != HelperFunctions.WidthTypes.SMALL) {
+            bottomTabsContainer.setVisibility(View.GONE);
+            ImageBottomTabsShadow.setVisibility(View.GONE);
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)internalContainer.getLayoutParams();
+            params.bottomMargin = 0;
+            internalContainer.setLayoutParams(params);
+        }
     }
 
     public void setRequestTabListener(IndexPageAdapter.RequestTabListener listener) {
         requestTabListener = listener;
+    }
+
+    @Override
+    public void tabChangeRequested(ServerLists newListType) {
+        if (newListType != listType) {
+            listType = newListType;
+
+            finishChangingTab();
+        }
     }
 
     @Override
@@ -123,6 +151,10 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             listType = ServerLists.Blocked;
         }
 
+        finishChangingTab();
+    }
+
+    private void finishChangingTab() {
         Gson gson = new Gson();
         String listTypeString = gson.toJson(listType);
         settings.edit()
@@ -182,7 +214,8 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             serverSubscription.dispose();
         }
 
-        recycler.setVisibility(View.GONE);
+        adapter.setData(new ArrayList<>(), listType);
+        noResultsContainer.setVisibility(View.GONE);
         loadingAnimation.setVisibility(View.VISIBLE);
 
         Observable<ArrayList<LocalServerData>> request;
@@ -201,10 +234,9 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
                 list.add(convertLocalServerData(server));
             }
 
-            adapter.setData(list, listType);
-
-            recycler.setVisibility(View.VISIBLE);
             loadingAnimation.setVisibility(View.GONE);
+
+            adapter.setData(list, listType);
         });
     }
 
@@ -253,7 +285,7 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
 
     @Override
     public void listHasElements(boolean hasElements, boolean emptyBecauseFilters) {
-        if (hasElements) {
+        if (hasElements || loadingAnimation.getVisibility() != View.GONE) {
             noResultsContainer.setVisibility(View.GONE);
         } else {
             noResultsContainer.setVisibility(View.VISIBLE);
@@ -339,9 +371,15 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             serverSubscription.dispose();
         }
 
-        serverSubscription = Observable.just(servers).flatMap(serversList ->
+        adapter.setData(new ArrayList<>(), listType);
+        noResultsContainer.setVisibility(View.GONE);
+        loadingAnimation.setVisibility(View.VISIBLE);
+
+        serverSubscription = Observable.just(servers).delay(50, TimeUnit.MILLISECONDS).flatMap(serversList ->
             VPNServersPersistentData.getInstance().history()
-        ).subscribe(r -> {
+        ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(r -> {
+            loadingAnimation.setVisibility(View.GONE);
+
             ArrayList<VpnServerForList> serversCopy = new ArrayList<>(servers);
 
             removeSavedData(serversCopy);
@@ -349,8 +387,6 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
             adapter.setData(serversCopy, ServerLists.Public);
         });
 
-        recycler.setVisibility(View.VISIBLE);
-        loadingAnimation.setVisibility(View.GONE);
     }
 
     private void addSavedData(ArrayList<VpnServerForList> servers) {

@@ -31,6 +31,7 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
         void onVpnServerSelected(VpnServerForList selectedServer);
         void onManualEntered(LocalServerData server);
         void listHasElements(boolean hasElements, boolean emptyBecauseFilters);
+        void tabChangeRequested(ServerLists newListType);
     }
 
     public enum SortableColumns {
@@ -77,6 +78,8 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     private List<VpnServerForList> filteredData;
     private ServerLists listType = ServerLists.Public;
     private VpnServerListEventListener listEventListener;
+    private boolean showingRows;
+    private int initialServerIndex;
 
     private ArrayList<FilterModalWindow.Filters> filters;
     private ConditionsList conditionsView;
@@ -85,22 +88,45 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     private ArrayList<Boolean> sortInverse;
 
     private ArrayList<ServerListButton> premadeButtons = new ArrayList<>();
+    private ArrayList<ServerListTableRow> premadeRows = new ArrayList<>();
     private int lastUsedPremadeButtonIdex = 0;
+
+    private ServerListOptions listOptionsView;
+    private ServerListTableHeader tableHeader;
 
     public VpnServersAdapter(Context context) {
         this.context = context;
 
         int screenHeightInDP = (int)(Resources.getSystem().getDisplayMetrics().heightPixels / context.getResources().getDisplayMetrics().density);
-        int aproxButtonsToFillScreen = (int)Math.ceil((screenHeightInDP / ServerListButton.APROX_HEIGHT_DP) * 1.3);
+        showingRows = HelperFunctions.getWidthType(context) != HelperFunctions.WidthTypes.SMALL;
 
-        for (int i = 0; i < aproxButtonsToFillScreen; i++) {
-            premadeButtons.add(createNewServerButton());
+        if (!showingRows) {
+            int aproxButtonsToFillScreen = (int)Math.ceil((screenHeightInDP / ServerListButton.APROX_HEIGHT_DP) * 1.3);
+            for (int i = 0; i < aproxButtonsToFillScreen; i++) {
+                premadeButtons.add(createNewServerButton());
+            }
+            initialServerIndex = 2;
+        } else {
+            int aproxButtonsToFillScreen = (int)Math.ceil((screenHeightInDP / ServerListTableRow.APROX_HEIGHT_DP) * 1.3);
+            for (int i = 0; i < aproxButtonsToFillScreen; i++) {
+                premadeRows.add(createNewServerRow());
+            }
+            initialServerIndex = 3;
         }
     }
 
     public void setData(List<VpnServerForList> data, ServerLists listType) {
         this.data = data;
         this.listType = listType;
+
+        if (listOptionsView != null) {
+            listOptionsView.selectCorrectTab(listType);
+        }
+
+        if (tableHeader != null) {
+            tableHeader.setListType(listType);
+        }
+
         processData();
     }
 
@@ -276,6 +302,8 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
             return 0;
         } else if (position == 1) {
             return 1;
+        } else if (position == 2 && showingRows) {
+            return 3;
         }
 
         return 2;
@@ -285,9 +313,10 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
     @Override
     public ListViewHolder<View> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == 0) {
-            ServerListOptions view = new ServerListOptions(context);
-            view.setClickWithIndexEventListener(this);
-            return new ListViewHolder<>(view);
+            listOptionsView = new ServerListOptions(context);
+            listOptionsView.setClickWithIndexEventListener(this);
+            listOptionsView.selectCorrectTab(listType);
+            return new ListViewHolder<>(listOptionsView);
         } else if (viewType == 1) {
             conditionsView = new ConditionsList(context);
             conditionsView.setConditions(sortBy.get(getCurrentListTypeIntVal()), sortInverse.get(getCurrentListTypeIntVal()), filters.get(getCurrentListTypeIntVal()));
@@ -332,17 +361,33 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
             });
 
             return new ListViewHolder<>(conditionsView);
+        } else if (viewType == 3) {
+            tableHeader = new ServerListTableHeader(context);
+            tableHeader.setListType(listType);
+            return new ListViewHolder<>(tableHeader);
         }
 
-        ServerListButton view;
-        if (lastUsedPremadeButtonIdex < premadeButtons.size()) {
-            view = premadeButtons.get(lastUsedPremadeButtonIdex);
-            lastUsedPremadeButtonIdex += 1;
+        if (!showingRows) {
+            ServerListButton view;
+            if (lastUsedPremadeButtonIdex < premadeButtons.size()) {
+                view = premadeButtons.get(lastUsedPremadeButtonIdex);
+                lastUsedPremadeButtonIdex += 1;
+            } else {
+                view = createNewServerButton();
+            }
+
+            return new ListViewHolder<>(view);
         } else {
-            view = createNewServerButton();
-        }
+            ServerListTableRow view;
+            if (lastUsedPremadeButtonIdex < premadeRows.size()) {
+                view = premadeRows.get(lastUsedPremadeButtonIdex);
+                lastUsedPremadeButtonIdex += 1;
+            } else {
+                view = createNewServerRow();
+            }
 
-        return new ListViewHolder<>(view);
+            return new ListViewHolder<>(view);
+        }
     }
 
     private ServerListButton createNewServerButton() {
@@ -351,29 +396,53 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
         return view;
     }
 
+    private ServerListTableRow createNewServerRow() {
+        ServerListTableRow view = new ServerListTableRow(context);
+        view.setClickWithIndexEventListener(this);
+        return view;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder<View> holder, int position) {
-        if (position > 1) {
-            position -= 2;
+        if (position >= initialServerIndex) {
+            position -= initialServerIndex;
 
-            ((ServerListButton) holder.itemView).setIndex(position);
-            ((ServerListButton) holder.itemView).changeData(filteredData.get(position), listType);
+            if (!showingRows) {
+                ((ServerListButton) holder.itemView).setIndex(position);
+                ((ServerListButton) holder.itemView).changeData(filteredData.get(position), listType);
 
-            if (filteredData.size() == 1) {
-                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
-            } else if (position == 0) {
-                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.TOP);
-            } else if (position == filteredData.size() - 1) {
-                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+                if (filteredData.size() == 1) {
+                    ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.SINGLE);
+                } else if (position == 0) {
+                    ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.TOP);
+                } else if (position == filteredData.size() - 1) {
+                    ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+                } else {
+                    ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+                }
             } else {
-                ((ServerListButton) holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+                ((ServerListTableRow) holder.itemView).setIndex(position);
+                ((ServerListTableRow) holder.itemView).changeData(filteredData.get(position), listType);
+
+                if (position == filteredData.size() - 1) {
+                    ((ServerListTableRow) holder.itemView).setBoxRowType(BoxRowTypes.BOTTOM);
+                } else {
+                    ((ServerListTableRow) holder.itemView).setBoxRowType(BoxRowTypes.MIDDLE);
+                }
             }
         }
     }
 
     @Override
     public int getItemCount() {
-        return filteredData != null ? (filteredData.size() + 2) : 2;
+        if (!showingRows) {
+            return filteredData != null ? (filteredData.size() + 2) : 2;
+        }
+
+        if (filteredData == null || filteredData.size() == 0) {
+            return 2;
+        }
+        return filteredData.size() + 3;
     }
 
     @Override
@@ -382,7 +451,17 @@ public class VpnServersAdapter extends RecyclerView.Adapter<ListViewHolder<View>
             if (index >= 0) {
                 listEventListener.onVpnServerSelected(this.filteredData.get(index));
             } else {
-                if (index == ServerListOptions.sortIndex) {
+                if (index <= ServerListOptions.showPublicIndex) {
+                    if (index == ServerListOptions.showPublicIndex) {
+                        listEventListener.tabChangeRequested(ServerLists.Public);
+                    } else if (index == ServerListOptions.showHistoryIndex) {
+                        listEventListener.tabChangeRequested(ServerLists.History);
+                    } else if (index == ServerListOptions.showFavoritesIndex) {
+                        listEventListener.tabChangeRequested(ServerLists.Favorites);
+                    } else if (index == ServerListOptions.showBlockedIndex) {
+                        listEventListener.tabChangeRequested(ServerLists.Blocked);
+                    }
+                } else if (index == ServerListOptions.sortIndex) {
                     SortableColumns currentSortBy = sortBy.get(getCurrentListTypeIntVal());
                     boolean currentSortInverse = sortInverse.get(getCurrentListTypeIntVal());
 

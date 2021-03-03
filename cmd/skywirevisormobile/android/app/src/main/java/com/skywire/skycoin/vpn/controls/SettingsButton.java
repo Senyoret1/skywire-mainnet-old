@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.controls;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -29,6 +30,21 @@ public class SettingsButton extends ButtonBase implements View.OnTouchListener {
         inflater.inflate(R.layout.view_settings_button, this, true);
 
         textIcon = this.findViewById (R.id.textIcon);
+
+        if (attrs != null) {
+            TypedArray attributes = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.SettingsButton,
+                0, 0
+            );
+
+            boolean useNoteIcon = attributes.getBoolean(R.styleable.SettingsButton_use_note_icon, false);
+            if (useNoteIcon) {
+                textIcon.setText("\ue88f");
+            }
+
+            attributes.recycle();
+        }
 
         setOnTouchListener(this);
     }

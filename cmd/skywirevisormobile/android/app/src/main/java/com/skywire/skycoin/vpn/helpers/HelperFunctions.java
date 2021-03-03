@@ -8,10 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
@@ -43,6 +49,12 @@ import skywiremob.Skywiremob;
  * General helper functions for different parts of the app.
  */
 public class HelperFunctions {
+    public enum WidthTypes {
+        SMALL,
+        BIG,
+        BIGGER,
+    }
+
     // Helpers for showing only a max number of decimals.
     public static final DecimalFormat twoDecimalsFormatter = new DecimalFormat("#.##");
     public static final DecimalFormat oneDecimalsFormatter = new DecimalFormat("#.#");
@@ -272,6 +284,55 @@ public class HelperFunctions {
         }
     }
 
+    public static int getCongestionNumberColor(int congestion) {
+        if (congestion < 60) {
+            return ContextCompat.getColor(App.getContext(), R.color.green);
+        } else if (congestion < 90) {
+            return ContextCompat.getColor(App.getContext(), R.color.yellow);
+        }
+
+        return ContextCompat.getColor(App.getContext(), R.color.red);
+    }
+
+    public static int getLatencyNumberColor(int latency) {
+        if (latency < 200) {
+            return ContextCompat.getColor(App.getContext(), R.color.green);
+        } else if (latency < 350) {
+            return ContextCompat.getColor(App.getContext(), R.color.yellow);
+        }
+
+        return ContextCompat.getColor(App.getContext(), R.color.red);
+    }
+
+    public static int getHopsNumberColor(int hops) {
+        if (hops < 5) {
+            return ContextCompat.getColor(App.getContext(), R.color.green);
+        } else if (hops < 9) {
+            return ContextCompat.getColor(App.getContext(), R.color.yellow);
+        }
+
+        return ContextCompat.getColor(App.getContext(), R.color.red);
+    }
+
+    public static void configureModalWindow(Context ctx, Window window) {
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        WidthTypes screenWidthType = getWidthType(ctx);
+        if (screenWidthType != WidthTypes.SMALL) {
+            int width = (int)TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                500,
+                ctx.getResources().getDisplayMetrics()
+            );
+
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = width;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+    }
+
     public static boolean showBackgroundForVerticalScreen() {
         double proportion = (double)Resources.getSystem().getDisplayMetrics().widthPixels / (double)Resources.getSystem().getDisplayMetrics().heightPixels;
         if (proportion > 1.1) {
@@ -281,16 +342,28 @@ public class HelperFunctions {
         return true;
     }
 
-    public static int getTabletExtraHorizontalPadding(Context ctx) {
+    public static WidthTypes getWidthType(Context ctx) {
         int screenWidthInDP = (int)(Resources.getSystem().getDisplayMetrics().widthPixels / ctx.getResources().getDisplayMetrics().density);
 
         if (screenWidthInDP >= 1100) {
+            return WidthTypes.BIGGER;
+        } else if (screenWidthInDP >= 800) {
+            return WidthTypes.BIG;
+        }
+
+        return WidthTypes.SMALL;
+    }
+
+    public static int getTabletExtraHorizontalPadding(Context ctx) {
+        WidthTypes widthType = getWidthType(ctx);
+
+        if (widthType == WidthTypes.BIGGER) {
             return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 100,
                 ctx.getResources().getDisplayMetrics()
             );
-        } else if (screenWidthInDP >= 800) {
+        } else if (widthType == WidthTypes.BIG) {
             return (int)TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 40,
