@@ -3,6 +3,8 @@ package com.skywire.skycoin.vpn.activities.start.connected;
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,6 +17,7 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
 import com.skywire.skycoin.vpn.activities.servers.ServerLists;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
+import com.skywire.skycoin.vpn.activities.start.StartViewRightPanel;
 import com.skywire.skycoin.vpn.controls.ConfirmationModalWindow;
 import com.skywire.skycoin.vpn.controls.ServerName;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
@@ -75,14 +78,18 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private Chart downloadChart;
     private Chart uploadChart;
     private Chart latencyChart;
+    private LinearLayout leftContainer;
+    private LinearLayout ipDataContainer;
     private LinearLayout ipContainer;
     private LinearLayout countryContainer;
     private FrameLayout appsContainer;
     private LinearLayout appsInternalContainer;
     private LinearLayout serverContainer;
+    private FrameLayout rightContainer;
     private ProgressBar progressIp;
     private ProgressBar progressCountry;
     private StopButton buttonStop;
+    private StartViewRightPanel rightPanel;
 
     private String previousIp;
     private String currentIp;
@@ -124,39 +131,62 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         downloadChart = findViewById(R.id.downloadChart);
         uploadChart = findViewById(R.id.uploadChart);
         latencyChart = findViewById(R.id.latencyChart);
+        leftContainer = findViewById(R.id.leftContainer);
+        ipDataContainer = findViewById(R.id.ipDataContainer);
         ipContainer = findViewById(R.id.ipContainer);
         countryContainer = findViewById(R.id.countryContainer);
         appsContainer = findViewById(R.id.appsContainer);
         appsInternalContainer = findViewById(R.id.appsInternalContainer);
         serverContainer = findViewById(R.id.serverContainer);
+        rightContainer = findViewById(R.id.rightContainer);
         progressIp = findViewById(R.id.progressIp);
         progressCountry = findViewById(R.id.progressCountry);
         buttonStop = findViewById(R.id.buttonStop);
+        rightPanel = findViewById(R.id.rightPanel);
 
         textLastError.setVisibility(GONE);
         textStartedByTheSystem.setVisibility(GONE);
         ipContainer.setVisibility(GONE);
         countryContainer.setVisibility(GONE);
 
+        if (HelperFunctions.getWidthType(getContext()) != HelperFunctions.WidthTypes.SMALL) {
+            float areaWidth = getContext().getResources().getDimension(R.dimen.tablet_status_area_width);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int)Math.round(areaWidth), LayoutParams.WRAP_CONTENT);
+            params.gravity = Gravity.CENTER_HORIZONTAL;
+            leftContainer.setLayoutParams(params);
+
+            ipDataContainer.setVisibility(GONE);
+            appsContainer.setVisibility(GONE);
+            serverContainer.setVisibility(GONE);
+
+            textLastError.setTextSize(TypedValue.COMPLEX_UNIT_PX, getContext().getResources().getDimension(R.dimen.small_text_size));
+        } else {
+            rightContainer.setVisibility(GONE);
+        }
+
         Globals.AppFilteringModes selectedMode = VPNGeneralPersistentData.getAppsSelectionMode();
         if (selectedMode != Globals.AppFilteringModes.PROTECT_ALL) {
             HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
 
-            if (selectedApps.size() > 0) {
-                if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
-                    textAppsProtectionMode.setText(R.string.tmp_status_connected_protecting_selected_apps);
-                } else {
-                    textAppsProtectionMode.setText(R.string.tmp_status_connected_ignoring_selected_apps);
-                }
-
-                appsInternalContainer.setOnClickListener((View v) -> {
-                    if (appsButtonTimeManager.canClick()) {
-                        appsButtonTimeManager.informClickMade();
-                        Intent intent = new Intent(getContext(), AppsActivity.class);
-                        intent.putExtra(AppsActivity.READ_ONLY_EXTRA, true);
-                        getContext().startActivity(intent);
+            if (HelperFunctions.getWidthType(getContext()) == HelperFunctions.WidthTypes.SMALL) {
+                if (selectedApps.size() > 0) {
+                    if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
+                        textAppsProtectionMode.setText(R.string.tmp_status_connected_protecting_selected_apps);
+                    } else {
+                        textAppsProtectionMode.setText(R.string.tmp_status_connected_ignoring_selected_apps);
                     }
-                });
+
+                    appsInternalContainer.setOnClickListener((View v) -> {
+                        if (appsButtonTimeManager.canClick()) {
+                            appsButtonTimeManager.informClickMade();
+                            Intent intent = new Intent(getContext(), AppsActivity.class);
+                            intent.putExtra(AppsActivity.READ_ONLY_EXTRA, true);
+                            getContext().startActivity(intent);
+                        }
+                    });
+                } else {
+                    appsContainer.setVisibility(GONE);
+                }
             } else {
                 appsContainer.setVisibility(GONE);
             }
@@ -198,21 +228,23 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
             }
         });
 
-        serverContainer.setOnClickListener((View v) -> {
-            if (serverButtonTimeManager.canClick()) {
-                serverButtonTimeManager.informClickMade();
-                Observable.just(1).delay(Globals.CLICK_DELAY_MS, TimeUnit.MILLISECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(val -> {
-                        HelperFunctions.showServerOptions(
-                            getContext(),
-                            ServersActivity.convertLocalServerData(VPNServersPersistentData.getInstance().getCurrentServer()),
-                            ServerLists.History
-                        );
-                    });
-            }
-        });
+        if (HelperFunctions.getWidthType(getContext()) == HelperFunctions.WidthTypes.SMALL) {
+            serverContainer.setOnClickListener((View v) -> {
+                if (serverButtonTimeManager.canClick()) {
+                    serverButtonTimeManager.informClickMade();
+                    Observable.just(1).delay(Globals.CLICK_DELAY_MS, TimeUnit.MILLISECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(val -> {
+                            HelperFunctions.showServerOptions(
+                                getContext(),
+                                ServersActivity.convertLocalServerData(VPNServersPersistentData.getInstance().getCurrentServer()),
+                                ServerLists.History
+                            );
+                        });
+                }
+            });
+        }
 
         buttonStop.setClickEventListener(this);
 
@@ -264,26 +296,34 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
                 }
 
                 if (VPNGeneralPersistentData.getShowIpActivated()) {
-                    if (state.state == VPNStates.CONNECTED) {
-                        if (ipContainer.getVisibility() == TextView.GONE) {
-                            ipContainer.setVisibility(VISIBLE);
-                            countryContainer.setVisibility(VISIBLE);
-                            textWaitingIp.setVisibility(GONE);
-                            textWaitingCountry.setVisibility(GONE);
+                    if (HelperFunctions.getWidthType(getContext()) == HelperFunctions.WidthTypes.SMALL) {
+                        if (state.state == VPNStates.CONNECTED) {
+                            if (ipContainer.getVisibility() == TextView.GONE) {
+                                ipContainer.setVisibility(VISIBLE);
+                                countryContainer.setVisibility(VISIBLE);
+                                textWaitingIp.setVisibility(GONE);
+                                textWaitingCountry.setVisibility(GONE);
 
-                            textIp.setText("---");
-                            textCountry.setText("---");
+                                textIp.setText("---");
+                                textCountry.setText("---");
 
-                            getIp(0);
+                                getIp(0);
+                            }
+                        } else {
+                            if (ipContainer.getVisibility() == TextView.VISIBLE) {
+                                ipContainer.setVisibility(GONE);
+                                countryContainer.setVisibility(GONE);
+                                textWaitingIp.setVisibility(VISIBLE);
+                                textWaitingCountry.setVisibility(VISIBLE);
+
+                                cancelIpCheck();
+                            }
                         }
                     } else {
-                        if (ipContainer.getVisibility() == TextView.VISIBLE) {
-                            ipContainer.setVisibility(GONE);
-                            countryContainer.setVisibility(GONE);
-                            textWaitingIp.setVisibility(VISIBLE);
-                            textWaitingCountry.setVisibility(VISIBLE);
-
-                            cancelIpCheck();
+                        if (state.state == VPNStates.CONNECTED) {
+                            rightPanel.refreshIpData();
+                        } else {
+                            rightPanel.putInWaitingForVpnState();
                         }
                     }
                 }
@@ -331,6 +371,10 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     public void continueUpdatingStats() {
         updateStats = true;
         updateDisplayedStats(lastStats);
+    }
+
+    public void updateRightBar() {
+        rightPanel.updateData();
     }
 
     private void updateTime(Date lastConnectionDate) {
@@ -420,6 +464,7 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         serverSubscription.dispose();
         serviceSubscription.dispose();
         statsSubscription.dispose();
+        rightPanel.close();
         cancelIpCheck();
     }
 

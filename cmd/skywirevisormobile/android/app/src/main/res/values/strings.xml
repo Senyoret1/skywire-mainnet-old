@@ -16,6 +16,8 @@
     <string name="general_no">No</string>
     <string name="general_unknown">Unknown</string>
 
+    <string name="general_copied">Copied to clipboard.</string>
+
     <string name="rating_gold">Gold</string>
     <string name="rating_silver">Silver</string>
     <string name="rating_bronze">Bronze</string>
@@ -114,9 +116,12 @@
     <string name="tmp_status_connected_ip_option_disabled">Option disabled</string>
     <string name="tmp_status_connected_total_data">%1$s total</string>
     <string name="tmp_status_connected_server_title">Server:</string>
+    <string name="tmp_status_connected_remote_pk">Remote visor public key:</string>
+    <string name="tmp_status_connected_local_pk">Local visor public key:</string>
     <string name="tmp_status_connected_disconnect">Disconnect</string>
     <string name="tmp_status_connected_disconnect_confirmation">Are you sure you want to stop the VPN protection?</string>
     <string name="tmp_status_connected_started_by_the_system">As the VPN connection was started using the system options, it cannot be stopped using this screen. For stopping the VPN, please use the same system options used for stating it.</string>
+    <string name="tmp_status_connected_app_protection">App protection:</string>
     <string name="tmp_status_connected_protecting_selected_apps">Protecting only selected apps</string>
     <string name="tmp_status_connected_ignoring_selected_apps">Ignoring selected apps</string>
 
@@ -174,7 +179,6 @@
 
     <string name="tmp_server_options_view_info">View info</string>
     <string name="tmp_server_options_copy_pk">Copy public key</string>
-    <string name="tmp_server_options_copy_pk_done">Copied to clipboard.</string>
     <string name="tmp_server_options_name">Custom name</string>
     <string name="tmp_server_options_note">Custom note</string>
     <string name="tmp_server_options_remove_password">Remove password</string>

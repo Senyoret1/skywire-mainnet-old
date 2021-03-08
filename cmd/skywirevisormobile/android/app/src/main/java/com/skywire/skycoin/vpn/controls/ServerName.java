@@ -18,6 +18,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.servers.ServerLists;
 import com.skywire.skycoin.vpn.activities.servers.VpnServerForList;
+import com.skywire.skycoin.vpn.helpers.AlphaSpan;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.helpers.MaterialFontSpan;
 import com.skywire.skycoin.vpn.objects.ServerFlags;
@@ -27,6 +28,7 @@ public class ServerName extends FrameLayout {
     private TextView text;
 
     private String defaultName = "";
+    private boolean showConfigIcon = false;
 
     public ServerName(Context context) {
         super(context);
@@ -70,12 +72,20 @@ public class ServerName extends FrameLayout {
                 text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
             }
 
+            showConfigIcon = attributes.getBoolean(R.styleable.ServerName_show_config_icon, false);
+
             attributes.recycle();
         }
     }
 
     public void setServer(VpnServerForList server, ServerLists listType, boolean doNotMarkCurrent) {
-        MaterialFontSpan materialFontSpan = new MaterialFontSpan();
+        if (server == null) {
+            text.setText(defaultName);
+
+            return;
+        }
+
+        MaterialFontSpan materialFontSpan = new MaterialFontSpan(getContext());
         RelativeSizeSpan relativeSizeSpan = new RelativeSizeSpan(0.75f);
 
         int initialicons = 0;
@@ -123,6 +133,19 @@ public class ServerName extends FrameLayout {
         }
 
         finalText.append(HelperFunctions.getServerName(server, defaultName));
+
+        if (showConfigIcon) {
+            finalText.append(" \ue8b8");
+
+            materialFontSpan = new MaterialFontSpan(getContext());
+            relativeSizeSpan = new RelativeSizeSpan(0.75f);
+            AlphaSpan alphaSpan = new AlphaSpan(128);
+
+            finalText.setSpan(materialFontSpan, finalText.length() - 2, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            finalText.setSpan(relativeSizeSpan, finalText.length() - 2, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            finalText.setSpan(alphaSpan, finalText.length() - 2, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
         text.setText(finalText);
     }
 }

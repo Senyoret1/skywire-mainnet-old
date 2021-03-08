@@ -254,9 +254,11 @@ public class StartActivity extends Fragment {
         background.resumeAnimation();
         if (viewDisconnected != null) {
             viewDisconnected.startAnimation();
+            viewDisconnected.updateRightBar();
         }
         if (viewConnected != null) {
             viewConnected.continueUpdatingStats();
+            viewConnected.updateRightBar();
         }
     }
 

@@ -62,11 +62,15 @@
         <attr name="default_name" format="string" />
         <attr name="text_size" format="dimension" />
         <attr name="center_text" format="boolean" />
+        <attr name="show_config_icon" format="boolean" />
     </declare-styleable>
     <declare-styleable name="Select">
         <attr name="hint" format="string" />
     </declare-styleable>
     <declare-styleable name="SettingsButton">
         <attr name="use_note_icon" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="StartViewRightPanel">
+        <attr name="hide_bottom_part" format="boolean" />
     </declare-styleable>
 </resources>

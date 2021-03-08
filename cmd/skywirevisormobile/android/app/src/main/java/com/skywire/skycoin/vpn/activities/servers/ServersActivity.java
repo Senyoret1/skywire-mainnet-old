@@ -241,6 +241,10 @@ public class ServersActivity extends Fragment implements VpnServersAdapter.VpnSe
     }
 
     public static VpnServerForList convertLocalServerData(LocalServerData server) {
+        if (server == null) {
+            return null;
+        }
+
         VpnServerForList converted = new VpnServerForList();
 
         converted.countryCode = server.countryCode;

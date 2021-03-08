@@ -3,6 +3,7 @@ package com.skywire.skycoin.vpn.activities.start.disconnected;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -12,6 +13,7 @@ import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.activities.index.IndexPageAdapter;
 import com.skywire.skycoin.vpn.activities.servers.ServerLists;
 import com.skywire.skycoin.vpn.activities.servers.ServersActivity;
+import com.skywire.skycoin.vpn.activities.start.StartViewRightPanel;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.objects.LocalServerData;
@@ -40,6 +42,8 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
     private StartButton startButton;
     private TextView textServerNote;
     private TextView textLastError;
+    private FrameLayout rightContainer;
+    private StartViewRightPanel rightPanel;
 
     private Activity parentActivity;
     private IndexPageAdapter.RequestTabListener requestTabListener;
@@ -53,6 +57,8 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
         startButton = findViewById(R.id.startButton);
         textServerNote = findViewById(R.id.textServerNote);
         textLastError = findViewById(R.id.textLastError);
+        rightContainer = findViewById(R.id.rightContainer);
+        rightPanel = findViewById(R.id.rightPanel);
 
         viewCurrentServerButton.setClickEventListener(this);
         startButton.setClickEventListener(this);
@@ -63,6 +69,14 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
         });
 
         setErrorMsg(VPNGeneralPersistentData.getLastError(null));
+
+        if (HelperFunctions.getWidthType(getContext()) == HelperFunctions.WidthTypes.SMALL) {
+            rightContainer.setVisibility(GONE);
+        } else {
+            textServerNote.setTextSize(TypedValue.COMPLEX_UNIT_PX, getContext().getResources().getDimension(R.dimen.small_text_size));
+            textLastError.setTextSize(TypedValue.COMPLEX_UNIT_PX, getContext().getResources().getDimension(R.dimen.small_text_size));
+            rightPanel.refreshIpData();
+        }
     }
 
     public void setRequestTabListener(IndexPageAdapter.RequestTabListener listener) {
@@ -79,6 +93,10 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
 
     public void stopAnimation() {
         startButton.stopAnimation();
+    }
+
+    public void updateRightBar() {
+        rightPanel.updateData();
     }
 
     public void setErrorMsg(String errorMsg) {
@@ -111,6 +129,7 @@ public class StartViewDisconnected extends FrameLayout implements ClickEvent, Cl
     @Override
     public void close() {
         currentServerSubscription.dispose();
+        rightPanel.close();
         stopAnimation();
     }
 

@@ -229,7 +229,7 @@ public class ServerInfoModalWindow extends Dialog implements ClickEvent {
                 }
             } else {
                 finalText.append(icon + " ");
-                finalText.setSpan(new MaterialFontSpan(), initialValuePos, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                finalText.setSpan(new MaterialFontSpan(getContext()), initialValuePos, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 finalText.setSpan(new RelativeSizeSpan(0.75f), initialValuePos, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 if (valueColor != null) {
                     finalText.setSpan(valueColor, initialValuePos, finalText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

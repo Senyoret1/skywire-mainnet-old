@@ -569,9 +569,9 @@ public class HelperFunctions {
                 infoModal.show();
             } else if (optionCodes.get(selectedOption) == 11) {
                 ClipboardManager clipboard = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("", server.pk);
-                clipboard.setPrimaryClip(clip);
-                HelperFunctions.showToast(ctx.getString(R.string.tmp_server_options_copy_pk_done), true);
+                ClipData clipData = ClipData.newPlainText("", server.pk);
+                clipboard.setPrimaryClip(clipData);
+                HelperFunctions.showToast(ctx.getString(R.string.general_copied), true);
             } else if (optionCodes.get(selectedOption) == 1) {
                 if (server.flag != ServerFlags.Blocked) {
                     VPNServersPersistentData.getInstance().changeFlag(savedVersion, ServerFlags.Favorite);
