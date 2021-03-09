@@ -9,6 +9,7 @@
 
     <dimen name="top_bar_height">54dp</dimen>
     <dimen name="top_bar_internal_height">52dp</dimen>
+    <dimen name="tablet_top_bar_height">115dp</dimen>
     <dimen name="top_bar_shadow_height">17dp</dimen>
     <dimen name="top_tab_bar_height">36dp</dimen>
     <dimen name="top_bar_with_tabs_height">90dp</dimen>

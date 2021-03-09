@@ -5,6 +5,26 @@
     android:layout_height="match_parent"
     tools:context=".activities.index.IndexActivity">
 
+    <ImageView
+        android:id="@+id/imageBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/top_bar_with_tabs_height"
+        android:alpha="0.1"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/map" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/top_bar_with_tabs_height" />
+
+    <com.skywire.skycoin.vpn.controls.TopBar
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,29 +41,17 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ImageView
-        android:id="@+id/imageBackground"
+    <com.skywire.skycoin.vpn.controls.TabletTopBar
+        android:id="@+id/tabletTopBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/top_bar_with_tabs_height"
-        android:alpha="0.1"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/map" />
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/top_bar_with_tabs_height" />
+        android:layout_height="wrap_content" />
 
     <ImageView
+        android:id="@+id/imageTopBarShadow"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_shadow_height"
         android:layout_marginTop="@dimen/top_bar_with_tabs_height"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/top_bar_shadow" />
 
-    <com.skywire.skycoin.vpn.controls.TopBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </FrameLayout>

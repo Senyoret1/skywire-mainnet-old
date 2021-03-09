@@ -73,4 +73,8 @@
     <declare-styleable name="StartViewRightPanel">
         <attr name="hide_bottom_part" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="TabletTopBarTab">
+        <attr name="icon_text" />
+        <attr name="label" format="string" />
+    </declare-styleable>
 </resources>
