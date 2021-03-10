@@ -44,6 +44,7 @@ public class ConditionsList extends ButtonBase implements View.OnTouchListener {
         mainContainer.setVisibility(GONE);
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     public void setConditions(VpnServersAdapter.SortableColumns column, boolean sortingReversed, FilterModalWindow.Filters filters) {

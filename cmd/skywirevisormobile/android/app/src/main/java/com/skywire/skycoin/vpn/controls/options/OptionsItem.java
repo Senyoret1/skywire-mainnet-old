@@ -70,6 +70,8 @@ public class OptionsItem extends ListButtonBase<Void> implements View.OnTouchLis
 
             attributes.recycle();
         }
+
+        setViewForCheckingClicks(this);
     }
 
     public void setParams(SelectableOption params) {

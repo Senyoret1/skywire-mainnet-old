@@ -9,28 +9,27 @@ import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.extensible.ButtonBase;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 
-public class BoxRowRipple extends FrameLayout implements View.OnTouchListener {
-
+public class BoxRowRipple extends ButtonBase implements View.OnTouchListener {
     public BoxRowRipple(Context context) {
         super(context);
-        Initialize(context, null);
     }
     public BoxRowRipple(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Initialize(context, attrs);
     }
     public BoxRowRipple(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Initialize(context, attrs);
     }
 
     RippleDrawable rippleDrawable;
 
-    private void Initialize (Context context, AttributeSet attrs) {
+    @Override
+    protected void Initialize (Context context, AttributeSet attrs) {
         setOutlineProvider(ViewOutlineProvider.BACKGROUND);
         setClipToOutline(true);
+        setClickable(true);
 
         View ripple = new View(context);
         FrameLayout.LayoutParams rippleLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -40,7 +39,8 @@ public class BoxRowRipple extends FrameLayout implements View.OnTouchListener {
 
         rippleDrawable = (RippleDrawable) ripple.getBackground();
 
-        setOnTouchListener(this);
+        ripple.setOnTouchListener(this);
+        setViewForCheckingClicks(ripple);
 
         setType(BoxRowTypes.TOP);
     }

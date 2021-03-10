@@ -32,6 +32,8 @@ public class AppListOptionButton extends ListButtonBase<Void> {
         radioSelected = this.findViewById (R.id.radioSelected);
 
         radioSelected.setChecked(false);
+
+        setClickableBoxView(mainLayout);
     }
 
     public void setBoxRowType(BoxRowTypes type) {

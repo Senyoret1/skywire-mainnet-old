@@ -47,6 +47,7 @@ public class SettingsButton extends ButtonBase implements View.OnTouchListener {
         }
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     @Override

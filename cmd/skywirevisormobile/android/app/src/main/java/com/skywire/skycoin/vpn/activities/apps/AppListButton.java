@@ -56,6 +56,9 @@ public class AppListButton extends ListButtonBase<Void> implements View.OnTouchL
 
         rippleDrawable = (RippleDrawable) mainLayout.getBackground();
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
+
+        setUseBigFastClickPrevention(false);
     }
 
     public void setSeparatorVisibility(boolean visible) {

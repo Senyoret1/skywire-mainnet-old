@@ -24,6 +24,7 @@
         <attr name="ignore_margins" format="boolean" />
         <attr name="ignore_clicks" format="boolean" />
         <attr name="hide_separator" format="boolean" />
+        <attr name="use_big_fast_click_prevention" format="boolean" />
     </declare-styleable>
     <declare-styleable name="SettingsOption">
         <attr name="box_row_type" />

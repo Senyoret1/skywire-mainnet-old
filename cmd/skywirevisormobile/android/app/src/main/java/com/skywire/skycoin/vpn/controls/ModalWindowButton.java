@@ -64,6 +64,7 @@ public class ModalWindowButton extends ButtonBase implements View.OnTouchListene
         rippleDrawable = (RippleDrawable) effectContainer.getBackground();
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     public void setText(int resourceId) {

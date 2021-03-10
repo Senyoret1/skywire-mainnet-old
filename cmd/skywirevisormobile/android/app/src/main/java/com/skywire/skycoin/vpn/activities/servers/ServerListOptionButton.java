@@ -7,10 +7,12 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.extensible.ButtonBase;
 
 public class ServerListOptionButton extends ButtonBase {
 
+    private BoxRowLayout mainLayout;
     private TextView textIcon;
 
     public ServerListOptionButton(Context context) {
@@ -28,6 +30,7 @@ public class ServerListOptionButton extends ButtonBase {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_server_list_option_button, this, true);
 
+        mainLayout = this.findViewById (R.id.mainLayout);
         textIcon = this.findViewById (R.id.textIcon);
 
         if (attrs != null) {
@@ -44,5 +47,7 @@ public class ServerListOptionButton extends ButtonBase {
 
             attributes.recycle();
         }
+
+        setClickableBoxView(mainLayout);
     }
 }

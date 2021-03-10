@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.skywire.skycoin.vpn.controls.BoxRowLayout;
 import com.skywire.skycoin.vpn.helpers.ClickTimeManagement;
 import com.skywire.skycoin.vpn.helpers.Globals;
 
@@ -17,17 +18,14 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public abstract class ListButtonBase<DataType> extends RelativeLayout implements View.OnClickListener {
     public ListButtonBase(Context context) {
         super(context);
-        this.setOnClickListener(this);
         Initialize(context, null);
     }
     public ListButtonBase(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.setOnClickListener(this);
         Initialize(context, attrs);
     }
     public ListButtonBase(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        this.setOnClickListener(this);
         Initialize(context, attrs);
     }
 
@@ -37,6 +35,26 @@ public abstract class ListButtonBase<DataType> extends RelativeLayout implements
     private ClickTimeManagement buttonTimeManager = new ClickTimeManagement();
 
     abstract protected void Initialize (Context context, AttributeSet attrs);
+
+    protected void setViewForCheckingClicks(View v) {
+        v.setOnClickListener(this);
+    }
+
+    protected void setClickableBoxView(BoxRowLayout v) {
+        v.setClickEventListener(view -> {
+            if (clickListener != null) {
+                clickListener.onClickWithIndex(index, dataForEvent);
+            }
+        });
+    }
+
+    public void setUseBigFastClickPrevention(boolean useBigFastClickPrevention) {
+        if (useBigFastClickPrevention) {
+            buttonTimeManager.setDelay(ClickTimeManagement.normalFastClickPreventionDelay);
+        } else {
+            buttonTimeManager.setDelay(Globals.CLICK_DELAY_MS);
+        }
+    }
 
     public void setIndex(int index) {
         this.index = index;

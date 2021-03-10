@@ -9,10 +9,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.helpers.BoxRowTypes;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 
-public class BoxRowLayout extends FrameLayout {
+public class BoxRowLayout extends FrameLayout implements ClickEvent {
     public BoxRowLayout(Context context) {
         super(context);
         Initialize(context, null);
@@ -31,6 +32,8 @@ public class BoxRowLayout extends FrameLayout {
     private BoxRowRipple ripple;
     private View separator;
 
+    private ClickEvent clickListener;
+
     private boolean addExtraPaddingForTablets = false;
     private boolean ignoreMargins = false;
     private boolean ignoreClicks = false;
@@ -41,6 +44,11 @@ public class BoxRowLayout extends FrameLayout {
     private float verticalPadding;
 
     private void Initialize (Context context, AttributeSet attrs) {
+        baseBackground = new View(context);
+        background = new BoxRowBackground(context);
+        ripple = new BoxRowRipple(context);
+        separator = new View(context);
+
         int type = 1;
 
         if (attrs != null) {
@@ -56,6 +64,8 @@ public class BoxRowLayout extends FrameLayout {
             ignoreMargins = attributes.getBoolean(R.styleable.BoxRowLayout_ignore_margins, false);
             ignoreClicks = attributes.getBoolean(R.styleable.BoxRowLayout_ignore_clicks, false);
             hideSeparator = attributes.getBoolean(R.styleable.BoxRowLayout_hide_separator, false);
+
+            setUseBigFastClickPrevention(attributes.getBoolean(R.styleable.BoxRowLayout_use_big_fast_click_prevention, true));
 
             attributes.recycle();
         }
@@ -78,11 +88,6 @@ public class BoxRowLayout extends FrameLayout {
             tabletExtraHorizontalPadding = HelperFunctions.getTabletExtraHorizontalPadding(getContext());
         }
 
-        baseBackground = new View(context);
-        background = new BoxRowBackground(context);
-        ripple = new BoxRowRipple(context);
-        separator = new View(context);
-
         separator.setBackgroundResource(R.color.box_separator);
 
         if (type == 0) {
@@ -100,23 +105,30 @@ public class BoxRowLayout extends FrameLayout {
         this.addView(baseBackground);
         this.addView(background);
         if (!ignoreClicks) {
+            ripple.setClickEventListener(this);
             this.addView(ripple);
         }
         this.addView(separator);
+
+        setClickable(false);
+    }
+
+    public void setClickEventListener(ClickEvent listener) {
+        clickListener = listener;
+    }
+
+    public void setUseBigFastClickPrevention(boolean useBigFastClickPrevention) {
+        ripple.setUseBigFastClickPrevention(useBigFastClickPrevention);
     }
 
     public void setType(BoxRowTypes type) {
         float bottomPaddingExtra = 0;
-        float topPaddingExtra = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            -2,
-            getResources().getDisplayMetrics()
-        );
+        float topPaddingExtra = 0;
 
         if (type == BoxRowTypes.TOP) {
             baseBackground.setBackgroundResource(R.drawable.background_box1);
 
-            topPaddingExtra += TypedValue.applyDimension(
+            topPaddingExtra = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 10,
                 getResources().getDisplayMetrics()
@@ -139,7 +151,7 @@ public class BoxRowLayout extends FrameLayout {
         } else if (type == BoxRowTypes.SINGLE) {
             baseBackground.setBackgroundResource(R.drawable.background_box4);
 
-            topPaddingExtra += TypedValue.applyDimension(
+            topPaddingExtra = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 10,
                 getResources().getDisplayMetrics()
@@ -196,5 +208,12 @@ public class BoxRowLayout extends FrameLayout {
         separatorLayoutParams.leftMargin = (int)separatorHorizontalMargin;
         separatorLayoutParams.rightMargin = (int)separatorHorizontalMargin;
         separator.setLayoutParams(separatorLayoutParams);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (clickListener != null) {
+            clickListener.onClick(this);
+        }
     }
 }

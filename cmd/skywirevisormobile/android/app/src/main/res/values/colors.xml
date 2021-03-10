@@ -14,12 +14,12 @@
     <color name="black_background">#88000000</color>
     <color name="black_background_ripple">#314560</color>
 
-    <color name="bar_background">#1e2f45</color>
-    <color name="bar_separator">#314560</color>
+    <color name="bar_background">#1a2739</color>
+    <color name="bar_separator">#28384e</color>
     <color name="bar_selected">#162334</color>
 
     <color name="box_separator">#45a7cbff</color>
-    <color name="box_ripple">#415a7d</color>
+    <color name="box_ripple">#394f6d</color>
     <color name="clear_box_ripple">#bcc4d0</color>
     <color name="primary_button_ripple">#113050</color>
     <color name="secondary_button_ripple">#727272</color>

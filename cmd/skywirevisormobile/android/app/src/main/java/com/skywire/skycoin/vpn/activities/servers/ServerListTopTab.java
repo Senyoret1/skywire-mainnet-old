@@ -67,7 +67,8 @@ public class ServerListTopTab extends ButtonBase implements View.OnTouchListener
             attributes.recycle();
         }
 
-        setOnTouchListener(this);
+        clickBackground.setOnTouchListener(this);
+        setViewForCheckingClicks(clickBackground);
     }
 
     public void changeState(boolean selected) {

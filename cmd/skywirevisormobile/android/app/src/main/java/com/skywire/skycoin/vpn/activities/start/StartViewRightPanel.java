@@ -153,6 +153,8 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
             HashSet<String> selectedApps = HelperFunctions.filterAvailableApps(VPNGeneralPersistentData.getAppList(new HashSet<>()));
 
             if (selectedApps.size() > 0) {
+                appProtectionClickableLayout.setVisibility(VISIBLE);
+
                 String text;
                 if (selectedMode == Globals.AppFilteringModes.PROTECT_SELECTED) {
                     text = getContext().getString(R.string.tmp_status_connected_protecting_selected_apps);
@@ -162,10 +164,10 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
 
                 putTextWithIcon(textAppProtection, text, "  \ue8f4");
             } else {
-                removeAppsContainer();
+                appProtectionClickableLayout.setVisibility(GONE);
             }
         } else {
-            removeAppsContainer();
+            appProtectionClickableLayout.setVisibility(GONE);
         }
     }
 
@@ -258,14 +260,6 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
         if (ipSubscription != null) {
             ipSubscription.dispose();
         }
-    }
-
-    private void removeAppsContainer() {
-        appProtectionClickableLayout.setVisibility(GONE);
-
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)remotePkClickableLayout.getLayoutParams();
-        params.bottomMargin = 0;
-        remotePkClickableLayout.setLayoutParams(params);
     }
 
     private void putTextWithIcon(TextView textView, String text, String iconText) {

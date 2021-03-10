@@ -78,6 +78,8 @@ public class ServerListButton extends ListButtonBase<Void> {
         imageFlag.setClipToOutline(true);
 
         buttonSettings.setClickEventListener(view -> showOptions());
+
+        setClickableBoxView(mainLayout);
     }
 
     public void changeData(@NonNull VpnServerForList serverData, ServerLists listType) {

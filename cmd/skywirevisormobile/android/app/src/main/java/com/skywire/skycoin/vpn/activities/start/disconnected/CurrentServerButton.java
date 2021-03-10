@@ -59,6 +59,7 @@ public class CurrentServerButton extends ButtonBase implements View.OnTouchListe
         imageFlag.setClipToOutline(true);
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     public void setData (LocalServerData currentServer) {

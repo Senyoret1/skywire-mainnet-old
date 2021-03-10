@@ -42,6 +42,7 @@ public class StopButton extends ButtonBase implements View.OnTouchListener {
         internalContainer.setClipToOutline(true);
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     @Override

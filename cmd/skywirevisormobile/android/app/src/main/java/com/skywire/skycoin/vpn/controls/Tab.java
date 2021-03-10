@@ -68,6 +68,7 @@ public class Tab extends ButtonBase implements View.OnTouchListener {
         }
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     public void changeState(boolean selected) {

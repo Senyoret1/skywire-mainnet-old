@@ -43,6 +43,7 @@ public class StartButton extends ButtonBase implements Animator.AnimatorListener
         animSet.setTarget(imageAnim);
 
         setOnTouchListener(this);
+        setViewForCheckingClicks(this);
     }
 
     public void startAnimation() {

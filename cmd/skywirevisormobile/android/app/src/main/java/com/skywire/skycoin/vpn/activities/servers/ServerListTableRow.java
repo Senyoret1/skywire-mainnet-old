@@ -73,6 +73,8 @@ public class ServerListTableRow extends ListButtonBase<Void> {
 
         buttonNote.setClickEventListener(view -> showNotes());
         buttonSettings.setClickEventListener(view -> showOptions());
+
+        setClickableBoxView(mainLayout);
     }
 
     public void changeData(@NonNull VpnServerForList serverData, ServerLists listType) {

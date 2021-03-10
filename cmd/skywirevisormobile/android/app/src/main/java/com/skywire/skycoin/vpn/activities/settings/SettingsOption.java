@@ -72,6 +72,8 @@ public class SettingsOption extends ButtonBase {
         }
 
         textAlertIcon.setVisibility(GONE);
+
+        setClickableBoxView(mainLayout);
     }
 
     public void setChecked(boolean checked) {
