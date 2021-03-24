@@ -27,6 +27,8 @@
     <color name="dark_background_separator">#26ffffff</color>
     <color name="modal_separator">#33215f9e</color>
 
+    <color name="tablet_selected_tab_background">#77000000</color>
+
     <color name="white">#ffffff</color>
     <color name="green">#72c012</color>
     <color name="yellow">#ffa500</color>

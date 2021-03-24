@@ -1,6 +1,7 @@
 package com.skywire.skycoin.vpn.helpers;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -224,13 +225,31 @@ public class HelperFunctions {
      * Allows to convert a bytes value to KB, MB, GB, etc. It considers 1024, and not 1000, a K.
      * @param bytes Amount of data to process, in bytes.
      * @param calculatePerSecond If true, the result will have "/s" added at the end.
+     * @param useBits If the data must be shown in bits (true) or bytes (false).
      */
-    public static String computeDataAmountString(double bytes, boolean calculatePerSecond) {
+    public static String computeDataAmountString(double bytes, boolean calculatePerSecond, boolean useBits) {
         double current = (double)bytes;
-        String[] accumulatedMeasurements = new String[]{" B", " KB", " MB", " GB", " TB"};
-        String[] measurementsPerSec = new String[]{" B/s", " KB/s", " MB/s", " GB/s", " TB/s"};
 
-        String[] scales = calculatePerSecond ? measurementsPerSec : accumulatedMeasurements;
+        // Set the correct units.
+        String[] scales;
+        if (calculatePerSecond) {
+            if (useBits) {
+                scales = new String[]{" b/s", " Kb/s", " Mb/s", " Gb/s", " Tb/s", "Pb/s", "Eb/s", "Zb/s", "Yb/s"};
+            } else {
+                scales = new String[]{" B/s", " KB/s", " MB/s", " GB/s", " TB/s", "PB/s", "EB/s", "ZB/s", "YB/s"};
+            }
+        } else {
+            if (useBits) {
+                scales = new String[]{" b", " Kb", " Mb", " Gb", " Tb", "Pb", "Eb", "Zb", "Yb"};
+            } else {
+                scales = new String[]{" B", " KB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"};
+            }
+        }
+
+        // Convert to bits, if needed.
+        if (useBits) {
+            current *= 8;
+        }
 
         // Divide the speed by 1024 until getting an appropriate scale to return.
         for (int i = 0; i < scales.length - 1; i++) {
@@ -314,16 +333,17 @@ public class HelperFunctions {
         return ContextCompat.getColor(App.getContext(), R.color.red);
     }
 
-    public static void configureModalWindow(Context ctx, Window window) {
+    public static void configureModalWindow(Dialog modal) {
+        Window window = modal.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        WidthTypes screenWidthType = getWidthType(ctx);
+        WidthTypes screenWidthType = getWidthType(modal.getContext());
         if (screenWidthType != WidthTypes.SMALL) {
             int width = (int)TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 500,
-                ctx.getResources().getDisplayMetrics()
+                modal.getContext().getResources().getDisplayMetrics()
             );
 
             WindowManager.LayoutParams params = window.getAttributes();

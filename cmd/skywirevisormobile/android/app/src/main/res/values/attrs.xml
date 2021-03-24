@@ -30,6 +30,7 @@
         <attr name="box_row_type" />
         <attr name="title" />
         <attr name="description" format="string" />
+        <attr name="hide_checkbox" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ServerListTopTab">
         <attr name="text" format="string" />

@@ -9,8 +9,10 @@ import androidx.core.app.NotificationCompat;
 
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 
+import io.reactivex.rxjava3.disposables.Disposable;
 import skywiremob.Skywiremob;
 
 /**
@@ -39,6 +41,15 @@ public class Notifications {
      * ID of the generic error notifications.
      */
     public static final int ERROR_NOTIFICATION_ID = 50;
+
+    /**
+     * Units used for showing the data transmission stats.
+     */
+    private static Globals.DataUnits dataUnits = VPNGeneralPersistentData.getDataUnits();
+    /**
+     * Subscription for updating the data transmission stats.
+     */
+    private static Disposable dataUnitsSubscription;
 
     /**
      * Closes all the alert and error notifications created by the app. Only notifications with
@@ -87,6 +98,13 @@ public class Notifications {
      * @return The created notification.
      */
     public static Notification createStatusNotification(VPNStates currentState, boolean protectionEnabled) {
+        // Start updating the data transmission stats, if needed.
+        if (dataUnitsSubscription == null) {
+            dataUnitsSubscription = VPNGeneralPersistentData.getDataUnitsObservable().subscribe(response -> {
+                dataUnits = response;
+            });
+        }
+
         // The title is always "preparing", unless the state indicates the service is connected,
         // disconnecting or restoring. For the state numeric values, check the emun documentation.
         int title = R.string.vpn_service_state_preparing;
@@ -104,8 +122,8 @@ public class Notifications {
         String text = App.getContext().getString(VPNStates.getDescriptionForState(currentState));
         // If connected, the connection stats are shown as the main text.
         if (currentState == VPNStates.CONNECTED) {
-            text = "\u2193" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthReceived(), true);
-            text += "  \u2191" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthSent(), true);
+            text = "\u2191" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthSent(), true, dataUnits != Globals.DataUnits.OnlyBytes);
+            text += "  \u2193" + HelperFunctions.computeDataAmountString(Skywiremob.vpnBandwidthReceived(), true, dataUnits != Globals.DataUnits.OnlyBytes);
             text += "  \u2194" + HelperFunctions.getLatencyValue(Skywiremob.vpnLatency());
         }
 

@@ -84,7 +84,7 @@ public class ManualServerModalWindow extends Dialog implements ClickEvent, TextW
         buttonConfirm.setEnabled(false);
         hasError = true;
 
-        HelperFunctions.configureModalWindow(getContext(), getWindow());
+        HelperFunctions.configureModalWindow(this);
     }
 
     @Override

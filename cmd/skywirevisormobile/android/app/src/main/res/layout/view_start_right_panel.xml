@@ -6,49 +6,95 @@
     android:orientation="vertical"
     android:padding="30dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/tmp_status_connected_current_ip_title"
-        android:textColor="@color/subtle_text" />
-
-    <TextView
-        android:id="@+id/textWaitingIp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="@string/tmp_status_connected_waiting" />
-
     <LinearLayout
-        android:id="@+id/ipContainer"
+        android:id="@+id/loadingIpContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textIp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/tmp_status_connected_current_ip_title"
+            android:textColor="@color/subtle_text" />
+
+        <TextView
+            android:id="@+id/textWaitingIp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:text="---"
-            android:textSize="20sp" />
+            android:text="@string/tmp_status_connected_waiting" />
 
-        <ProgressBar
-            android:id="@+id/progressIp"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/normal_text"
-            android:indeterminateTintMode="src_in"
-            android:translationY="2dp"/>
+        <LinearLayout
+            android:id="@+id/ipContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="---"
+                android:textSize="20sp" />
+
+            <ProgressBar
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/normal_text"
+                android:indeterminateTintMode="src_in"
+                android:translationY="2dp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
+
+    <com.skywire.skycoin.vpn.controls.ClickableLinearLayout
+        android:id="@+id/ipClickableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tmp_status_connected_current_ip_title"
+            android:textColor="@color/subtle_text" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="---"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:alpha="0.5"
+                android:text="\ue5d5"
+                android:fontFamily="@font/material_font"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+    </com.skywire.skycoin.vpn.controls.ClickableLinearLayout>
 
     <TextView
         android:layout_width="wrap_content"

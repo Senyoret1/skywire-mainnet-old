@@ -37,7 +37,7 @@ public class MapBackground extends View {
     private ObjectAnimator animation;
 
     private void Initialize (Context context, AttributeSet attrs) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map_phones);
         bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
         bitmapDrawable.setAlpha(25);
 

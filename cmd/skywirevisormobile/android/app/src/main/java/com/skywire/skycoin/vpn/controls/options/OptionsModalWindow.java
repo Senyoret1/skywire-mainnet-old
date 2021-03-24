@@ -55,7 +55,7 @@ public class OptionsModalWindow extends Dialog implements ClickWithIndexEvent<Vo
             container.addView(view);
         }
 
-        HelperFunctions.configureModalWindow(getContext(), getWindow());
+        HelperFunctions.configureModalWindow(this);
     }
 
     @Override

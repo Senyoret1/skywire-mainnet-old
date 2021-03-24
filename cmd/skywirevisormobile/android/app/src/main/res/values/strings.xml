@@ -114,6 +114,7 @@
     <string name="tmp_status_connected_current_country_title">Current Country:</string>
     <string name="tmp_status_connected_waiting">Waiting for VPN...</string>
     <string name="tmp_status_connected_ip_option_disabled">Option disabled</string>
+    <string name="tmp_status_connected_ip_refresh_time_warning">Please wait %1$s second(s) before refreshing the data.</string>
     <string name="tmp_status_connected_total_data">%1$s total</string>
     <string name="tmp_status_connected_server_title">Server:</string>
     <string name="tmp_status_connected_remote_pk">Remote visor public key:</string>
@@ -157,6 +158,7 @@
     <string name="tmp_select_server_favorites">Favorites</string>
     <string name="tmp_select_server_blocked">Blocked</string>
     <string name="tmp_select_server_unnamed">Unnamed</string>
+    <string name="tmp_select_server_unknown_location">Unknown</string>
     <string name="tmp_select_server_running_error">Please stop the VPN before changing the server.</string>
 
     <string name="filter_server_title">Filter List</string>
@@ -272,6 +274,20 @@
     <string name="tmp_options_start_on_boot_title">Start on boot.</string>
     <string name="tmp_options_start_on_boot_description">The VPN protection will be automatically started shortly after turning on the device.</string>
     <string name="tmp_options_start_on_boot_without_server_error">Please select a server before using this option.</string>
+    <string name="tmp_options_data_units_title">Data units</string>
+    <string name="tmp_options_data_units_only_bits">Bits for all stats</string>
+    <string name="tmp_options_data_units_only_bytes">Bytes for all stats</string>
+    <string name="tmp_options_data_units_bits_speed_and_bytes_volume">Bits for speed and bytes for volume (default)</string>
+    <string name="tmp_options_dns_title">Custom DNS server</string>
+    <string name="tmp_options_dns_default">None (use the default configuration).</string>
+    <string name="tmp_options_dns_description">%1$s (the OS and some apps could ignore this configuration in some circumstances)</string>
+
+    <string name="tmp_dns_title">Custom DNS Server</string>
+    <string name="tmp_dns_ip_label">IP (empty to remove)</string>
+    <string name="tmp_dns_apply_button">Apply</string>
+    <string name="tmp_dns_cancel_button">Cancel</string>
+    <string name="tmp_dns_validation_error">Please enter a valid IPv4 address.</string>
+    <string name="tmp_dns_changes_made_confirmation">The change has been made.</string>
 
     <string name="tmp_confirmation_title">Confirmation</string>
     <string name="tmp_confirmation_yes">Yes</string>

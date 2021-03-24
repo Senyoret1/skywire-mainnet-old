@@ -59,7 +59,7 @@ public class ServerNotesModalWindow extends Dialog implements ClickEvent {
 
         buttonClose.setClickEventListener(this);
 
-        HelperFunctions.configureModalWindow(getContext(), getWindow());
+        HelperFunctions.configureModalWindow(this);
     }
 
     @Override

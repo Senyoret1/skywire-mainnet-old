@@ -96,6 +96,7 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private String previousCountry;
     private VPNCoordinator.ConnectionStats lastStats;
     private boolean updateStats = true;
+    private Globals.DataUnits dataUnits = VPNGeneralPersistentData.getDataUnits();
 
     private ClickTimeManagement appsButtonTimeManager = new ClickTimeManagement();
     private ClickTimeManagement serverButtonTimeManager = new ClickTimeManagement();
@@ -104,6 +105,7 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
     private Disposable serverSubscription;
     private Disposable ipSubscription;
     private Disposable statsSubscription;
+    private Disposable dataUnitsSubscription;
 
     protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
@@ -337,6 +339,14 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
             }
         });
 
+        dataUnitsSubscription = VPNGeneralPersistentData.getDataUnitsObservable().subscribe(response -> {
+            dataUnits = response;
+
+            if (lastStats != null && updateStats) {
+                updateDisplayedStats(lastStats);
+            }
+        });
+
         updateTime(null);
     }
 
@@ -348,18 +358,18 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
             uploadChart.setData(stats.uploadSpeedHistory, false);
             latencyChart.setData(stats.latencyHistory, true);
 
-            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentDownloadSpeed, true));
-            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentUploadSpeed, true));
+            textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentDownloadSpeed, true, dataUnits != Globals.DataUnits.OnlyBytes));
+            textUploadSpeed.setText(HelperFunctions.computeDataAmountString(stats.currentUploadSpeed, true, dataUnits != Globals.DataUnits.OnlyBytes));
             textLatency.setText(HelperFunctions.getLatencyValue(stats.currentLatency));
 
             textTotalDownloaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(stats.totalDownloadedData, false)
+                HelperFunctions.computeDataAmountString(stats.totalDownloadedData, false, dataUnits == Globals.DataUnits.OnlyBits)
             ));
 
             textTotalUploaded.setText(String.format(
                 getContext().getText(R.string.tmp_status_connected_total_data).toString(),
-                HelperFunctions.computeDataAmountString(stats.totalUploadedData, false)
+                HelperFunctions.computeDataAmountString(stats.totalUploadedData, false, dataUnits == Globals.DataUnits.OnlyBits)
             ));
         }
     }
@@ -464,7 +474,11 @@ public class StartViewConnected extends FrameLayout implements ClickEvent, Close
         serverSubscription.dispose();
         serviceSubscription.dispose();
         statsSubscription.dispose();
+        dataUnitsSubscription.dispose();
         rightPanel.close();
+        downloadChart.close();
+        uploadChart.close();
+        latencyChart.close();
         cancelIpCheck();
     }
 

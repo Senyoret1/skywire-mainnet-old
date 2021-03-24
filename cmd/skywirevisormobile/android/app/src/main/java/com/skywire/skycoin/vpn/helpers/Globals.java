@@ -28,6 +28,15 @@ public class Globals {
     public static final String[] INTERNET_CHECKING_ADDRESSES = new String[]{"https://dmsg.discovery.skywire.skycoin.com", "https://www.skycoin.com"};
 
     /**
+     * Options for how to show the VPN data transmission stats.
+     */
+    public enum DataUnits {
+        BitsSpeedAndBytesVolume,
+        OnlyBytes,
+        OnlyBits,
+    }
+
+    /**
      * List with all the possible app selection modes. Each option has an associated string value.
      */
     public enum AppFilteringModes {

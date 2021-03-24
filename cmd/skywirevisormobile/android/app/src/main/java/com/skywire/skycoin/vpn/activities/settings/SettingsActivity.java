@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.skywire.skycoin.vpn.activities.apps.AppsActivity;
+import com.skywire.skycoin.vpn.controls.options.OptionsItem;
+import com.skywire.skycoin.vpn.controls.options.OptionsModalWindow;
 import com.skywire.skycoin.vpn.extensible.ClickEvent;
 import com.skywire.skycoin.vpn.R;
 import com.skywire.skycoin.vpn.helpers.Globals;
@@ -19,6 +21,7 @@ import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
 import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class SettingsActivity extends Fragment implements ClickEvent {
@@ -28,6 +31,11 @@ public class SettingsActivity extends Fragment implements ClickEvent {
     private SettingsOption optionResetAfterErrors;
     private SettingsOption optionProtectBeforeConnecting;
     private SettingsOption optionStartOnBoot;
+    private SettingsOption optionDataUnits;
+    private SettingsOption optionDns;
+
+    // Units that must be used for displaying the data stats.
+    private Globals.DataUnits dataUnitsOption = VPNGeneralPersistentData.getDataUnits();
 
     @Nullable
     @Override
@@ -47,6 +55,8 @@ public class SettingsActivity extends Fragment implements ClickEvent {
         optionResetAfterErrors = view.findViewById(R.id.optionResetAfterErrors);
         optionProtectBeforeConnecting = view.findViewById(R.id.optionProtectBeforeConnecting);
         optionStartOnBoot = view.findViewById(R.id.optionStartOnBoot);
+        optionDataUnits = view.findViewById(R.id.optionDataUnits);
+        optionDns = view.findViewById(R.id.optionDns);
 
         optionShowIp.setChecked(VPNGeneralPersistentData.getShowIpActivated());
         optionKillSwitch.setChecked(VPNGeneralPersistentData.getKillSwitchActivated());
@@ -60,6 +70,12 @@ public class SettingsActivity extends Fragment implements ClickEvent {
         optionResetAfterErrors.setClickEventListener(this);
         optionProtectBeforeConnecting.setClickEventListener(this);
         optionStartOnBoot.setClickEventListener(this);
+        optionDataUnits.setClickEventListener(this);
+        optionDns.setClickEventListener(this);
+
+        optionDataUnits.setDescription(getUnitsOptionText(dataUnitsOption), null);
+
+        setDnsOptionText(VPNGeneralPersistentData.getCustomDns());
     }
 
     @Override
@@ -85,8 +101,55 @@ public class SettingsActivity extends Fragment implements ClickEvent {
         }
     }
 
+    /**
+     * Gets the ID of the string for a data units selection.
+     */
+    private int getUnitsOptionText(Globals.DataUnits units) {
+        if (units == Globals.DataUnits.OnlyBits) {
+            return R.string.tmp_options_data_units_only_bits;
+        } else if (units == Globals.DataUnits.OnlyBytes) {
+            return R.string.tmp_options_data_units_only_bytes;
+        }
+
+        return R.string.tmp_options_data_units_bits_speed_and_bytes_volume;
+    }
+
+    private void setDnsOptionText(String customIp) {
+        if (customIp == null || customIp.trim().length() == 0) {
+            optionDns.setDescription(R.string.tmp_options_dns_default, null);
+            optionDns.changeAlertIconVisibility(false);
+        } else {
+            optionDns.setDescription(R.string.tmp_options_dns_description, customIp);
+            optionDns.changeAlertIconVisibility(true);
+        }
+    }
+
     @Override
     public void onClick(View view) {
+        if (view.getId() == R.id.optionDataUnits) {
+            ArrayList<OptionsItem.SelectableOption> options = new ArrayList();
+            Globals.DataUnits[] unitOptions = new Globals.DataUnits[3];
+            unitOptions[0] = Globals.DataUnits.BitsSpeedAndBytesVolume;
+            unitOptions[1] = Globals.DataUnits.OnlyBytes;
+            unitOptions[2] = Globals.DataUnits.OnlyBits;
+
+            for (Globals.DataUnits unitOption : unitOptions) {
+                OptionsItem.SelectableOption option = new OptionsItem.SelectableOption();
+                option.icon = dataUnitsOption == unitOption ? "\ue876" : null;
+                option.translatableLabelId = getUnitsOptionText(unitOption);
+                options.add(option);
+            }
+
+            OptionsModalWindow modal = new OptionsModalWindow(getContext(), null, options, (int selectedOption) -> {
+                dataUnitsOption = unitOptions[selectedOption];
+                optionDataUnits.setDescription(getUnitsOptionText(dataUnitsOption), null);
+                VPNGeneralPersistentData.setDataUnits(dataUnitsOption);
+            });
+            modal.show();
+
+            return;
+        }
+
         if (VPNCoordinator.getInstance().isServiceRunning()) {
             HelperFunctions.showToast(getContext().getText(R.string.general_server_running_error).toString(), true);
 
@@ -98,6 +161,16 @@ public class SettingsActivity extends Fragment implements ClickEvent {
             startActivity(intent);
 
             return;
+        }
+
+        if (view.getId() == R.id.optionDns) {
+            CustomDnsModalWindow modal = new CustomDnsModalWindow(getContext(), (String newIp) -> {
+                VPNGeneralPersistentData.setCustomDns(newIp);
+                setDnsOptionText(newIp);
+
+                HelperFunctions.showToast(getContext().getString(R.string.tmp_dns_changes_made_confirmation), true);
+            });
+            modal.show();
         }
 
         if (view.getId() == R.id.optionStartOnBoot && VPNServersPersistentData.getInstance().getCurrentServer() == null) {

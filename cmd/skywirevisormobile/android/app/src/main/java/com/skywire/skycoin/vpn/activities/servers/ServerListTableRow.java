@@ -84,7 +84,12 @@ public class ServerListTableRow extends ListButtonBase<Void> {
         imageFlag.setImageResource(HelperFunctions.getFlagResourceId(serverData.countryCode));
         serverName.setServer(serverData, listType, false);
 
-        textLocation.setText(serverData.location);
+        if (serverData.location != null && serverData.location.trim().length() > 0) {
+            textLocation.setText(serverData.location);
+        } else {
+            textLocation.setText(R.string.tmp_select_server_unknown_location);
+        }
+
         textPk.setText(serverData.pk);
 
         if ((serverData.note == null || serverData.note.equals("")) && (serverData.personalNote == null || serverData.personalNote.equals(""))) {

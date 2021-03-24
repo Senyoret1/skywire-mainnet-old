@@ -4,10 +4,14 @@ import android.content.SharedPreferences;
 
 import androidx.preference.PreferenceManager;
 
+import com.google.gson.Gson;
 import com.skywire.skycoin.vpn.App;
 import com.skywire.skycoin.vpn.helpers.Globals;
 
 import java.util.HashSet;
+
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 /**
  * Helper class for saving and getting general data related to the VPN to and from the
@@ -16,6 +20,8 @@ import java.util.HashSet;
 public class VPNGeneralPersistentData {
     // Keys for persistent storage.
     private static final String LAST_ERROR = "lastError";
+    private static final String DATA_UNITS = "dataUnits";
+    private static final String CUSTOM_DNS = "customDns";
     private static final String APPS_SELECTION_MODE = "appsMode";
     private static final String APPS_LIST = "appsList";
     private static final String SHOW_IP = "showIp";
@@ -25,6 +31,8 @@ public class VPNGeneralPersistentData {
     private static final String PROTECT_BEFORE_CONNECTED = "protectBeforeConnected";
 
     private static final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+
+    private static BehaviorSubject<Globals.DataUnits> dataUnitsSubject;
 
     /////////////////////////////////////////////////////////////
     // Setters.
@@ -36,6 +44,27 @@ public class VPNGeneralPersistentData {
      */
     public static void setLastError(String val) {
         settings.edit().putString(LAST_ERROR, val).apply();
+    }
+
+    /**
+     * Saves the data units that must be shown in the UI.
+     */
+    public static void setDataUnits(Globals.DataUnits val) {
+        Gson gson = new Gson();
+        String valString = gson.toJson(val);
+        settings.edit().putString(DATA_UNITS, valString).apply();
+
+        // Inform the change.
+        if (dataUnitsSubject != null) {
+            dataUnitsSubject.onNext(val);
+        }
+    }
+
+    /**
+     * Saves the IP of the custom DNS server.
+     */
+    public static void setCustomDns(String val) {
+        settings.edit().putString(CUSTOM_DNS, val).apply();
     }
 
     /**
@@ -99,6 +128,40 @@ public class VPNGeneralPersistentData {
      */
     public static String getLastError(String defaultValue) {
         return settings.getString(LAST_ERROR, defaultValue);
+    }
+
+    /**
+     * Returns the data units that must be shown in the UI. If the user has not changed
+     * the setting, it returns DataUnits.BitsSpeedAndBytesVolume by default.
+     */
+    public static Globals.DataUnits getDataUnits() {
+        Gson gson = new Gson();
+        String savedVal = settings.getString(DATA_UNITS, null);
+        if (savedVal != null) {
+            return gson.fromJson(savedVal, Globals.DataUnits.class);
+        }
+
+        return Globals.DataUnits.BitsSpeedAndBytesVolume;
+    }
+
+    /**
+     * Emits every time the data units that must be shown in the UI are changed. It emits the most
+     * recent value immediately after subscription.
+     */
+    public static Observable<Globals.DataUnits> getDataUnitsObservable() {
+        if (dataUnitsSubject == null) {
+            dataUnitsSubject = BehaviorSubject.create();
+            dataUnitsSubject.onNext(getDataUnits());
+        }
+
+        return dataUnitsSubject.hide();
+    }
+
+    /**
+     * Gets the IP of the custom DNS server.
+     */
+    public static String getCustomDns() {
+        return settings.getString(CUSTOM_DNS, null);
     }
 
     /**

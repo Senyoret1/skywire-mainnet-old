@@ -73,7 +73,7 @@ public class ServerListTopTab extends ButtonBase implements View.OnTouchListener
 
     public void changeState(boolean selected) {
         if (selected) {
-            clickBackground.setBackgroundResource(R.color.bar_selected);
+            clickBackground.setBackgroundResource(R.color.tablet_selected_tab_background);
             rippleDrawable = null;
             this.setClickable(false);
         } else {

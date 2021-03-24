@@ -51,7 +51,7 @@ public class ConfirmationModalWindow extends Dialog implements ClickEvent {
         buttonCancel.setClickEventListener(this);
         buttonConfirm.setClickEventListener(this);
 
-        HelperFunctions.configureModalWindow(getContext(), getWindow());
+        HelperFunctions.configureModalWindow(this);
     }
 
     @Override

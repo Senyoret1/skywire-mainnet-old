@@ -12,11 +12,16 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 
-public class Chart extends FrameLayout {
+import io.reactivex.rxjava3.disposables.Disposable;
+
+public class Chart extends FrameLayout implements Closeable {
     public Chart(Context context) {
         super(context);
         Initialize(context, null);
@@ -35,6 +40,12 @@ public class Chart extends FrameLayout {
     private TextView textMin;
     private TextView textMid;
     private TextView textMax;
+
+    private Globals.DataUnits dataUnits = VPNGeneralPersistentData.getDataUnits();
+    private ArrayList<Long> lastData;
+    private boolean showingMs;
+
+    private Disposable dataUnitsSubscription;
 
     protected void Initialize (Context context, AttributeSet attrs) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -62,9 +73,20 @@ public class Chart extends FrameLayout {
 
         chart.setScaleEnabled(false);
         chart.setTouchEnabled(false);
+
+        dataUnitsSubscription = VPNGeneralPersistentData.getDataUnitsObservable().subscribe(response -> {
+            dataUnits = response;
+
+            if (lastData != null) {
+                setData(lastData, showingMs);
+            }
+        });
     }
 
     public void setData(ArrayList<Long> data, boolean showingMs) {
+        this.lastData = data;
+        this.showingMs = showingMs;
+
         ArrayList<Entry> values = new ArrayList<>();
 
         double max = 0;
@@ -91,9 +113,9 @@ public class Chart extends FrameLayout {
                 textMid.setText(HelperFunctions.getLatencyValue(mid));
                 textMin.setText(HelperFunctions.getLatencyValue(0));
             } else {
-                textMax.setText(HelperFunctions.computeDataAmountString(max, true));
-                textMid.setText(HelperFunctions.computeDataAmountString(mid, true));
-                textMin.setText(HelperFunctions.computeDataAmountString(0, true));
+                textMax.setText(HelperFunctions.computeDataAmountString(max, true, dataUnits != Globals.DataUnits.OnlyBytes));
+                textMid.setText(HelperFunctions.computeDataAmountString(mid, true, dataUnits != Globals.DataUnits.OnlyBytes));
+                textMin.setText(HelperFunctions.computeDataAmountString(0, true, dataUnits != Globals.DataUnits.OnlyBytes));
             }
         }
 
@@ -127,5 +149,10 @@ public class Chart extends FrameLayout {
 
             chart.setData(lineData);
         }
+    }
+
+    @Override
+    public void close() {
+        dataUnitsSubscription.dispose();
     }
 }

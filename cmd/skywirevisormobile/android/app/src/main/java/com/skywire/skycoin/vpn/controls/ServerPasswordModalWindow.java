@@ -64,7 +64,7 @@ public class ServerPasswordModalWindow extends Dialog implements ClickEvent, Tex
 
         buttonConfirm.setEnabled(false);
 
-        HelperFunctions.configureModalWindow(getContext(), getWindow());
+        HelperFunctions.configureModalWindow(this);
     }
 
     @Override

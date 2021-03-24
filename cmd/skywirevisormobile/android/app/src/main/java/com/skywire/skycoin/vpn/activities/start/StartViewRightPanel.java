@@ -33,6 +33,7 @@ import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNServersPersistentData;
 
 import java.io.Closeable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
@@ -65,14 +66,15 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
     private TextView textLocalPk;
     private TextView textAppProtection;
     private ServerName serverName;
+    private ClickableLinearLayout ipClickableLayout;
     private ClickableLinearLayout serverClickableLayout;
     private ClickableLinearLayout remotePkClickableLayout;
     private ClickableLinearLayout localPkClickableLayout;
     private ClickableLinearLayout appProtectionClickableLayout;
+    private LinearLayout loadingIpContainer;
     private LinearLayout ipContainer;
     private LinearLayout countryContainer;
     private LinearLayout bottomPartContainer;
-    private ProgressBar progressIp;
     private ProgressBar progressCountry;
 
     private LocalServerData currentServer;
@@ -80,6 +82,7 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
     private String previousIp;
     private String currentIp;
     private String previousCountry;
+    private Date lastIpRefresDate;
 
     private Disposable serverSubscription;
     private Disposable ipSubscription;
@@ -96,22 +99,25 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
         textLocalPk = findViewById(R.id.textLocalPk);
         textAppProtection = findViewById(R.id.textAppProtection);
         serverName = findViewById(R.id.serverName);
+        ipClickableLayout = findViewById(R.id.ipClickableLayout);
         serverClickableLayout = findViewById(R.id.serverClickableLayout);
         remotePkClickableLayout = findViewById(R.id.remotePkClickableLayout);
         localPkClickableLayout = findViewById(R.id.localPkClickableLayout);
         appProtectionClickableLayout = findViewById(R.id.appProtectionClickableLayout);
+        loadingIpContainer = findViewById(R.id.loadingIpContainer);
         ipContainer = findViewById(R.id.ipContainer);
         countryContainer = findViewById(R.id.countryContainer);
         bottomPartContainer = findViewById(R.id.bottomPartContainer);
-        progressIp = findViewById(R.id.progressIp);
         progressCountry = findViewById(R.id.progressCountry);
 
+        ipClickableLayout.setClickEventListener(this);
         serverClickableLayout.setClickEventListener(this);
         remotePkClickableLayout.setClickEventListener(this);
         localPkClickableLayout.setClickEventListener(this);
         appProtectionClickableLayout.setClickEventListener(this);
 
         localPkClickableLayout.setVisibility(View.GONE);
+        ipClickableLayout.setVisibility(View.GONE);
         ipContainer.setVisibility(View.GONE);
         countryContainer.setVisibility(View.GONE);
 
@@ -174,6 +180,9 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
     public void putInWaitingForVpnState() {
         cancelIpCheck();
 
+        ipClickableLayout.setVisibility(GONE);
+        loadingIpContainer.setVisibility(VISIBLE);
+
         textWaitingIp.setVisibility(VISIBLE);
         textWaitingCountry.setVisibility(VISIBLE);
         ipContainer.setVisibility(View.GONE);
@@ -191,9 +200,11 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
 
         cancelIpCheck();
 
+        ipClickableLayout.setVisibility(GONE);
+        loadingIpContainer.setVisibility(VISIBLE);
+
         textWaitingIp.setVisibility(GONE);
         textWaitingCountry.setVisibility(GONE);
-        progressIp.setVisibility(VISIBLE);
         progressCountry.setVisibility(VISIBLE);
         ipContainer.setVisibility(View.VISIBLE);
         countryContainer.setVisibility(View.VISIBLE);
@@ -205,7 +216,10 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(response -> {
                 if (response.body() != null) {
-                    progressIp.setVisibility(GONE);
+                    lastIpRefresDate = new Date();
+
+                    ipClickableLayout.setVisibility(VISIBLE);
+                    loadingIpContainer.setVisibility(GONE);
 
                     currentIp = response.body().ip;
                     textIp.setText(currentIp);
@@ -277,7 +291,19 @@ public class StartViewRightPanel extends FrameLayout implements ClickEvent, Clos
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.serverClickableLayout) {
+        if (view.getId() == R.id.ipClickableLayout) {
+            long msToWait = 10000;
+            long elapsedTime = (new Date()).getTime() - lastIpRefresDate.getTime();
+
+            if (elapsedTime < msToWait) {
+                HelperFunctions.showToast(String.format(
+                    getContext().getText(R.string.tmp_status_connected_ip_refresh_time_warning).toString(),
+                    HelperFunctions.zeroDecimalsFormatter.format(Math.ceil((msToWait - elapsedTime)) / 1000d)
+                ), true);
+            } else {
+                this.refreshIpData();
+            }
+        } else if (view.getId() == R.id.serverClickableLayout) {
             HelperFunctions.showServerOptions(getContext(), ServersActivity.convertLocalServerData(currentServer), ServerLists.History);
         } else if (view.getId() == R.id.appProtectionClickableLayout) {
             Intent intent = new Intent(getContext(), AppsActivity.class);

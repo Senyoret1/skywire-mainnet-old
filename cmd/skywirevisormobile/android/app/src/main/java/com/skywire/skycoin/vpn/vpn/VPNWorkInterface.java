@@ -113,7 +113,13 @@ public class VPNWorkInterface implements Closeable {
             // Use an address for blocking all connections.
             builder.addAddress("8.8.8.8", 32);
         }
-        builder.addDnsServer("8.8.8.8");
+
+        // Use the custom DNS server, if any.
+        String dnsServer = VPNGeneralPersistentData.getCustomDns();
+        if (dnsServer != null && dnsServer.trim().length() > 0) {
+            builder.addDnsServer(dnsServer.trim());
+        }
+
         builder.addRoute("0.0.0.0", 0);
         // This makes the streams created with the interface synchronous, so that the data can be
         // read blocking an independent thread in an efficient way.

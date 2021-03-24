@@ -55,6 +55,11 @@ public class SettingsOption extends ButtonBase {
             name = attributes.getString(R.styleable.SettingsOption_title);
             description = attributes.getString(R.styleable.SettingsOption_description);
 
+            boolean hideCheckbox = attributes.getBoolean(R.styleable.SettingsOption_hide_checkbox, false);
+            if (hideCheckbox) {
+                checkSelected.setVisibility(GONE);
+            }
+
             attributes.recycle();
         }
 

@@ -12,8 +12,10 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.skywire.skycoin.vpn.R;
+import com.skywire.skycoin.vpn.helpers.Globals;
 import com.skywire.skycoin.vpn.helpers.HelperFunctions;
 import com.skywire.skycoin.vpn.vpn.VPNCoordinator;
+import com.skywire.skycoin.vpn.vpn.VPNGeneralPersistentData;
 import com.skywire.skycoin.vpn.vpn.VPNStates;
 
 import java.io.Closeable;
@@ -30,6 +32,7 @@ public class TabletTopBarStats extends FrameLayout implements Animator.AnimatorL
 
     private VPNStates currentState = VPNStates.OFF;
     private VPNCoordinator.ConnectionStats currentStats = new VPNCoordinator.ConnectionStats();
+    private Globals.DataUnits dataUnits = VPNGeneralPersistentData.getDataUnits();
 
     private AnimatorSet animSet;
 
@@ -37,6 +40,7 @@ public class TabletTopBarStats extends FrameLayout implements Animator.AnimatorL
     private boolean closed = false;
     private Disposable eventsSubscription;
     private Disposable statsSubscription;
+    private Disposable dataUnitsSubscription;
 
     public TabletTopBarStats(Context context) {
         super(context);
@@ -83,6 +87,11 @@ public class TabletTopBarStats extends FrameLayout implements Animator.AnimatorL
                 currentStats = stats;
                 updateData();
             });
+
+            dataUnitsSubscription = VPNGeneralPersistentData.getDataUnitsObservable().subscribe(response -> {
+                dataUnits = response;
+                updateData();
+            });
         }
     }
 
@@ -93,6 +102,7 @@ public class TabletTopBarStats extends FrameLayout implements Animator.AnimatorL
 
         eventsSubscription.dispose();
         statsSubscription.dispose();
+        dataUnitsSubscription.dispose();
     }
 
     @Override
@@ -122,8 +132,8 @@ public class TabletTopBarStats extends FrameLayout implements Animator.AnimatorL
         textConnectionIcon.setTextColor(stateColor);
 
         textLatency.setText(HelperFunctions.getLatencyValue(currentStats.currentLatency));
-        textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(currentStats.currentDownloadSpeed, true));
-        textUploadSpeed.setText(HelperFunctions.computeDataAmountString(currentStats.currentUploadSpeed, true));
+        textDownloadSpeed.setText(HelperFunctions.computeDataAmountString(currentStats.currentDownloadSpeed, true, dataUnits != Globals.DataUnits.OnlyBytes));
+        textUploadSpeed.setText(HelperFunctions.computeDataAmountString(currentStats.currentUploadSpeed, true, dataUnits != Globals.DataUnits.OnlyBytes));
     }
 
     @Override
